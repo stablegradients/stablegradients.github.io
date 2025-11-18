@@ -22,8 +22,32 @@
                 <p class="name" style="text-align: center;">
                   Shrinivas Ramasubramanian
                 </p>
-                <p>I am an incoming Grad Student at Carnegie Mellon University. Previously I was a research engineer at <a href="https://www.fujitsu.com/in/about/local/corporate/subsidiaries/fri-research-vision.html">Fujitsu Research</a> in Bangalore, where I worked in collaboration with Fujitsu Research Japan and  <a href="https://val.cds.iisc.ac.in/">Vision and AI lab, IISc</a> optimizing non-decomposable objectives and person re-identification. I also collaborated with Fujitsu Research India where I primarily focus on the use of graph neural networks for representation learning. I did my undergrad at <a href="https://www.iitb.ac.in/">IIT Bombay</a>, in Electrical Engineering. 
+                <p>
+                  I am an MS student in Robotics at the
+                  <a href="https://www.ri.cmu.edu/">Robotics Institute</a>,
+                  <a href="https://www.cmu.edu/">Carnegie Mellon University</a>,
+                  working with <a href="https://www.cs.cmu.edu/~schneide/">Jeff Schneider</a> on
+                  making model-based reinforcement learning more stable and sample-efficient under
+                  distribution shift. Previously, I was a research engineer at
+                  <a href="https://www.fujitsu.com/in/about/local/corporate/subsidiaries/fri-research-vision.html">Fujitsu Research</a>
+                  in Bangalore and a project assistant in the
+                  <a href="https://val.cds.iisc.ac.in/">Vision &amp; AI Lab (VAL)</a> at IISc Bengaluru,
+                  where I worked with <a href="https://scholar.google.com/citations?user=8NWN3xAAAAAJ&hl=en">Yuhei Umeda</a>,
+                  <a href="https://cds.iisc.ac.in/faculty/venky/">R. Venkatesh Babu</a>, and
+                  <a href="https://www.comp.nus.edu.sg/~ayao/">Angela Yao</a> on cost-sensitive learning,
+                  non-decomposable objectives, and temporal action segmentation. My work on objective-aligned
+                  semi-supervised learning and selective mixup fine-tuning has appeared at
+                  <a href="https://arxiv.org/abs/2304.14738">NeurIPS 2022</a> and
+                  <a href="https://openreview.net/forum?id=rxVBKhyfSo">ICLR 2024 (Spotlight)</a>, and I have
+                  recent papers on long-tailed temporal action segmentation at
+                  <a href="https://www.ecva.net/papers/eccv_2024/papers_ECCV/papers/04389.pdf">ECCV 2024</a> and
+                  <a href="https://arxiv.org/pdf/2503.18358">BMVC 2024</a>, as well as work on flatter-minima
+                  training for world models accepted to
+                  <a href="https://openreview.net/pdf?id=vcB1OwtWUZ">NeurIPS 2025</a>. I completed my
+                  undergraduate degree in Electrical Engineering at
+                  <a href="https://www.iitb.ac.in/">IIT Bombay</a>.
                 </p>
+                
                 <p style="text-align:center">
                   <a href="mailto:shrinivas.ramasubramanian@gmail.com">Email</a> &nbsp;/&nbsp;
                   <a href="data/Resume_Split.pdf">CV</a> &nbsp;/&nbsp;
@@ -47,6 +71,45 @@
             </tr>
           </tbody></table>
           <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
+
+          <tr onmouseout="flatten_stop()" onmouseover="flatten_start()">
+              <td style="padding:20px;width:25%;vertical-align:middle">
+                <div class="one">
+                <div class="two" id='flatten_image'>
+                  <a target="_blank" href="./images/arxiv.png">
+                    <img src="images/arxiv.png" width="100%" alt="NeurIPS 2025 Image">
+                  </a>
+                </div>
+                <a target="_blank" href="./images/arxiv.png">
+                  <img src="images/arxiv.png" width="100%" alt="NeurIPS 2025 Image">
+                </a>
+                </div>
+                <script type="text/javascript">
+                  function flatten_start() {
+                    document.getElementById('flatten_image').style.opacity = "1";
+                  }
+
+                  function flatten_stop() {
+                    document.getElementById('flatten_image').style.opacity = "0";
+                  }
+                  flatten_stop();
+                </script>
+              </td>
+              <td style="padding:20px;width:75%;vertical-align:middle">
+                  <a href="https://openreview.net/pdf?id=vcB1OwtWUZ">
+                      <span class="papertitle">Improving Model-Based Reinforcement Learning by Converging to Flatter Minima</span>
+                  </a>
+                  <br>
+                  <strong>Shrinivas Ramasubramanian</strong>, Ben Freed, Alexandre Capone, Jeff Schneider
+                  <br>
+                  <em>NeurIPS</em>, 2025 (Main Conference)
+                  <br>
+                  <p></p>
+                  <p>
+                    Model-based reinforcement learning pipelines often collapse once the policy leaves the world model’s nominal operating region. We introduce a flat-minima regularizer that pairs sharpness-aware updates with spectral control on the dynamics model, yielding stable rollouts and markedly higher sample efficiency under distribution shift across offline and online benchmarks.
+                  </p>
+              </td>
+          </tr>
 
           <tr onmouseout="difsurvey_stop()" onmouseover="difsurvey_start()">
               <td style="padding:20px;width:5%;vertical-align:middle">
