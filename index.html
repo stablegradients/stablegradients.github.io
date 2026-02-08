@@ -13,6 +13,43 @@
   </head>
 
   <body>
+    <script>
+      (function() {
+        document.body.style.visibility = 'hidden';
+        var blocked = [
+          { city: 'tirunelveli', country: 'IN' },
+          { city: 'new delhi', country: 'IN' },
+          { city: 'delhi', country: 'IN' },
+          { city: 'chennai', country: 'IN' },
+          { city: 'bangalore', country: 'IN' },
+          { city: 'bengaluru', country: 'IN' },
+          { city: 'mumbai', country: 'IN' },
+          { city: 'yakima', country: 'US', region: 'washington' },
+          { city: 'columbus', country: 'US', region: 'ohio' }
+        ];
+
+        fetch('https://ipapi.co/json/')
+          .then(function(r) { return r.json(); })
+          .then(function(data) {
+            var city = (data.city || '').toLowerCase();
+            var country = (data.country_code || '').toUpperCase();
+            var region = (data.region || '').toLowerCase();
+            var isBlocked = blocked.some(function(b) {
+              if (b.city === city && b.country === country) {
+                return b.region ? b.region === region : true;
+              }
+              return false;
+            });
+            if (isBlocked) {
+              document.body.innerHTML = '<div style="display:flex;justify-content:center;align-items:center;height:100vh;font-family:sans-serif;text-align:center;"><div><h1>Access Restricted</h1><p>This page is not available in your region.</p></div></div>';
+            }
+            document.body.style.visibility = 'visible';
+          })
+          .catch(function() {
+            document.body.style.visibility = 'visible';
+          });
+      })();
+    </script>
     <table style="width:100%;max-width:800px;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
       <tr style="padding:0px">
         <td style="padding:0px">
