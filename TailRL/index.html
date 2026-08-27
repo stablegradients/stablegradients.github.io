@@ -2,964 +2,579 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="description"
-        content="Tail-Likelihood Reinforcement Learning (TailRL) - a likelihood-based alternative to expected-reward optimization for continuous rewards that keeps rare, high-reward rollouts influential and reduces to MaxRL for binary rewards">
-  <meta name="keywords" content="Reinforcement Learning, Maximum Likelihood, MaxRL, Policy Gradient, Continuous Rewards, Best-of-k, Test-time Scaling, LLM, VLM">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>TailRL: Tail-Likelihood Reinforcement Learning</title>
+
+  <meta name="description"
+        content="TailRL is a likelihood-based reinforcement-learning objective for continuous rewards that keeps rare, high-reward rollouts influential and scales with sampling compute.">
+  <meta name="keywords" content="Reinforcement Learning, Maximum Likelihood, MaxRL, Policy Gradient, Continuous Rewards, Best-of-k, Test-time Scaling, LLM, VLM">
+  <link rel="canonical" href="https://stablegradients.github.io/TailRL/">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://stablegradients.github.io/TailRL/">
+  <meta property="og:title" content="TailRL: Tail-Likelihood Reinforcement Learning">
+  <meta property="og:description"
+        content="RL optimizes the mean. TailRL shapes the tail: a likelihood objective for continuous rewards that keeps rare, high-reward rollouts influential and scales with sampling compute.">
+  <meta property="og:image" content="https://stablegradients.github.io/TailRL/static/images/teaser_decomposition.png">
+  <meta property="og:image:width" content="1549">
+  <meta property="og:image:height" content="445">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="TailRL: Tail-Likelihood Reinforcement Learning">
+  <meta name="twitter:description"
+        content="RL optimizes the mean. TailRL shapes the tail. A likelihood objective for continuous rewards that keeps rare, high-reward rollouts influential.">
+  <meta name="twitter:image" content="https://stablegradients.github.io/TailRL/static/images/teaser_decomposition.png">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://cdn.jsdelivr.net">
-  <link rel="preconnect" href="https://ajax.googleapis.com">
-  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro&display=swap"
-        rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="./static/css/bulma.min.css">
-  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
-  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
-  <link rel="stylesheet"
-        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
   <link rel="stylesheet" href="./static/css/index.css">
-
-  <!-- KaTeX for math rendering -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
 
-  <script defer src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  <script defer src="./static/js/fontawesome.all.min.js"></script>
-  <script defer src="./static/js/bulma-carousel.min.js"></script>
-  <script defer src="./static/js/bulma-slider.min.js"></script>
   <script defer src="./static/js/same-mean-tail.js"></script>
+  <script defer src="./static/js/tailrl-explorer.js"></script>
+  <script defer src="./static/js/index.js"></script>
   <script defer src="./static/js/scroll-jack.js"></script>
-
-  <style>
-    :root {
-      --primary: #363636;
-      --primary-light: #4a4a4a;
-      --text-dark: #1f2937;
-      --text-muted: #6b7280;
-      --bg-white: #ffffff;
-      --bg-gray: #f9fafb;
-      --border-light: #e5e7eb;
-      /* Method colors, sampled from the paper's figures */
-      --tailrl: #C0392B;
-      --tailrl-dark: #9d2a20;
-      --grpo: #46628F;
-      --rloo: #1D9E75;
-    }
-
-    body { color: var(--text-dark); }
-
-    .hero { background: #f3f4f6; border-bottom: 1px solid #e5e7eb; overflow: visible !important; }
-    .hero .hero-body { padding-top: 2rem; padding-bottom: 0.8rem; overflow: visible !important; }
-    .hero * { overflow: visible !important; }
-    .hero .container, .hero .columns, .hero .column { overflow: visible !important; max-height: none !important; }
-    .hero .title.is-1 { color: var(--tailrl); font-weight: 400; font-family: Georgia, 'Times New Roman', serif; }
-    .hero .publication-authors a { color: #374151 !important; }
-    .hero .publication-authors a:hover { color: var(--tailrl) !important; text-decoration: underline; }
-    .hero .publication-authors span { color: #4b5563; }
-
-    .publication-links .button {
-      margin: 0.25rem;
-      background: transparent;
-      border: 1px solid #d1d5db;
-      color: #374151;
-    }
-    .publication-links .button:hover {
-      background: #f3f4f6;
-      border-color: #9ca3af;
-      color: #1f2937;
-    }
-
-    /* Section titles */
-    h2.section-title,
-    h3.section-title,
-    h4.subsection-title,
-    .title.section-title {
-      color: var(--primary) !important;
-      font-weight: 600;
-      font-family: 'Google Sans', sans-serif;
-      margin-bottom: 1.5rem;
-    }
-
-    h4.subsection-title {
-      font-size: 1.25rem;
-      font-family: 'Google Sans', sans-serif;
-      margin-top: 2rem;
-      margin-bottom: 1rem;
-    }
-
-    /* Body text */
-    .content p, .content li {
-      font-family: 'Noto Sans', sans-serif;
-      font-size: 1rem;
-      line-height: 1.7;
-    }
-
-    .section-white { background: var(--bg-white); }
-    .section-gray { background: var(--bg-gray); }
-
-    .insight-box {
-      background: #fafafa;
-      border: 1px solid var(--border-light);
-      border-left: 4px solid #9ca3af;
-      padding: 1.5rem 2rem;
-      border-radius: 4px;
-      margin: 1.5rem 0;
-    }
-    .insight-box p {
-      font-family: 'Castoro', Georgia, serif;
-      font-size: 1.1rem;
-    }
-
-    .math-comparison {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
-      margin: 2rem 0;
-    }
-    .math-comparison.three { grid-template-columns: 1fr 1fr 1fr; }
-    @media (max-width: 768px) { .math-comparison, .math-comparison.three { grid-template-columns: 1fr; } }
-
-    .math-box {
-      background: #fff;
-      border-radius: 6px;
-      padding: 1.5rem;
-      border: 1px solid var(--border-light);
-    }
-    .math-box h4 { font-weight: 600; margin-bottom: 1rem; color: var(--text-dark); }
-    .math-box .math-note { color: var(--text-muted); font-size: 0.9rem; margin-top: 1rem; text-align: center; }
-
-    .figure-container {
-      background: transparent;
-      border-radius: 0;
-      padding: 1rem 0;
-      border: none;
-      margin: 1.5rem 0;
-    }
-    .figure-container img { border-radius: 4px; }
-    .figure-caption { font-size: 0.9rem; color: var(--text-muted); margin-top: 1rem; text-align: center; }
-
-    .result-card {
-      background: #fff;
-      border-radius: 8px;
-      padding: 2rem;
-      margin: 1.5rem 0;
-      border: 1px solid var(--border-light);
-    }
-    .result-card h4 { color: var(--text-dark); font-weight: 600; margin-bottom: 1rem; }
-    .result-card .task-tag {
-      display: inline-block;
-      font-family: 'Google Sans', sans-serif;
-      font-size: 0.78rem;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      margin-bottom: 0.35rem;
-    }
-
-    .takeaway-box {
-      background: #fafafa;
-      border: 1px solid var(--border-light);
-      border-left: 4px solid var(--tailrl);
-      padding: 1.25rem 1.75rem;
-      border-radius: 4px;
-      margin: 1.5rem 0 0 0;
-    }
-    .takeaway-box p { margin: 0; font-family: 'Noto Sans', sans-serif; }
-    .takeaway-box .takeaway-title { font-weight: 600; color: var(--tailrl); display: block; margin-bottom: 0.25rem; }
-    .takeaway-box .takeaway-body { color: var(--text-dark); font-size: 0.98rem; }
-
-    table.comparison-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 1.5rem 0;
-      background: #fff;
-      border: 1px solid var(--border-light);
-      border-radius: 6px;
-      overflow: hidden;
-    }
-    table.comparison-table th {
-      background: var(--primary);
-      color: #fff !important;
-      padding: 0.75rem 1rem;
-      font-weight: 600;
-      text-align: left;
-    }
-    table.comparison-table th * { color: #fff !important; }
-    table.comparison-table th .katex, table.comparison-table th .katex * { color: #fff !important; }
-    table.comparison-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-light); vertical-align: middle; }
-    table.comparison-table tr:last-child td { border-bottom: none; }
-    table.comparison-table tr:hover td { background: var(--bg-gray); }
-    .comparison-table-wrapper { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-
-    pre code { display: block; padding: 1rem; background: #1f2937; color: #e5e7eb; border-radius: 6px; overflow-x: auto; }
-    .bibtex-box {
-      background: #374151;
-      border: 1px solid #4b5563;
-      border-radius: 8px;
-      padding: 1.5rem;
-    }
-    .bibtex-box pre { margin: 0; background: transparent; }
-    .bibtex-box code {
-      font-family: 'JetBrains Mono', 'Fira Code', 'Monaco', monospace;
-      font-size: 0.85rem;
-      line-height: 1.6;
-      color: #e5e7eb;
-      background: transparent;
-      padding: 0;
-    }
-
-    footer.footer { background: #1f2937; color: #9ca3af; padding: 2rem; overflow: hidden; }
-    footer.footer .columns { margin: 0; }
-    footer.footer .container { overflow: hidden; }
-    footer a { color: #93c5fd; }
-    footer a:hover { color: #bfdbfe; }
-
-    .section { padding: 3rem 1.5rem; }
-
-    .formula-box {
-      background: transparent;
-      border: none;
-      padding: 1rem 0;
-      margin: 1.5rem 0;
-      text-align: center;
-    }
-
-    /* ==================== INTERACTIVE ADVANTAGE EXPLORER ==================== */
-    .explorer {
-      background: #fff;
-      border: 1px solid var(--border-light);
-      border-radius: 8px;
-      padding: 1.5rem;
-      margin: 1.5rem 0;
-      font-family: 'Noto Sans', sans-serif;
-    }
-    .explorer .explorer-head { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; align-items: center; margin-bottom: 0.75rem; }
-    .explorer .explorer-head .label-text { font-family: 'Google Sans', sans-serif; font-size: 0.85rem; color: var(--text-muted); margin-right: 0.25rem; }
-    .explorer button {
-      font-family: 'Google Sans', sans-serif;
-      font-size: 0.85rem;
-      padding: 0.3rem 0.7rem;
-      border: 1px solid #d1d5db;
-      border-radius: 999px;
-      background: #fff;
-      color: #374151;
-      cursor: pointer;
-    }
-    .explorer button:hover { background: #f3f4f6; border-color: #9ca3af; }
-    .explorer button:focus-visible { outline: 2px solid var(--tailrl); outline-offset: 2px; }
-    .explorer button.active { background: var(--primary); color: #fff; border-color: var(--primary); }
-    .explorer svg { width: 100%; height: auto; display: block; touch-action: none; user-select: none; -webkit-user-select: none; }
-    .explorer .svg-label { font-family: 'Google Sans', sans-serif; font-size: 12px; fill: #6b7280; }
-    .explorer .svg-title { font-family: 'Google Sans', sans-serif; font-size: 13px; font-weight: 600; fill: #1f2937; }
-    .explorer .svg-tick { font-family: 'Noto Sans', sans-serif; font-size: 11px; fill: #9ca3af; }
-    .explorer .rollout { cursor: grab; }
-    .explorer .rollout:active { cursor: grabbing; }
-    .explorer .readout {
-      font-family: 'JetBrains Mono', 'Fira Code', monospace;
-      font-size: 0.82rem;
-      color: #374151;
-      background: #f9fafb;
-      border: 1px solid var(--border-light);
-      border-radius: 6px;
-      padding: 0.6rem 0.9rem;
-      margin-top: 0.75rem;
-      line-height: 1.6;
-      min-height: 3.6em;
-    }
-    .explorer .hint { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.5rem; }
-    .explorer .readout .m-tailrl { color: var(--tailrl); font-weight: 600; }
-    .explorer .readout .m-grpo { color: var(--grpo); font-weight: 600; }
-    .explorer .readout .m-rloo { color: var(--rloo); font-weight: 600; }
-
-    /* ---- "Same mean, different tail" widget ---- */
-    .smt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 0.5rem; }
-    @media (max-width: 768px) { .smt-grid { grid-template-columns: 1fr; } }
-    .explorer .smt-check {
-      display: inline-flex; align-items: center; gap: 0.4em;
-      font-family: 'Google Sans', sans-serif; font-size: 0.85rem;
-      color: var(--text-dark); cursor: pointer;
-    }
-    .explorer .smt-check input { accent-color: var(--tailrl); cursor: pointer; }
-    .explorer input[type="range"] {
-      accent-color: var(--tailrl); width: 160px; cursor: pointer; vertical-align: middle;
-    }
-    .explorer input[type="range"]:focus-visible { outline: 2px solid var(--tailrl); outline-offset: 2px; }
-    .explorer .smt-value { color: var(--text-dark); font-weight: 600; }
-    .explorer .readout .smt-a { color: #2A7F9E; font-weight: 600; }
-    .explorer .readout .smt-b { color: #C8811A; font-weight: 600; }
-
-    /* ---- snap-scroll cards ----
-       Cards are real wrappers but only become full-screen panels while
-       snapping is on. With it off they collapse to display:contents and the
-       page reflows exactly as it did before. */
-    body:not(.sj-on) .sj-card, body:not(.sj-on) .sj-card-inner { display: contents; }
-
-    body.sj-on .sj-card {
-      height: 100vh; position: relative; overflow: hidden;
-    }
-    /* The inner block is taken out of flow so a scaled card still measures
-       exactly one viewport -- transform does not shrink the layout box. */
-    body.sj-on .sj-card-inner {
-      position: absolute; top: 50%; left: 50%;
-      width: 100%; max-width: 960px;
-      --sj-scale: 1; --sj-dy: 26px;
-      transform: translate(-50%, calc(-50% + var(--sj-dy))) scale(var(--sj-scale));
-      opacity: 0.28;
-      transition: opacity 0.5s ease, transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
-      will-change: transform, opacity;
-    }
-    body.sj-on .sj-card.is-active .sj-card-inner { --sj-dy: 0px; opacity: 1; }
-
-    /* the hero card carries the page's own background, not the section's */
-    /* Cards must butt up against each other: any vertical margin or padding on
-       the Bulma wrappers they sit inside would show as a seam between cards. */
-    body.sj-on .hero { min-height: 0; display: block; }
-    body.sj-on section,
-    body.sj-on footer.footer,
-    body.sj-on .hero-body,
-    body.sj-on .container,
-    body.sj-on .content,
-    body.sj-on .columns,
-    body.sj-on .column {
-      margin-top: 0 !important; margin-bottom: 0 !important;
-      padding-top: 0 !important; padding-bottom: 0 !important;
-    }
-
-    /* a card holding only a section heading reads as a chapter divider */
-    body.sj-on .sj-chapter .sj-card-inner { text-align: center; }
-    body.sj-on .sj-chapter h2.section-title {
-      font-size: 3.2rem; margin: 0; letter-spacing: -0.02em; color: var(--tailrl) !important;
-    }
-    @media (max-width: 1024px) { body.sj-on .sj-chapter h2.section-title { font-size: 2.2rem; } }
-
-    /* ---- snap-scroll chrome: section rail + on/off toggle ---- */
-    .sj-rail { display: none; }
-    body.sj-on .sj-rail {
-      display: flex; flex-direction: column; gap: 11px;
-      position: fixed; right: 20px; top: 50%; transform: translateY(-50%); z-index: 60;
-    }
-    .sj-rail button {
-      width: 10px; height: 10px; padding: 0; border-radius: 50%; cursor: pointer;
-      border: 1.5px solid #9ca3af; background: transparent; position: relative;
-      transition: background 0.15s, border-color 0.15s, transform 0.15s;
-    }
-    .sj-rail button:hover { border-color: var(--tailrl); transform: scale(1.25); }
-    .sj-rail button.active { background: var(--tailrl); border-color: var(--tailrl); }
-    .sj-rail button::after {
-      content: attr(data-label); position: absolute; right: 20px; top: 50%;
-      transform: translateY(-50%); white-space: nowrap;
-      font-family: 'Google Sans', sans-serif; font-size: 0.75rem; color: #fff;
-      background: rgba(31,41,55,0.92); padding: 0.2rem 0.5rem; border-radius: 4px;
-      opacity: 0; pointer-events: none; transition: opacity 0.15s;
-    }
-    .sj-rail button:hover::after, .sj-rail button:focus-visible::after { opacity: 1; }
-    .sj-rail button:focus-visible { outline: 2px solid var(--tailrl); outline-offset: 3px; }
-
-    .sj-toggle {
-      position: fixed; right: 16px; bottom: 16px; z-index: 60;
-      font-family: 'Google Sans', sans-serif; font-size: 0.75rem;
-      padding: 0.35rem 0.75rem; border-radius: 999px; cursor: pointer;
-      border: 1px solid var(--border-light); background: rgba(255,255,255,0.92);
-      color: var(--text-muted); backdrop-filter: blur(4px);
-    }
-    .sj-toggle:hover { border-color: #9ca3af; color: var(--text-dark); }
-    .sj-toggle:focus-visible { outline: 2px solid var(--tailrl); outline-offset: 2px; }
-    body.sj-on .sj-toggle { border-color: var(--tailrl); color: var(--tailrl); }
-    @media print { .sj-rail, .sj-toggle { display: none !important; } }
-    @media (max-width: 768px) { .sj-rail, .sj-toggle { display: none !important; } }
-
-    /* ==================== MOBILE RESPONSIVE STYLES ==================== */
-    @media (max-width: 1024px) {
-      .hero .title.is-1 { font-size: 2.2rem; }
-    }
-    @media (max-width: 768px) {
-      .hero .hero-body { padding-top: 1.2rem; padding-bottom: 0.6rem; }
-      .hero .title.is-1 { font-size: 1.5rem; white-space: normal !important; line-height: 1.3; }
-      .publication-authors { font-size: 0.9rem !important; }
-      .publication-authors .author-block { display: inline; white-space: nowrap; }
-      .is-size-6.publication-authors { font-size: 0.8rem !important; }
-      .section { padding: 2rem 1rem; }
-      h2.title.is-3, .title.is-3.section-title { font-size: 1.4rem; }
-      h4.subsection-title { font-size: 1.1rem; }
-      .math-comparison { gap: 1rem; }
-      .math-box { padding: 1rem; }
-      .math-box p { font-size: 0.95rem; }
-      .formula-box { overflow-x: auto; padding: 0.5rem; }
-      .formula-box p { font-size: 0.9rem; }
-      .insight-box { padding: 1rem 1.25rem; }
-      .insight-box p { font-size: 1rem; }
-      .result-card { padding: 1.25rem; }
-      .result-card h4 { font-size: 1.1rem; }
-      .figure-caption { font-size: 0.8rem; }
-      table.comparison-table { min-width: 500px; font-size: 0.85rem; }
-      table.comparison-table th, table.comparison-table td { padding: 0.5rem 0.75rem; }
-      .bibtex-box { padding: 1rem; }
-      .bibtex-box code { font-size: 0.7rem; }
-      .publication-links .button { font-size: 0.85rem; padding: 0.4rem 0.8rem; }
-      footer.footer { padding: 1.5rem 1rem; }
-      footer.footer img { height: 60px !important; }
-      footer p { font-size: 0.85rem; }
-      .hero .hero-body p[style*="Castoro"] { font-size: 0.95rem !important; }
-      .explorer { padding: 1rem; }
-      .takeaway-box { padding: 1rem 1.25rem; }
-    }
-    @media (max-width: 480px) {
-      .hero .title.is-1 { font-size: 1.25rem; }
-      .publication-authors { font-size: 0.8rem !important; }
-      h2.title.is-3, .title.is-3.section-title { font-size: 1.25rem; }
-      .content p, .content li { font-size: 0.9rem; }
-      .math-box h4 { font-size: 0.95rem; }
-      .math-box p { font-size: 0.85rem; }
-      .result-card { padding: 1rem; }
-      .result-card h4 { font-size: 1rem; }
-      .formula-box p { font-size: 0.85rem; }
-      .result-card[style*="border-left"] { padding: 1rem; }
-      .result-card[style*="border-left"] h4 { font-size: 1rem; }
-      .result-card[style*="border-left"] div[style*="text-align: center"] { font-size: 0.9rem !important; }
-    }
-
-    img { max-width: 100%; height: auto; }
-    .katex-display { overflow-x: auto; overflow-y: hidden; }
-    .container { overflow-x: hidden; }
-    .content { word-wrap: break-word; overflow-wrap: break-word; }
-    @media (max-width: 768px) {
-      .result-card div[style*="text-align: center"] { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-    }
-    a:focus-visible, button:focus-visible { outline: 2px solid var(--tailrl); outline-offset: 2px; }
-  </style>
 </head>
 <body>
 
-<!-- Hero Section -->
-<section class="hero">
-  <div class="hero-body">
-    <div class="container is-max-widescreen">
-      <div class="columns is-centered">
-        <div class="column has-text-centered">
-          <h1 class="title is-1 publication-title">Tail-Likelihood Reinforcement Learning</h1>
+<!-- ==================== STICKY SECTION NAV ==================== -->
+<nav class="pagenav" aria-label="Section navigation">
+  <div class="inner">
+    <span class="brand">TailRL</span>
+    <span class="links">
+      <a href="#idea">Idea</a>
+      <a href="#likelihood">Likelihood</a>
+      <a href="#estimator">Estimator</a>
+      <a href="#results">Results</a>
+      <a href="#bibtex">BibTeX</a>
+    </span>
+    <label class="is-sr-only" for="pagenav-jump">Jump to section</label>
+    <select class="jump" id="pagenav-jump">
+      <option value="">Jump to…</option>
+      <option value="#idea">Idea</option>
+      <option value="#likelihood">Likelihood</option>
+      <option value="#estimator">Estimator</option>
+      <option value="#results">Results</option>
+      <option value="#bibtex">BibTeX</option>
+    </select>
+  </div>
+</nav>
 
-          <div class="is-size-5 publication-authors" style="margin-top: 0.9rem;">
-            <span class="author-block"><a href="https://stablegradients.github.io">Shrinivas Ramasubramanian</a>,</span>
-            <span class="author-block"><a href="https://daman1209arora.github.io/">Daman Arora</a>,</span>
-            <span class="author-block"><a href="https://tajwarfahim.github.io/">Fahim Tajwar</a>,</span>
-            <span class="author-block"><a href="https://scholar.google.com/citations?user=SU6ooAQAAAAJ">Guanning Zeng</a>,</span>
-            <span class="author-block">Qingyang Wu,</span>
-            <span class="author-block">Zhongzhu Zhou,</span>
-            <span class="author-block">Chenfeng Xu,</span>
-            <span class="author-block"><a href="https://havenfeng.github.io/">Haiwen Feng</a>,</span>
-            <span class="author-block"><a href="https://yudasong.github.io/">Yuda Song</a>,</span>
-            <span class="author-block"><a href="https://www.cs.cmu.edu/~aarti/">Aarti Singh</a>,</span>
-            <span class="author-block"><a href="https://www.cs.cmu.edu/~rsalakhu/">Ruslan Salakhutdinov</a>,</span>
-            <span class="author-block">Drew Bagnell,</span>
-            <span class="author-block"><a href="https://www.cs.cmu.edu/~schneide/">Jeff Schneider</a><sup>&dagger;</sup>,</span>
-            <span class="author-block"><a href="https://azanette.com">Andrea Zanette</a><sup>&dagger;</sup></span>
-          </div>
-          <div class="is-size-6 publication-authors" style="margin-top: 0.35rem;">
-            <span class="author-block">Carnegie Mellon University</span>
-            <span class="author-block" style="margin-left: 0.8em;"><sup>&dagger;</sup>Joint advising</span>
-            <span class="author-block" style="margin-left: 0.8em;">Preprint, 2026</span>
-          </div>
+<!-- ==================== HERO ==================== -->
+<header class="section" style="padding-top: 2.5rem; padding-bottom: 1.5rem;">
+  <div class="container is-max-desktop">
 
-          <div class="has-text-centered" style="margin-top: 0.8rem;">
-            <div class="publication-links">
-              <!-- TODO: both links below are placeholders. Swap in the real arXiv ID and code repo before announcing. -->
-              <span class="link-block">
-                <a href="https://arxiv.org/abs/0000.00000" class="external-link button is-normal is-rounded" target="_blank" rel="noopener" title="arXiv (placeholder - replace with the real ID)">
-                  <span class="icon"><img src="./static/images/arxiv-logomark-small.svg" alt="arXiv" style="width: 1em; height: 1em; vertical-align: middle;"></span>
-                  <span>arXiv</span>
-                </a>
-              </span>
-              <span class="link-block">
-                <a href="https://github.com/stablegradients/TailRL" class="external-link button is-normal is-rounded" target="_blank" rel="noopener" title="Code (placeholder - repo not published yet)">
-                  <span class="icon"><i class="fab fa-github"></i></span>
-                  <span>Code</span>
-                </a>
-              </span>
-              <span class="link-block">
-                <a href="https://zanette-labs.github.io/MaxRL" class="external-link button is-normal is-rounded" target="_blank" rel="noopener">
-                  <span class="icon"><i class="fas fa-project-diagram"></i></span>
-                  <span>MaxRL (binary rewards)</span>
-                </a>
-              </span>
-            </div>
-          </div>
+    <div class="hero-grid">
+      <div>
+        <h1 class="title is-2" style="color: var(--tailrl); font-family: Georgia, 'Times New Roman', serif; font-weight: 400; margin-bottom: 0.9rem;">
+          Tail-Likelihood Reinforcement Learning
+        </h1>
 
-          <div style="margin-top: 0.6rem; text-align: center;">
-            <p style="font-family: 'Castoro', Georgia, serif; font-size: 1.05rem; color: #374151;">
-              <strong>TL;DR</strong>&nbsp; A continuous reward is a continuum of pass/fail events, one at every threshold.
-              TailRL maximizes the log-likelihood of clearing every level &mdash; a critic-free advantage that is one sort over the rollouts you already sample &mdash;
-              and matches RLOO's Pass@$1024$ with <strong>8</strong> rollouts instead of $1024$.
-            </p>
-          </div>
+        <div class="is-size-6 publication-authors">
+          <span class="author-block"><a href="https://stablegradients.github.io">Shrinivas Ramasubramanian</a>,</span>
+          <span class="author-block"><a href="https://daman1209arora.github.io/">Daman Arora</a>,</span>
+          <span class="author-block"><a href="https://tajwarfahim.github.io/">Fahim Tajwar</a>,</span>
+          <span class="author-block"><a href="https://scholar.google.com/citations?user=SU6ooAQAAAAJ">Guanning Zeng</a>,</span>
+          <span class="author-block">Qingyang Wu,</span>
+          <span class="author-block">Zhongzhu Zhou,</span>
+          <span class="author-block">Chenfeng Xu,</span>
+          <span class="author-block"><a href="https://havenfeng.github.io/">Haiwen Feng</a>,</span>
+          <span class="author-block"><a href="https://yudasong.github.io/">Yuda Song</a>,</span>
+          <span class="author-block"><a href="https://www.cs.cmu.edu/~aarti/">Aarti Singh</a>,</span>
+          <span class="author-block"><a href="https://www.cs.cmu.edu/~rsalakhu/">Ruslan Salakhutdinov</a>,</span>
+          <span class="author-block">Drew Bagnell,</span>
+          <span class="author-block"><a href="https://www.cs.cmu.edu/~schneide/">Jeff Schneider</a><sup>&dagger;</sup>,</span>
+          <span class="author-block"><a href="https://azanette.com">Andrea Zanette</a><sup>&dagger;</sup></span>
+        </div>
+        <div class="is-size-7 publication-authors" style="margin-top: 0.3rem; color: var(--text-muted);">
+          Carnegie Mellon University &nbsp;·&nbsp; <sup>&dagger;</sup>Joint advising &nbsp;·&nbsp; Preprint, 2026
+        </div>
+
+        <p class="hook">RL optimizes the mean. <span class="em">TailRL shapes the tail.</span></p>
+        <p class="subhead">
+          A likelihood objective for continuous rewards that keeps rare, high-reward rollouts influential,
+          scales with sampling compute, and reduces exactly to MaxRL on binary rewards.
+        </p>
+
+        <div class="btn-row">
+          <span class="btn" aria-disabled="true" role="link" title="The preprint is not public yet">
+            <span class="icon"><img src="./static/images/arxiv-logomark-small.svg" alt="" width="14" height="14" style="vertical-align: middle;"></span>
+            <span>Paper</span> <span class="btn-note">soon</span>
+          </span>
+          <span class="btn" aria-disabled="true" role="link" title="The code release is not public yet">
+            <span>Code</span> <span class="btn-note">soon</span>
+          </span>
+          <a href="#idea" class="btn btn-primary">Explore the idea →</a>
         </div>
       </div>
+
+      <figure class="hero-figure" style="margin: 0;">
+        <img src="./static/images/decomposition_teaser.gif"
+             data-static="./static/images/teaser_decomposition.png"
+             width="1650" height="550"
+             alt="A rollout's continuous reward is compared against a ladder of reward levels; each comparison is a pass/fail test, and averaging the passes across a group of rollouts traces the tail-probability curve.">
+        <figcaption class="figure-caption">
+          <strong>A continuous reward contains a success test at every reward level.</strong>
+          A rollout passes every level below its reward; TailRL learns from the resulting tail-probability curve.
+        </figcaption>
+      </figure>
+    </div>
+
+    <div class="evidence">
+      <a href="#gui">
+        <span class="ev-num">128× / 256× less inference sampling</span>
+        <span class="ev-sub">Matches RLOO's Pass@1024 at 3B / 7B.</span>
+      </a>
+      <a href="#code-opt">
+        <span class="ev-num">7.7× Best-of-1024 code speedup</span>
+        <span class="ev-sub">GRPO and RLOO remain below 1×.</span>
+      </a>
+      <a href="#imagenet">
+        <span class="ev-num">1/64 the training rollouts</span>
+        <span class="ev-sub">TailRL at $N=16$ exceeds expected-reward baselines at $N=1024$ on ImageNet.</span>
+      </a>
+    </div>
+
+  </div>
+</header>
+
+<!-- ==================== 1. SAME MEAN, DIFFERENT FUTURE ==================== -->
+<section class="section section-narrow section-gray" id="idea">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 section-title">Same mean. Different future.</h2>
+    <div class="prose">
+      <p>
+        Two policies can have the same expected reward and radically different odds of producing an exceptional sample.
+        Expected-reward RL cannot tell them apart. Best-of-$k$ can.
+      </p>
+      <p style="color: var(--text-muted); font-size: 0.95rem;">
+        Drag the bars, keep the means locked, and increase the rollout budget.
+      </p>
+    </div>
+
+    <div class="explorer" id="smt-widget">
+      <div class="explorer-head">
+        <span class="label-text">Presets</span>
+        <span id="smt-presets"></span>
+        <label class="smt-check"><input type="checkbox" id="smt-lock" checked> Lock means</label>
+        <input type="range" id="smt-k" min="0" max="10" step="1" value="4"
+               aria-label="Rollout budget k, powers of two from 1 to 1024">
+        <span id="smt-k-value" class="label-text smt-value">rollout budget k = 16</span>
+        <button type="button" class="reset" id="smt-reset" aria-label="Reset the same-mean widget to its default state">Reset</button>
+      </div>
+      <div class="smt-grid">
+        <svg id="smt-hist-a" viewBox="0 0 360 220" role="img" aria-label="Editable reward distribution for policy A"></svg>
+        <svg id="smt-hist-b" viewBox="0 0 360 220" role="img" aria-label="Editable reward distribution for policy B"></svg>
+      </div>
+      <div class="smt-grid">
+        <svg id="smt-tail" viewBox="0 0 360 220" role="img" aria-label="Tail-probability curves for both policies"></svg>
+        <svg id="smt-bok" viewBox="0 0 360 220" role="img" aria-label="Best-of-k against the rollout budget for both policies"></svg>
+      </div>
+      <div class="readout" id="smt-readout"></div>
+      <div class="hint" id="smt-hint"></div>
+    </div>
+
+    <p class="keyline" style="max-width: 780px;">
+      The mean is the same. The policy with the stronger tail keeps improving as sampling compute grows.
+    </p>
+  </div>
+</section>
+
+<!-- ==================== 2. FROM REWARD TO LIKELIHOOD ==================== -->
+<section class="section section-narrow section-white" id="likelihood">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 section-title">From a continuous reward to a likelihood</h2>
+
+    <div class="steps">
+      <div class="step">
+        <span class="step-n">Step 1</span>
+        <h4>Every reward level asks a question</h4>
+        <p>For each level, ask whether a rollout's reward exceeds it. Better rollouts pass more levels.</p>
+      </div>
+      <div class="step">
+        <span class="step-n">Step 2</span>
+        <h4>Test the levels independently</h4>
+        <p>Assign each level a fresh rollout. The policy passes the <strong>quality audit</strong> only if every rollout clears its assigned level. Independent rollouts keep the levels as separate likelihood factors.</p>
+      </div>
+      <div class="step">
+        <span class="step-n">Step 3</span>
+        <h4>Average the log-likelihood</h4>
+        <p>Refining the audit should not change the quantity being measured, so we use the log-likelihood per level. In the continuum, this becomes TailRL.</p>
+      </div>
+    </div>
+
+    <div class="formula-box" style="margin: 1.75rem 0 0.75rem 0;">
+      <p style="font-size: 1.15rem; margin: 0;">
+        $J_{\mathrm{TailRL}}(\theta;x) = \displaystyle\int_0^1 \log p_\theta(x,\tau)\,d\tau$
+      </p>
+    </div>
+    <div class="prose">
+      <p style="text-align: center; color: var(--text-muted); font-size: 0.95rem;">
+        Here $p_\theta(x,\tau)$ is the probability that one rollout exceeds reward level $\tau$.
+      </p>
+
+      <p class="keyline">
+        TailRL maximizes the average log-probability of reaching the quality levels implied by a continuous verifier.
+      </p>
+
+      <p>
+        On binary rewards, every nontrivial level asks the same question: did the rollout succeed?
+        TailRL therefore reduces exactly to MaxRL.
+        <a href="https://zanette-labs.github.io/MaxRL" target="_blank" rel="noopener">Related project: MaxRL for binary rewards →</a>
+      </p>
+    </div>
+
+    <details class="deep">
+      <summary>Show the finite audit and derivation</summary>
+      <div class="deep-body">
+        <p>
+          For $L$ equally spaced levels $\tau_\ell=(\ell-1)/L$, draw independent rollouts $z_1,\ldots,z_L\sim\pi_\theta(\cdot\mid x)$
+          and let $E_L$ be the event that every one clears its assigned level. Independence factorizes the likelihood:
+        </p>
+        <div class="formula-box">
+          <p style="margin: 0;">
+            $E_L := \displaystyle\bigcap_{\ell=1}^{L}\left\{r(x,z_\ell)>\tau_\ell\right\}, \qquad
+            \Pr_\theta(E_L\mid x) = \prod_{\ell=1}^{L} p_\theta(x,\tau_\ell)$
+          </p>
+        </div>
+        <p>
+          The number of levels sets only the resolution of the audit. Requiring the objective to be invariant to that
+          resolution, while agreeing with the ordinary log-likelihood at $L=1$, fixes the normalization at $1/L$. The
+          result is a Riemann sum, and letting $L\to\infty$ gives the population objective:
+        </p>
+        <div class="formula-box">
+          <p style="margin: 0;">
+            $\displaystyle\lim_{L\to\infty}\frac{1}{L}\log\Pr_\theta(E_L\mid x)
+            = \lim_{L\to\infty}\frac{1}{L}\sum_{\ell=1}^{L}\log p_\theta(x,\tau_\ell)
+            = \int_0^1 \log p_\theta(x,\tau)\,d\tau$
+          </p>
+        </div>
+        <p style="margin-bottom: 0;">
+          The audit defines the population likelihood. It is not a sampling procedure: the finite-rollout estimator below
+          does not draw one rollout per level.
+        </p>
+      </div>
+    </details>
+
+    <h3 class="title is-5" style="margin-top: 2.25rem; margin-bottom: 0.6rem;">Sampling compute changes the objective</h3>
+    <div class="prose">
+      <p>
+        Truncating the logarithm gives a compute-indexed family. Its first member is expected-reward RL; increasing the
+        order moves the objective toward the full tail likelihood.
+      </p>
+    </div>
+    <div class="formula-box" style="margin: 1.25rem 0 0.5rem 0;">
+      <p style="font-size: 1.1rem; margin: 0;">
+        $\nabla_\theta J_{\mathrm{TailRL}}^{(T)}(\theta;x) = \displaystyle\sum_{k=1}^{T}\frac{1}{k}\,\nabla_\theta\,\text{Best-of-}k(\theta;x)$
+      </p>
+    </div>
+    <p class="figure-caption" style="max-width: 720px; margin: 0 auto;">
+      TailRL is a harmonic mixture of Best-of-$k$ objectives across inference budgets.
+      The weights come from the logarithm; they are not tuned.
+    </p>
+
+    <details class="deep">
+      <summary>Show the harmonic derivation</summary>
+      <div class="deep-body">
+        <p>
+          Truncating the Mercator series $\log p = -\sum_{k\ge1}(1-p)^k/k$ after $T$ terms and integrating over the
+          reward level gives
+        </p>
+        <div class="formula-box">
+          <p style="margin: 0;">
+            $J_{\mathrm{TailRL}}^{(T)}(\theta;x) := -\displaystyle\int_0^1\sum_{k=1}^{T}\frac{\left(1-p_\theta(x,\tau)\right)^k}{k}\,d\tau$
+          </p>
+        </div>
+        <p>
+          By the layer-cake identity, $\text{Best-of-}k(\theta;x)=\int_0^1\left[1-(1-p_\theta(x,\tau))^k\right]d\tau$.
+          Substituting gives $J_{\mathrm{TailRL}}^{(T)} = \sum_{k=1}^{T}\left(\text{Best-of-}k - 1\right)/k$,
+          whose gradient is the identity above. At $T=1$ this is expected-reward RL; as $T\to\infty$ it is the tail likelihood.
+        </p>
+      </div>
+    </details>
+  </div>
+</section>
+
+<!-- ==================== 3. WHY THE GRADIENT CHANGES ==================== -->
+<section class="section section-narrow section-gray">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 section-title">Rare reward levels should not vanish into the mean</h2>
+    <div class="prose">
+      <p>
+        Expected reward and TailRL can see the same rollouts and make different updates.
+        The difference is how much each reward level matters.
+      </p>
+    </div>
+
+    <div class="weights">
+      <div class="wcard rl">
+        <div class="wname">Expected reward / RLOO</div>
+        <p><strong>One weight for every reward level.</strong> Rare levels matter only in proportion to how often the policy reaches them.</p>
+        <div class="wformula">level weight $= 1$</div>
+      </div>
+      <div class="wcard grpo">
+        <div class="wname">GRPO</div>
+        <p><strong>One detached scale for the whole input update.</strong> GRPO changes how much an input matters, but not the relative importance of reward levels within it.</p>
+        <div class="wformula">input scale $= 1/\sigma(x)$</div>
+      </div>
+      <div class="wcard tail">
+        <div class="wname">TailRL</div>
+        <p><strong>A different weight at every reward level.</strong> Levels the policy reaches rarely receive more influence.</p>
+        <div class="wformula">level weight $= 1/p(x,\tau)$</div>
+      </div>
+    </div>
+
+    <figure class="figure-container" style="margin-top: 2rem;">
+      <img loading="lazy" decoding="async" src="./static/images/weight_vs_survival_wrap.png"
+           width="850" height="746" style="max-width: 470px; width: 100%;"
+           alt="Gradient weight plotted against pass rate. Expected reward is a flat line at one. Finite-order TailRL curves rise as the pass rate falls, approaching one over the pass rate while flattening off at a cap set by the truncation order.">
+      <figcaption class="figure-caption">
+        <strong>TailRL emphasizes rare levels.</strong> Expected reward is flat across pass rates.
+        Finite-order TailRL approaches inverse-probability weighting while capping the rarest-level weight.
+        The horizontal reference marks GRPO's single input-level multiplier for one illustrative fixed input.
+      </figcaption>
+    </figure>
+
+    <p class="keyline" style="max-width: 780px;">
+      Rare, exceptional rollouts remain visible to the update instead of disappearing into the mean.
+    </p>
+  </div>
+</section>
+
+<!-- ==================== 4. ESTIMATOR ==================== -->
+<section class="section section-narrow section-white" id="estimator">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 section-title">A new objective, not a new training stack</h2>
+    <div class="prose">
+      <p>
+        TailRL uses the same rollout groups as GRPO and RLOO. Sort the rewards, divide each reward gap among the
+        rollouts that reach it, mean-center the resulting weights, and use them as advantages.
+      </p>
+    </div>
+
+    <div class="badges">
+      <span class="badge">No critic</span>
+      <span class="badge">No tail-probability model</span>
+      <span class="badge">No new hyperparameter</span>
+      <span class="badge">One sort + linear passes</span>
+    </div>
+
+    <div style="margin: 0 0 0.5rem 0;">
+      <iframe id="tailrl-code-frame" src="./code.html" title="TailRL advantage computation as a diff against GRPO"
+              width="900" height="662"
+              style="border: none; overflow: hidden; max-width: 100%; display: block; margin: 0 auto;"
+              scrolling="no"></iframe>
+    </div>
+    <p class="figure-caption">In a group-based RL pipeline, only the advantage computation changes.</p>
+
+    <h3 class="title is-5" style="margin-top: 2.25rem; margin-bottom: 0.6rem;">Play with the rollout group</h3>
+    <div class="prose">
+      <p>
+        Drag the rewards. TailRL splits each reward gap among the rollouts that reach it, so a rare top gap belongs to
+        fewer rollouts and carries more weight.
+      </p>
+    </div>
+
+    <div class="explorer" id="tailrl-explorer">
+      <div class="explorer-head">
+        <span class="label-text">Rollouts $N$</span>
+        <input type="range" id="ex-n-slider" min="1" max="10" step="1" value="3"
+               aria-label="Number of rollouts, powers of two from 2 to 1024">
+        <span id="ex-n-value" class="label-text" style="min-width: 3.5em; color: var(--text-dark); font-weight: 600;">8</span>
+        <span class="label-text" style="margin-left: 0.5rem;">Presets</span>
+        <span id="ex-preset-buttons"></span>
+        <button type="button" class="reset" id="ex-reset" aria-label="Reset the rollout explorer to its default state">Reset</button>
+      </div>
+      <svg id="ex-svg-weights" viewBox="0 0 760 290" role="img" aria-label="Gap-over-survivors staircase with draggable rollout rewards"></svg>
+      <svg id="ex-svg-adv" viewBox="0 0 760 250" role="img" aria-label="Advantages assigned by TailRL, GRPO and RLOO"></svg>
+      <div class="readout" id="ex-readout"></div>
+      <div class="hint">Hover or tap a rollout to see its weight and advantages, and move the slider to change the group size from 2 to 1024 rollouts.</div>
+    </div>
+
+    <details class="deep">
+      <summary>Show the estimator theorem</summary>
+      <div class="deep-body">
+        <p>
+          Given $N$ i.i.d. rollouts $z_1,\ldots,z_N\sim\pi_\theta(\cdot\mid x)$ with rewards $r_i:=r(x,z_i)$ and score
+          $S(x,z):=\nabla_\theta\log\pi_\theta(z\mid x)$, the estimator
+        </p>
+        <div class="formula-box">
+          <p style="margin: 0;">
+            $g^{(N)}_{\mathrm{TailRL}}(x) := \displaystyle\sum_{i=1}^{N}\omega(r_i)\,S(x,z_i), \qquad
+            \omega(r_i) := \int_0^{r_i}\frac{d\tau}{\sum_{j=1}^{N}\mathbf{1}\{r_j>\tau\}}$
+          </p>
+        </div>
+        <p>
+          is unbiased for $\nabla_\theta J^{(N)}_{\mathrm{TailRL}}(\theta;x)$. The denominator counts the survivors at
+          each level, so a level cleared by one rollout out of $N$ is worth $N$ times a level cleared by all.
+        </p>
+        <p>
+          The integrand is piecewise constant, so the weight has a closed form as a gap-over-survivors sum over the
+          sorted rewards $r_{(1)}\le\cdots\le r_{(N)}$, with $r_{(0)}:=0$:
+        </p>
+        <div class="formula-box">
+          <p style="margin: 0;">
+            $\omega\!\left(r_{(i)}\right) = \displaystyle\sum_{k=1}^{i}\frac{r_{(k)}-r_{(k-1)}}{N-k+1}, \qquad \sum_{i=1}^{N}\omega\!\left(r_{(i)}\right) = \max_{j} r_j$
+          </p>
+        </div>
+        <p style="margin-bottom: 0;">
+          The weights are nonnegative and sum to the largest reward in the group, so the best reward observed controls
+          the scale of the update. Without centering the estimator targets the order-$N$ objective; with the
+          mean-centering used in training it targets order $N-1$.
+        </p>
+      </div>
+    </details>
+  </div>
+</section>
+
+<!-- ==================== 5. RESULTS ==================== -->
+<section class="section section-narrow section-gray" id="results">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 section-title">TailRL moves the sampling-compute frontier</h2>
+    <div class="prose">
+      <p>
+        Across every tested model and task, TailRL improves the performance-versus-sampling-compute frontier over
+        expected-reward baselines. The largest gaps appear when exceptional outcomes are rare or when a safe, moderate
+        shortcut dominates the mean.
+      </p>
+    </div>
+
+    <div class="result-card" id="imagenet">
+      <span class="eyebrow">Does the finite estimator approach the exact objective?</span>
+      <h4>ImageNet localization</h4>
+      <p>
+        The categorical policy is tractable enough to optimize population TailRL exactly. Finite-rollout TailRL
+        approaches that reference as $N$ grows, and TailRL at $N=16$ already exceeds GRPO and RLOO trained with $N=1024$.
+      </p>
+      <figure class="figure-container">
+        <img loading="lazy" decoding="async" src="./static/images/imagenet_rl_curves.png" width="1645" height="581"
+             alt="Three panels showing CorLoc at 0.5, mean IoU and Best-of-1024 IoU against training epochs. TailRL curves at increasing rollout budgets rise toward a dashed exact-objective reference, and all sit above the GRPO and RLOO curves.">
+        <figcaption class="figure-caption">
+          Larger rollout groups move finite TailRL toward the exact population objective. Even $N=16$, using $1/64$ the
+          training rollouts, exceeds the expected-reward baselines at $N=1024$.
+        </figcaption>
+      </figure>
+      <p class="result-note">
+        Using only scalar IoU rewards, population TailRL also matches or exceeds task-specific coordinate supervision.
+      </p>
+      <details class="deep" style="margin-bottom: 0;">
+        <summary>Task details</summary>
+        <div class="deep-body">
+          <p style="margin-bottom: 0;">
+            A ResNet-50 backbone feeds four categorical heads that sample a bounding box centre, width and height. The
+            reward is the box's IoU with the ground truth. Because the policy is a tractable categorical distribution
+            over a finite box set, the exact policy-induced reward distribution — and so the population objective — can
+            be computed directly. Metrics are CorLoc@$\delta$, mean IoU and Best-of-$k$ IoU on held-out validation images.
+          </p>
+        </div>
+      </details>
+    </div>
+
+    <div class="result-card" id="maze">
+      <span class="eyebrow">Can RL learn when exceptional outcomes are almost absent?</span>
+      <h4>Text-maze navigation</h4>
+      <p>
+        We vary the initial shortest-path success rate from about $1\%$ to $0.01\%$. TailRL remains reliable in the
+        rare-success regime, where RLOO stays at zero and GRPO becomes seed-dependent.
+      </p>
+      <figure class="figure-container">
+        <img loading="lazy" decoding="async" src="./static/images/maze_init_sweep_wrap.png"
+             width="766" height="688" style="max-width: 470px; width: 100%;"
+             alt="Pass@1 after RL plotted against Pass@1 before RL. In the shaded low-success region the TailRL curve stays high while RLOO sits at zero and GRPO varies widely across seeds.">
+        <figcaption class="figure-caption">
+          Pass@$1$ before and after post-training with $N=16$. In the shaded region RLOO ends at zero shortest-path
+          success and GRPO becomes seed-dependent; once successes are common the three methods converge.
+        </figcaption>
+      </figure>
+      <p class="takeaway-line">
+        <strong>TailRL separates exactly where the high-reward tail becomes hard to observe.</strong>
+      </p>
+    </div>
+
+    <div class="result-card" id="gui">
+      <span class="eyebrow">Do similar one-sample policies scale differently with more inference?</span>
+      <h4>GUI grounding with 3B and 7B vision-language models</h4>
+      <p>
+        TailRL and RLOO have similar Pass@$1$, but their curves separate as more samples are drawn. TailRL matches
+        RLOO's Pass@$1024$ with $8$ rollouts at 3B and $4$ at 7B: $128\times$ and $256\times$ less inference sampling.
+      </p>
+      <figure class="figure-container">
+        <img loading="lazy" decoding="async" src="./static/images/gui_scales.png" width="1669" height="987"
+             alt="Pass@k, Best-of-k reward and training accuracy for Qwen2.5-VL 3B and 7B on ScreenSpot-Pro. The TailRL Pass@k curves keep climbing with the rollout budget while RLOO flattens and GRPO trails, even though training accuracy is similar for all three.">
+        <figcaption class="figure-caption">
+          ScreenSpot-Pro after post-training Qwen2.5-VL-3B (top) and 7B (bottom). All three methods reach similar
+          training accuracy, but only TailRL keeps improving with the inference budget.
+        </figcaption>
+      </figure>
+      <p class="takeaway-line">
+        <strong>Single-sample accuracy hides how much useful behavior remains recoverable from the policy.</strong>
+      </p>
+    </div>
+
+    <div class="result-card" id="code-opt">
+      <span class="eyebrow">Can the objective escape a safe but useless shortcut?</span>
+      <h4>Code runtime optimization</h4>
+      <p>
+        Copying the input is always correct and earns reward $1$. GRPO and RLOO collapse to this shortcut; TailRL keeps
+        producing risky rewrites and reaches $7.7\times$ Best-of-$1024$ speedup on held-out problems, versus below
+        $1\times$ for both baselines.
+      </p>
+      <figure class="figure-container">
+        <img loading="lazy" decoding="async" src="./static/images/pie_results_v3.png" width="1652" height="521"
+             alt="Three panels: mean training reward over one epoch, the density of per-problem Best-of-1024 reward on the test set, and correctness probability during training. TailRL's reward climbs well above the copying value while GRPO and RLOO settle at it.">
+        <figcaption class="figure-caption">
+          Mean reward during one epoch (left), per-problem Best-of-$1024$ reward on the test set (middle) where GRPO and
+          RLOO coincide at $1.0$, and the fraction of rollouts passing every test (right).
+        </figcaption>
+      </figure>
+      <figure class="figure-container inset-figure" style="margin-top: 0.5rem;">
+        <img loading="lazy" decoding="async" src="./static/images/pie_rollout_dist_v2.png" width="791" height="633"
+             alt="The initial reward distribution on PIE: a large mass of incorrect rollouts at zero, a tall spike at a speedup of one from copying the input, and a thin tail of correct and faster programs.">
+        <figcaption class="figure-caption">
+          The shortcut is visible from the start: $74.4\%$ of initial rollouts are incorrect, $23.5\%$ copy the input
+          (the spike at $1\times$), and only $2.1\%$ are correct and faster.
+        </figcaption>
+      </figure>
+      <p class="takeaway-line">
+        <strong>Expected reward settles for the common moderate outcome. TailRL preserves the rare behavior needed to improve it.</strong>
+      </p>
+    </div>
+
+    <div class="prose" style="margin-top: 2rem;">
+      <p>
+        Expected-reward training fails in two ways: it overlooks rare good outcomes, or it collapses to a frequent
+        moderate one. TailRL addresses both by keeping rarely reached reward levels influential.
+      </p>
     </div>
   </div>
 </section>
 
-<!-- ==================== TEASER ==================== -->
-<section class="section section-white" style="padding-top: 0.8rem; padding-bottom: 0.5rem;">
+<!-- ==================== CLOSING ==================== -->
+<section class="section closing">
   <div class="container is-max-desktop">
-
-    <div class="figure-container" style="margin: 0;">
-      <center>
-        <img src="./static/images/decomposition_teaser.gif" data-static="./static/images/teaser_decomposition.png"
-             alt="Four rollout rewards induce an indicator matrix over reward thresholds; the row averages trace the empirical tail-probability curve" style="max-width: 100%;">
-      </center>
-      <p class="figure-caption">
-        <strong>A continuous reward decomposes into threshold events.</strong>
-        A rollout with reward $r_i$ clears every threshold below $r_i$. Across a group of rollouts these binary outcomes trace the
-        tail-probability $p_\theta(x,\tau)$ at every reward level &mdash; the curve whose log TailRL maximizes.
-      </p>
-    </div>
-
-    <div class="figure-container" id="gui-figure" style="margin-top: 0.5rem;">
-      <center>
-        <img loading="lazy" decoding="async" src="./static/images/gui_scales.png" alt="ScreenSpot-Pro results for Qwen2.5-VL-3B and 7B: Pass@k, Best-of-k reward and training accuracy" style="max-width: 100%;">
-      </center>
-      <p class="figure-caption">
-        <strong>GUI grounding on ScreenSpot-Pro</strong> after post-training Qwen2.5-VL-3B (top) and 7B (bottom).
-        All three methods reach similar training accuracy (right), but only TailRL keeps improving with the inference budget:
-        Pass@$1024$ up <strong>7.2&ndash;14.6</strong> points, and RLOO's Pass@$1024$ matched with <strong>8</strong> rollouts at 3B and <strong>4</strong> at 7B &mdash;
-        <strong>128&times;</strong> and <strong>256&times;</strong> less test-time compute.
-      </p>
-    </div>
-  </div>
-</section>
-
-<!-- ==================== WHY A TAIL LIKELIHOOD ==================== -->
-<section class="section section-white" style="padding-bottom: 1rem;">
-  <div class="container is-max-desktop">
-    <div class="content has-text-left">
-
-      <h2 class="title is-3 section-title">Why a Tail Likelihood?</h2>
-
-      <p>
-        Two policies can share the same expected reward while placing very different probability on high-reward rollouts.
-        The difference appears the moment inference compute is scaled: $\text{Best-of-}k(\theta;x)=\mathbb{E}[\max_{i\le k} r(x,z_i)]$ depends on the upper tail
-        of the reward distribution, not on its mean &mdash; and expected-reward training is known to narrow exactly that tail.
-      </p>
-
-      <p>
-        The obvious fix, declaring $r=1$ a success and everything below it a failure, throws the information away.
-        Exact success may be unattainable, and lowering the threshold does not help: once a rollout clears it, the objective has no preference for improving further.
-        A continuous reward already defines a success event at <em>every</em> threshold.
-      </p>
-
-      <h4 class="subsection-title" style="clear: both;">Try It: Same Mean, Different Tail</h4>
-      <p>
-        Shape two reward distributions. The widget holds their means equal, so expected-reward RL sees the same objective for both.
-        Move the rollout budget $k$ to see where Best-of-$k$ and the tail likelihood disagree with it.
-      </p>
-
-      <div class="explorer" id="smt-widget">
-        <div class="explorer-head">
-          <span class="label-text">Presets</span>
-          <span id="smt-presets"></span>
-          <label class="smt-check"><input type="checkbox" id="smt-lock" checked> Lock means</label>
-          <input type="range" id="smt-k" min="0" max="10" step="1" value="4"
-                 aria-label="Rollout budget k, powers of two from 1 to 1024">
-          <span id="smt-k-value" class="label-text smt-value">rollout budget k = 16</span>
-        </div>
-        <div class="smt-grid">
-          <svg id="smt-hist-a" viewBox="0 0 360 220" role="img" aria-label="Editable reward distribution for policy A"></svg>
-          <svg id="smt-hist-b" viewBox="0 0 360 220" role="img" aria-label="Editable reward distribution for policy B"></svg>
-        </div>
-        <div class="smt-grid">
-          <svg id="smt-tail" viewBox="0 0 360 220" role="img" aria-label="Tail-probability curves for both policies"></svg>
-          <svg id="smt-bok" viewBox="0 0 360 220" role="img" aria-label="Best-of-k against the rollout budget for both policies"></svg>
-        </div>
-        <div class="readout" id="smt-readout"></div>
-        <div class="hint" id="smt-hint"></div>
-      </div>
-
-      <div class="math-comparison three" style="clear: both;">
-        <div class="math-box" style="border-top: 3px solid var(--grpo);">
-          <h4 style="color: var(--grpo); text-align: center;">Expected Reward</h4>
-          <p style="text-align: center; font-size: 1rem; margin: 0.5rem 0;">
-            $J_{\mathrm{RL}} = \mathbb{E}_{z\sim\pi_\theta}\left[r(x,z)\right]$
-          </p>
-          <p class="math-note">The mean of the reward distribution</p>
-        </div>
-        <div class="math-box" style="border-top: 3px solid var(--primary);">
-          <h4 style="color: var(--primary); text-align: center;">MaxRL (binary rewards)</h4>
-          <p style="text-align: center; font-size: 1rem; margin: 0.5rem 0;">
-            $J_{\mathrm{MaxRL}} = \log q_\theta(x)$
-          </p>
-          <p class="math-note">Log-probability of the single success event</p>
-        </div>
-        <div class="math-box" style="border-top: 3px solid var(--tailrl);">
-          <h4 style="color: var(--tailrl); text-align: center;">TailRL (continuous rewards)</h4>
-          <p style="text-align: center; font-size: 1rem; margin: 0.5rem 0;">
-            $J_{\mathrm{TailRL}} = \displaystyle\int_0^1 \log p_\theta(x,\tau)\,d\tau$
-          </p>
-          <p class="math-note">Average log-probability of clearing every level</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ==================== TAILRL OBJECTIVE ==================== -->
-<section class="section section-white" style="padding-top: 1rem;">
-  <div class="container is-max-desktop">
-    <h2 class="title is-3 section-title">The TailRL Objective</h2>
-
-    <div class="content has-text-left">
-
-      <p>
-        For a threshold $\tau\in[0,1)$, the <strong>tail-probability</strong>
-        $p_\theta(x,\tau) := \Pr_{z\sim\pi_\theta(\cdot\mid x)}\!\left(r(x,z)>\tau\right)$
-        records how often the policy reaches each reward level.
-        Give every level its own independent rollout and require that all of them clear their assigned threshold; the log-probability of passing that audit, per level, is
-      </p>
-
-      <div class="formula-box">
-        <p style="font-size: 1.05rem; margin: 0;">
-          $J_{\mathrm{TailRL}}(\theta;x) := \displaystyle\int_0^1 \log p_\theta(x,\tau)\,d\tau$
-        </p>
-      </div>
-
-      <div class="insight-box">
-        <p style="margin: 0;">
-          TailRL maximizes the expected log-probability of clearing a uniformly sampled reward threshold.
-          On a binary reward every threshold is the same event, so $p_\theta(x,\tau)=q_\theta(x)$ and TailRL reduces <em>exactly</em> to MaxRL.
-        </p>
-      </div>
-
-      <p>
-        Truncating the Mercator series $\log p = -\sum_{k\ge1}(1-p)^k/k$ after $T$ terms gives a <strong>compute-indexed family</strong>:
-      </p>
-
-      <div class="formula-box">
-        <p style="font-size: 1.05rem; margin: 0;">
-          $J_{\mathrm{TailRL}}^{(T)}(\theta;x) := -\displaystyle\int_0^1\sum_{k=1}^{T}\frac{\left(1-p_\theta(x,\tau)\right)^k}{k}\,d\tau$
-        </p>
-      </div>
-
-      <ul style="margin: 1.25rem 0; padding-left: 1.5rem;">
-        <li style="margin-bottom: 0.4rem;">$T = 1$ recovers expected-reward reinforcement learning</li>
-        <li>$T \to \infty$ recovers the population-level tail likelihood</li>
-      </ul>
-
-      <p>
-        By the layer-cake identity, every member of this family is exactly a weighted sum of Best-of-$k$ objectives:
-      </p>
-
-      <div class="math-comparison">
-        <div class="math-box" style="border-top: 3px solid var(--grpo);">
-          <h4 style="color: var(--grpo); text-align: center;">Expected Reward</h4>
-          <p style="text-align: center; font-size: 1rem; margin: 0.5rem 0;">
-            $$\begin{aligned} J_{\mathrm{RL}}(\theta;x) &= \text{Best-of-}1(\theta;x) \\ \nabla_\theta J_{\mathrm{RL}}(\theta;x) &= \nabla_\theta\,\text{Best-of-}1(\theta;x) \end{aligned}$$
-          </p>
-          <p class="math-note">Optimizes Best-of-1</p>
-        </div>
-        <div class="math-box" style="border-top: 3px solid var(--tailrl);">
-          <h4 style="color: var(--tailrl); text-align: center;">Tail Likelihood</h4>
-          <p style="text-align: center; font-size: 1rem; margin: 0.5rem 0;">
-            $$\begin{aligned} J_{\mathrm{TailRL}}(\theta;x) &= \int_0^1 \log p_\theta(x,\tau)\,d\tau \\ \nabla_\theta J_{\mathrm{TailRL}}(\theta;x) &= \sum_{k=1}^{\infty}\frac{1}{k}\,\nabla_\theta\text{Best-of-}k(\theta;x) \end{aligned}$$
-          </p>
-          <p class="math-note">Optimizes a harmonic mixture of Best-of-$k$</p>
-        </div>
-      </div>
-
-      <div class="insight-box">
-        <p style="margin: 0;">
-          The harmonic coefficients $1/k$ fall straight out of the logarithm. They are not chosen or tuned.
-          Expected-reward RL keeps only the first term of this mixture.
-        </p>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-<!-- ==================== ESTIMATOR ==================== -->
-<section class="section section-gray">
-  <div class="container is-max-desktop">
-    <h2 class="title is-3 section-title">The Estimator</h2>
-
-    <div class="content has-text-left">
-
-      <div class="result-card" style="border-left: 4px solid var(--primary); margin: 0 0 1.5rem 0;">
-        <h4 style="color: var(--primary); margin-bottom: 0.8rem;">Theorem: Unbiased Policy-Gradient Estimator</h4>
-        <p style="margin-bottom: 1rem;">Given $N$ i.i.d. rollouts $z_1,\ldots,z_N\sim\pi_\theta(\cdot\mid x)$ with rewards $r_i:=r(x,z_i)$ and score $S(x,z):=\nabla_\theta\log\pi_\theta(z\mid x)$, the estimator</p>
-        <div style="text-align: center; font-size: 1.1rem; padding: 0.5rem 0;">
-          $g^{(N)}_{\mathrm{TailRL}}(x) := \displaystyle\sum_{i=1}^{N}\omega(r_i)\,S(x,z_i), \qquad
-          \omega(r_i) := \int_0^{r_i}\frac{d\tau}{\sum_{j=1}^{N}\mathbf{1}\{r_j>\tau\}}$
-        </div>
-        <p style="margin-top: 1rem; margin-bottom: 0.5rem;">is unbiased for $\nabla_\theta J^{(N)}_{\mathrm{TailRL}}(\theta;x)$.</p>
-        <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 0.5rem; margin-bottom: 0;">
-          <strong>Interpretation:</strong> the denominator counts the <em>survivors</em> at each level, so a rollout's weight integrates the inverse tail-probability over every level below its reward.
-          A level cleared by one rollout out of $N$ is worth $N$ times a level cleared by all. No critic and no pass-rate estimation, and $N$ rollouts automatically target truncation order $N$.
-        </p>
-      </div>
-
-      <p>
-        The denominator changes only when $\tau$ crosses a sampled reward, so the integral is a <strong>gap-over-survivors</strong> sum over the sorted rewards $r_{(1)}\le\cdots\le r_{(N)}$, with $r_{(0)}:=0$:
-      </p>
-
-      <div class="formula-box" style="margin: 1.25rem 0;">
-        <p style="font-size: 1.05rem; margin: 0;">
-          $\omega\!\left(r_{(i)}\right) = \displaystyle\sum_{k=1}^{i}\frac{r_{(k)}-r_{(k-1)}}{N-k+1}, \qquad \sum_{i=1}^{N}\omega\!\left(r_{(i)}\right) = \max_{j} r_j$
-        </p>
-      </div>
-
-      <p>
-        The weights are nonnegative and sum to the largest reward in the group, so the best reward observed controls the scale of the update.
-        Mean-centering them within the group gives the advantages used in training.
-      </p>
-
-      <div class="math-comparison">
-        <div class="math-box" style="border-top: 3px solid var(--grpo);">
-          <h4 style="color: var(--grpo); text-align: center;">REINFORCE</h4>
-          <p style="text-align: center; font-size: 1.1rem;">
-            $\displaystyle\frac{1}{N}\sum_{i=1}^N r_i\, S(x,z_i)$
-          </p>
-          <p class="math-note">
-            <strong>Unbiased for:</strong> $\nabla_\theta\,\text{Best-of-}1$
-            <br><br>
-            The reward itself is the weight
-          </p>
-        </div>
-        <div class="math-box" style="border-top: 3px solid var(--tailrl);">
-          <h4 style="color: var(--tailrl); text-align: center;">TailRL (Ours)</h4>
-          <p style="text-align: center; font-size: 1.1rem;">
-            $\displaystyle\sum_{i=1}^N \omega(r_i)\, S(x,z_i)$
-          </p>
-          <p class="math-note">
-            <strong>Unbiased for:</strong> $\sum_{k=1}^{N}\frac{1}{k}\nabla_\theta\,\text{Best-of-}k$
-            <br><br>
-            The integrated inverse survivor count is the weight
-          </p>
-        </div>
-      </div>
-
-      <div class="insight-box">
-        <p style="margin: 0;">
-          In REINFORCE, increasing $N$ only reduces the <strong>variance</strong> of a fixed objective.
-          In TailRL, $N$ sets the truncation order: more rollouts move the <strong>objective itself</strong> toward the tail likelihood.
-          No critic, no extra hyperparameter.
-        </p>
-      </div>
-
-      <h4 class="subsection-title">Try It</h4>
-      <p>
-        Drag the rollouts along the reward axis. The staircase is the integrand $1/\#\{j: r_j>\tau\}$, and a rollout's weight is the shaded area beneath it.
-      </p>
-
-      <div class="explorer" id="tailrl-explorer">
-        <div class="explorer-head">
-          <span class="label-text">Rollouts $N$</span>
-          <input type="range" id="ex-n-slider" min="1" max="10" step="1" value="3"
-                 aria-label="Number of rollouts, powers of two from 2 to 1024">
-          <span id="ex-n-value" class="label-text" style="min-width: 3.5em; color: var(--text-dark); font-weight: 600;">8</span>
-          <span class="label-text" style="margin-left: 0.5rem;">Presets</span>
-          <span id="ex-preset-buttons"></span>
-        </div>
-        <svg id="ex-svg-weights" viewBox="0 0 760 290" role="img" aria-label="Gap-over-survivors staircase with draggable rollout rewards"></svg>
-        <svg id="ex-svg-adv" viewBox="0 0 760 250" role="img" aria-label="Advantages assigned by TailRL, GRPO and RLOO"></svg>
-        <div class="readout" id="ex-readout"></div>
-        <div class="hint">Hover or tap a rollout to see its weight and advantages, and move the slider to change the group size from 2 to 1024 rollouts.</div>
-      </div>
-
-      <h4 class="subsection-title">A Drop-In Advantage</h4>
-      <p>
-        One sort and two linear passes over the $N$ rewards a GRPO or RLOO run already samples. Sampler, surrogate and optimizer are unchanged.
-      </p>
-
-      <div style="margin: 1.5rem 0 0 0;">
-        <center>
-          <iframe
-            id="tailrl-code-frame"
-            src="./code.html"
-            title="TailRL advantage code diff"
-            width="900"
-            height="470"
-            style="border: none; overflow: hidden; max-width: 100%;"
-            scrolling="no">
-          </iframe>
-        </center>
-      </div>
-
-      <h4 class="subsection-title">What Changes Relative to GRPO and RLOO</h4>
-      <p>
-        All of these objectives integrate a scalar function of the tail-probability, $J_\phi(\theta;x)=\int_0^1\phi(p_\theta(x,\tau))\,d\tau$.
-        They differ only in the <strong>gradient weight</strong> $\phi'$ placed on making a reward level more likely.
-      </p>
-
-      <div class="comparison-table-wrapper">
-        <table class="comparison-table">
-          <thead>
-            <tr>
-              <th>Objective</th>
-              <th style="white-space: nowrap;">Gradient weight $\phi'(p)$</th>
-              <th>Reads as</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>$J_{\mathrm{RL}}$ (REINFORCE, RLOO)</td>
-              <td>$1$</td>
-              <td>Every level weighted equally, however rarely it is reached</td>
-            </tr>
-            <tr>
-              <td>$J_{\mathrm{GRPO}}$ (population)</td>
-              <td>$1/\sigma_\theta(x)$</td>
-              <td>One scale per input; flat across levels within it</td>
-            </tr>
-            <tr>
-              <td>$J_{\mathrm{TailRL}}^{(T)}$</td>
-              <td>$\dfrac{1-(1-p)^{T}}{p}$</td>
-              <td>Approaches $1/p$, capped at $T$ for the rarest levels</td>
-            </tr>
-            <tr>
-              <td>$J_{\mathrm{TailRL}}$</td>
-              <td>$1/p$</td>
-              <td>Inverse tail-probability: rare levels dominate</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      <div class="figure-container">
-        <center>
-          <img loading="lazy" decoding="async" src="./static/images/weight_vs_survival_wrap.png" alt="Gradient weight versus tail-probability for expected reward, truncated TailRL and the tail likelihood" style="max-width: 520px; width: 100%;">
-        </center>
-        <p class="figure-caption">
-          <strong>Gradient weight vs. tail-probability.</strong> Expected reward is flat; order-$T$ TailRL approaches $1/p_\theta(x,\tau)$ as $T$ grows.
-          GRPO's $1/\sigma$ changes how much an input matters, not which rollouts within it matter.
-        </p>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-<!-- ==================== EXPERIMENTS ==================== -->
-<section class="section section-white">
-  <div class="container is-max-desktop">
-    <h2 class="title is-3 section-title">Experiments</h2>
-
-    <div class="content has-text-left" style="margin-bottom: 2rem;">
-      <p>
-        When strong outcomes are common, all three objectives behave similarly. When they are not, the expected-reward baselines fail in one of two ways:
-        they <strong>overlook infrequent outcomes</strong>, or they <strong>retreat to a frequent but less useful one</strong>.
-        Four settings isolate these failures. Throughout, $N$ is the training rollout budget and $k$ the inference budget; within each comparison all methods share
-        the same policy, data, optimizer and budget, and differ only in the advantage estimator.
-      </p>
-    </div>
-
-    <!-- ImageNet -->
-    <div class="result-card">
-      <span class="task-tag">Setting 1 &middot; Exact population objective available</span>
-      <h4>ImageNet Object Localization</h4>
-      <p>
-        Four categorical heads sample a bounding box and the reward is its IoU with the ground truth.
-        The policy is tractable enough to optimize the population objective $J_{\mathrm{TailRL}}$ exactly, giving a reference the finite-rollout estimator can be measured against.
-        From the scalar IoU reward alone, TailRL also matches the L1+GIoU coordinate supervision used by DETR.
-      </p>
-      <div class="figure-container">
-        <center><img loading="lazy" decoding="async" src="./static/images/imagenet_rl_curves.png" alt="TailRL at N=16 to 1024 versus GRPO and RLOO at N=1024 on CorLoc, mean IoU and Best-of-1024 IoU" style="max-width: 100%;"></center>
-        <p class="figure-caption">
-          <strong>Comparison with expected-reward baselines.</strong> TailRL at $N\in\{16,64,256,1024\}$ (darker is larger $N$), the exact population objective (dashed), and GRPO and RLOO at $N=1024$.
-          At $N=16$ &mdash; $1/64$ the training rollouts &mdash; TailRL already exceeds both baselines trained at $N=1024$ on all three metrics.
-        </p>
-      </div>
-    </div>
-
-    <!-- Text-Maze -->
-    <div class="result-card">
-      <span class="task-tag">Setting 2 &middot; Varying the quality of the initial policy</span>
-      <h4>Text-Maze Navigation from Low-Success Initial Policies</h4>
-      <p>
-        A rollout is a token sequence describing a path through a $17\times17$ text maze. Partial credit is given for ending near the goal, but reward $1$ requires a shortest path.
-        Varying supervised pretraining yields initial policies whose shortest-path success rate ranges from about $1\%$ down to $0.01\%$; we post-train each with $N=16$ rollouts per maze.
-      </p>
-      <div class="figure-container">
-        <center>
-          <img loading="lazy" decoding="async" src="./static/images/maze_init_sweep_wrap.png" alt="Pass@1 after RL versus Pass@1 before RL for TailRL, GRPO and RLOO across initial policies" style="max-width: 520px; width: 100%;">
-        </center>
-        <p class="figure-caption">
-          <strong>Pass@$1$ before and after post-training.</strong> In the shaded region RLOO ends at zero shortest-path success, and GRPO becomes seed-dependent &mdash;
-          some runs learn, others stay at zero, so its mean reflects between-seed failure rather than partial learning. Once successes are common the three methods converge.
-        </p>
-      </div>
-      <div class="takeaway-box">
-        <p><span class="takeaway-title">TailRL stays reliable when high-reward rollouts are exceptionally rare.</span>
-        <span class="takeaway-body">It learns from initial policies whose successes are nearly absent, where RLOO fails outright and GRPO becomes seed-dependent.</span></p>
-      </div>
-    </div>
-
-    <!-- GUI grounding -->
-    <div class="result-card">
-      <span class="task-tag">Setting 3 &middot; Vision-language models at two scales</span>
-      <h4>GUI Grounding with Vision-Language Models</h4>
-      <p>
-        Given a screenshot and an instruction, the VLM emits click coordinates and receives a continuous reward $r(x,z)\in[0,2.5]$ combining proximity, a hit bonus and a format bonus.
-        We fine-tune Qwen2.5-VL-3B and 7B with $N=8$ rollouts per input and evaluate on ScreenSpot-Pro (<a href="#gui-figure">figure at top</a>).
-        Training accuracy gives no hint of the separation: all three methods stay within a few points of one another on training batches while their held-out
-        Pass@$k$ and Best-of-$k$ curves diverge increasingly with the inference budget.
-      </p>
-      <div class="takeaway-box">
-        <p><span class="takeaway-title">TailRL-trained VLMs are better at test-time scaling.</span>
-        <span class="takeaway-body">The advantage over GRPO and RLOO is not higher training success, but a policy from which good clicks remain recoverable as more samples are drawn.</span></p>
-      </div>
-    </div>
-
-    <!-- Code runtime optimization -->
-    <div class="result-card">
-      <span class="task-tag">Setting 4 &middot; A safe but suboptimal shortcut exists</span>
-      <h4>Code Runtime Optimization</h4>
-      <p>
-        Each input is a slow C++ program from the PIE corpus, and the model must write a faster version that stays correct.
-        A rewrite that fails any test earns $0$; otherwise it earns its speedup, measured in gem5 simulated time.
-        <strong>Returning the input unchanged is always correct and earns reward $1$</strong> &mdash; a dependable shortcut that offers no speedup.
-        We post-train Qwen3-1.7B-Instruct with $N=16$ rollouts per program, three seeds per method.
-      </p>
-      <div class="figure-container">
-        <center><img loading="lazy" decoding="async" src="./static/images/pie_rollout_dist_v2.png" alt="Initial reward distribution of Qwen3-1.7B-Instruct on PIE: most rollouts incorrect, a spike at speedup 1 from copying, and a thin tail of faster programs" style="max-width: 520px; width: 100%;"></center>
-        <p class="figure-caption">
-          <strong>Initial reward distribution.</strong> $74.4\%$ of rollouts are incorrect, $23.5\%$ are correct but no faster than the input (the spike at $1\times$), and only $2.1\%$ are correct and faster.
-        </p>
-      </div>
-      <p>
-        GRPO and RLOO converge to the shortcut within roughly one hundred steps: correctness above $98\%$, mean reward just below the value of copying, and policy entropy collapsing by one to two orders of magnitude.
-        TailRL keeps producing risky rewrites, trading single-rollout correctness for probability mass on programs that are both correct and meaningfully faster &mdash; mean reward $2.92$, nearly three times the copying value, and still rising at the one-epoch budget.
-        On held-out problems its Best-of-$1024$ speedup is $\mathbf{7.7\times}$, against $0.98\times$ for GRPO and $0.96\times$ for RLOO, whose best rollouts never beat the program they reproduce.
-      </p>
-      <div class="figure-container">
-        <center><img loading="lazy" decoding="async" src="./static/images/pie_results_v3.png" alt="PIE results: mean training reward, Best-of-1024 density on test problems, and correctness probability during training" style="max-width: 100%;"></center>
-        <p class="figure-caption">
-          (Left) mean reward during one training epoch. (Middle) density of the per-problem Best-of-$1024$ reward on the test set; GRPO and RLOO coincide at $1.0$, i.e. they only echo the input program. (Right) fraction of training rollouts passing every test.
-        </p>
-      </div>
-      <div class="takeaway-box">
-        <p><span class="takeaway-title">TailRL escapes safe but suboptimal shortcuts.</span>
-        <span class="takeaway-body">When an easy suboptimal solution exists, expected-reward methods settle for it. TailRL keeps searching and learns to produce rarer and better outcomes.</span></p>
-      </div>
-    </div>
-
-    <div class="content has-text-left" style="margin-top: 2rem;">
-      <p>
-        Both failures share a source. Expected reward credits each reward threshold in proportion to how often the policy reaches it, so the highest rewards contribute almost nothing.
-        TailRL weights each level by the inverse of that frequency &mdash; one change, and it addresses both.
-      </p>
+    <p class="closing-line">One objective. The same rollout pipeline. A better tail.</p>
+    <div class="btn-row">
+      <span class="btn" aria-disabled="true" role="link">Read the paper <span class="btn-note">soon</span></span>
+      <span class="btn" aria-disabled="true" role="link">View the code <span class="btn-note">soon</span></span>
+      <button type="button" class="btn btn-primary" id="copy-bibtex" data-target="bibtex-src">Copy BibTeX</button>
+      <span class="copy-ok" id="copy-status" role="status" aria-live="polite"></span>
     </div>
   </div>
 </section>
 
 <!-- ==================== BIBTEX ==================== -->
-<section class="section section-gray" id="BibTeX">
+<section class="section section-white" id="bibtex" style="padding-top: 2.5rem;">
   <div class="container is-max-desktop content">
-    <h2 class="title is-3 section-title">BibTeX</h2>
+    <h2 class="title is-4 section-title">BibTeX</h2>
     <div class="bibtex-box">
-<pre><code>@article{ramasubramanian2026tailrl,
+<pre><code id="bibtex-src">@article{ramasubramanian2026tailrl,
   title   = {Tail-Likelihood Reinforcement Learning},
   author  = {Ramasubramanian, Shrinivas and Arora, Daman and Tajwar, Fahim and Zeng, Guanning
              and Wu, Qingyang and Zhou, Zhongzhu and Xu, Chenfeng and Feng, Haiwen and Song, Yuda
@@ -972,351 +587,23 @@
   </div>
 </section>
 
-<!-- Footer -->
 <footer class="footer">
   <div class="container">
-    <div class="content has-text-centered" style="margin-bottom: 1.5rem;">
+    <div class="content has-text-centered" style="margin-bottom: 1.25rem;">
       <a href="https://www.cmu.edu/" target="_blank" rel="noopener">
-        <img loading="lazy" decoding="async" src="./static/images/cmu_logo.png" alt="Carnegie Mellon University" style="height: 100px; border-radius: 4px;">
+        <img loading="lazy" src="./static/images/cmu_logo.png" width="900" height="900"
+             alt="Carnegie Mellon University" style="height: 76px; width: auto; border-radius: 4px;">
       </a>
     </div>
     <div class="columns is-centered">
       <p>
         Corresponding author: <a href="mailto:shrinivr@andrew.cmu.edu">Shrinivas Ramasubramanian</a><br>
-        Website adapted from <a href="https://zanette-labs.github.io/MaxRL">MaxRL</a> and <a href="https://github.com/nerfies/nerfies.github.io">Nerfies</a>.
+        Related project: <a href="https://zanette-labs.github.io/MaxRL" target="_blank" rel="noopener">MaxRL</a> (binary rewards).
+        Website adapted from <a href="https://github.com/nerfies/nerfies.github.io" target="_blank" rel="noopener">Nerfies</a>.
       </p>
     </div>
   </div>
 </footer>
-
-<script>
-  // Reduced motion: swap animated GIFs for their static counterparts.
-  (function () {
-    var mq = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)');
-    if (!mq || !mq.matches) return;
-    document.querySelectorAll('img[data-static]').forEach(function (img) {
-      img.src = img.getAttribute('data-static');
-    });
-  })();
-
-  // Size the code-diff iframe to its content (code.html posts its height).
-  window.addEventListener('message', function (e) {
-    if (!e.data || typeof e.data.tailrlCodeHeight !== 'number') return;
-    var frame = document.getElementById('tailrl-code-frame');
-    if (frame) frame.style.height = e.data.tailrlCodeHeight + 'px';
-  });
-</script>
-
-<script>
-  // ==================== Interactive TailRL advantage explorer ====================
-  (function () {
-    var root = document.getElementById('tailrl-explorer');
-    if (!root) return;
-    var NS = 'http://www.w3.org/2000/svg';
-    var C = { tailrl: '#C0392B', grpo: '#46628F', rloo: '#1D9E75', ink: '#1f2937', muted: '#9ca3af', grid: '#e5e7eb' };
-
-    var N = 8, rewards = [], hover = -1, dragging = -1, preset = 'rare';
-
-    var presets = {
-      rare:   function (n) { var a = []; for (var i = 0; i < n; i++) a.push(0.12 + 0.28 * ((i * 7919) % n) / n); a[n - 1] = 0.92; return a; },
-      binary: function (n) { var a = []; var K = Math.max(1, Math.round(n / 4)); for (var i = 0; i < n; i++) a.push(i < K ? 1 : 0); return a; },
-      spread: function (n) { var a = []; for (var i = 0; i < n; i++) a.push((i + 0.5) / n); return a; },
-      random: function (n) { var a = []; for (var i = 0; i < n; i++) a.push(Math.round(Math.random() * 100) / 100); return a; }
-    };
-    var presetLabels = { rare: 'One rare high reward', binary: 'Binary rewards (MaxRL)', spread: 'Evenly spread', random: 'Randomize' };
-
-    function order(r) { return r.map(function (v, i) { return i; }).sort(function (a, b) { return r[a] - r[b] || a - b; }); }
-
-    function tailrl(r) {
-      var n = r.length, idx = order(r), w = new Array(n), prev = 0, acc = 0;
-      idx.forEach(function (j, k) { acc += (r[j] - prev) / (n - k); prev = r[j]; w[j] = acc; });
-      var wbar = w.reduce(function (s, v) { return s + v; }, 0) / n;
-      return { w: w, A: w.map(function (v) { return v - wbar; }), wbar: wbar, idx: idx };
-    }
-    function grpo(r) {
-      var n = r.length, m = r.reduce(function (s, v) { return s + v; }, 0) / n;
-      var sd = Math.sqrt(r.reduce(function (s, v) { return s + (v - m) * (v - m); }, 0) / n);
-      return r.map(function (v) { return (v - m) / (sd + 1e-6); });
-    }
-    function rloo(r) {
-      var n = r.length, tot = r.reduce(function (s, v) { return s + v; }, 0);
-      return r.map(function (v) { return n > 1 ? v - (tot - v) / (n - 1) : 0; });
-    }
-
-    function el(name, attrs, parent) {
-      var e = document.createElementNS(NS, name);
-      for (var k in attrs) e.setAttribute(k, attrs[k]);
-      if (parent) parent.appendChild(e);
-      return e;
-    }
-    function text(parent, x, y, s, cls, anchor) {
-      var t = el('text', { x: x, y: y, 'class': cls || 'svg-label', 'text-anchor': anchor || 'middle' }, parent);
-      t.textContent = s; return t;
-    }
-    // At N = 1024 the interesting weights are around 1/1024, so widen the
-    // precision rather than printing a row of zeros.
-    function dec(v) { var a = Math.abs(v); return (a > 0 && a < 0.01) ? 4 : 3; }
-    function fmt(v) { return (v >= 0 ? '+' : '') + v.toFixed(dec(v)); }
-
-    // How the group is drawn at each size. Beyond 64 rollouts individual
-    // glyphs stop being resolvable, so the panels switch to a sorted profile.
-    function sizing() {
-      var n = rewards.length;
-      if (n <= 16)  return { r: 7,   op: 1,   risers: true,  bars: true  };
-      if (n <= 64)  return { r: 5,   op: 0.8, risers: true,  bars: true  };
-      if (n <= 256) return { r: 3.5, op: 0.6, risers: false, bars: false };
-      return              { r: 2.5, op: 0.5, risers: false, bars: false };
-    }
-
-    var svgW = document.getElementById('ex-svg-weights');
-    var svgA = document.getElementById('ex-svg-adv');
-    var readout = document.getElementById('ex-readout');
-
-    // ---- Panel A: staircase + draggable rollouts ----
-    var PA = { x0: 60, x1: 730, yTop: 40, yBase: 190, yRoll: 240 };
-    function xOf(t) { return PA.x0 + t * (PA.x1 - PA.x0); }
-    function tOf(x) { return Math.min(1, Math.max(0, (x - PA.x0) / (PA.x1 - PA.x0))); }
-    function yOf(v) { return PA.yBase - v * (PA.yBase - PA.yTop); }
-    function localX(svg, e) {
-      var pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
-      return pt.matrixTransform(svg.getScreenCTM().inverse());
-    }
-    function nearest(t) {
-      var best = -1, bd = Infinity, i, d;
-      for (i = 0; i < rewards.length; i++) {
-        d = Math.abs(rewards[i] - t);
-        if (d < bd) { bd = d; best = i; }
-      }
-      return best;
-    }
-
-    function drawWeights() {
-      while (svgW.firstChild) svgW.removeChild(svgW.firstChild);
-      var res = tailrl(rewards), idx = res.idx, n = rewards.length, sz = sizing();
-      text(svgW, PA.x0, 18, 'Weight per unit reward, 1 / #survivors(τ)', 'svg-title', 'start');
-      // grid
-      [0, 0.25, 0.5, 0.75, 1].forEach(function (v) {
-        el('line', { x1: PA.x0, x2: PA.x1, y1: yOf(v), y2: yOf(v), stroke: C.grid, 'stroke-width': 1 }, svgW);
-        text(svgW, PA.x0 - 8, yOf(v) + 4, v.toFixed(2), 'svg-tick', 'end');
-      });
-
-      var focus = hover >= 0 ? hover : idx[n - 1];
-      var rFocus = rewards[focus];
-      var k, rk, v, prev;
-
-      // shaded weight of the focused rollout, as a single path
-      var shade = '';
-      prev = 0;
-      for (k = 0; k < n; k++) {
-        rk = rewards[idx[k]]; v = 1 / (n - k);
-        var a = Math.min(prev, rFocus), b = Math.min(rk, rFocus);
-        if (b > a) shade += 'M' + xOf(a) + ' ' + yOf(0) + 'H' + xOf(b) + 'V' + yOf(v) + 'H' + xOf(a) + 'Z';
-        prev = rk;
-      }
-      if (shade) el('path', { d: shade, fill: C.tailrl, opacity: 0.18 }, svgW);
-
-      // staircase and risers, one path each
-      var stair = '', risers = '';
-      prev = 0;
-      for (k = 0; k < n; k++) {
-        rk = rewards[idx[k]]; v = 1 / (n - k);
-        if (rk > prev) stair += 'M' + xOf(prev) + ' ' + yOf(v) + 'H' + xOf(rk);
-        if (k < n - 1 && rewards[idx[k + 1]] > rk) risers += 'M' + xOf(rk) + ' ' + yOf(v) + 'V' + yOf(1 / (n - k - 1));
-        prev = rk;
-      }
-      if (stair) el('path', { d: stair, fill: 'none', stroke: C.tailrl, 'stroke-width': 2.5 }, svgW);
-      if (risers && sz.risers) el('path', { d: risers, fill: 'none', stroke: C.tailrl, 'stroke-width': 1.5, 'stroke-dasharray': '3,3' }, svgW);
-
-      // axes
-      el('line', { x1: PA.x0, x2: PA.x1, y1: PA.yBase, y2: PA.yBase, stroke: C.muted, 'stroke-width': 1 }, svgW);
-      el('line', { x1: PA.x0, x2: PA.x1, y1: PA.yRoll, y2: PA.yRoll, stroke: C.ink, 'stroke-width': 1.2 }, svgW);
-      [0, 0.2, 0.4, 0.6, 0.8, 1].forEach(function (v2) {
-        el('line', { x1: xOf(v2), x2: xOf(v2), y1: PA.yRoll - 4, y2: PA.yRoll + 4, stroke: C.ink, 'stroke-width': 1 }, svgW);
-        text(svgW, xOf(v2), PA.yRoll + 20, v2.toFixed(1), 'svg-tick');
-      });
-      text(svgW, PA.x1, PA.yRoll + 36, 'reward r  (drag the rollouts)', 'svg-label', 'end');
-
-      // rollouts: individual circles while they are still resolvable, one
-      // batched path beyond that (hit-tested by nearest reward instead).
-      // drawn last, so the focused rollout always sits on top
-      function focusDecor(parent, r) {
-        var wF = res.w[focus];
-        el('line', { x1: xOf(r), x2: xOf(r), y1: PA.yRoll - sz.r * 1.4 - 1, y2: PA.yBase, stroke: C.tailrl, 'stroke-width': 1, 'stroke-dasharray': '2,3' }, parent);
-        el('circle', { cx: xOf(r), cy: PA.yRoll, r: sz.r * 1.4, fill: C.tailrl, stroke: C.tailrl, 'stroke-width': 2 }, parent);
-        var t = text(parent, xOf(r), PA.yRoll - sz.r * 1.4 - 7, 'ω = ' + wF.toFixed(wF < 0.01 ? 4 : 2), 'svg-tick');
-        t.setAttribute('fill', C.tailrl);
-      }
-
-      if (sz.bars) {
-        rewards.forEach(function (r, i) {
-          if (i === focus) return;
-          var g = el('g', { 'class': 'rollout', 'data-i': i }, svgW);
-          el('circle', { cx: xOf(r), cy: PA.yRoll, r: sz.r, fill: '#fff', stroke: C.tailrl, 'stroke-width': 2, opacity: sz.op }, g);
-          g.addEventListener('pointerdown', function (e) { startDrag(i, e); });
-          g.addEventListener('pointerenter', function () { if (dragging < 0) { hover = i; scheduleRender(); } });
-        });
-        var gf = el('g', { 'class': 'rollout', 'data-i': focus }, svgW);
-        gf.addEventListener('pointerdown', function (e) { startDrag(focus, e); });
-        focusDecor(gf, rewards[focus]);
-      } else {
-        var cd = '', i2, cx;
-        for (i2 = 0; i2 < n; i2++) {
-          if (i2 === focus) continue;
-          cx = xOf(rewards[i2]);
-          cd += 'M' + (cx - sz.r) + ' ' + PA.yRoll +
-                'a' + sz.r + ' ' + sz.r + ' 0 1 0 ' + (2 * sz.r) + ' 0' +
-                'a' + sz.r + ' ' + sz.r + ' 0 1 0 ' + (-2 * sz.r) + ' 0';
-        }
-        if (cd) el('path', { d: cd, fill: '#fff', stroke: C.tailrl, 'stroke-width': 1.2, opacity: sz.op }, svgW);
-        focusDecor(svgW, rewards[focus]);
-      }
-    }
-
-    function startDrag(i, e) {
-      dragging = i; hover = i;
-      if (svgW.setPointerCapture) { try { svgW.setPointerCapture(e.pointerId); } catch (err) {} }
-      render(); e.preventDefault();
-    }
-
-    // ---- pointer handling, one render per animation frame ----
-    var pend = null, rafId = 0;
-    function flush() { rafId = 0; if (pend) { rewards[pend.i] = pend.v; pend = null; } render(); }
-    function scheduleRender() { if (!rafId) rafId = requestAnimationFrame(flush); }
-
-    // Beyond 64 rollouts the circles are batched into one path, so grab the
-    // nearest rollout instead of relying on per-glyph hit testing.
-    svgW.addEventListener('pointerdown', function (e) {
-      if (rewards.length <= 64 || dragging >= 0) return;
-      var p = localX(svgW, e);
-      if (Math.abs(p.y - PA.yRoll) > 24) return;
-      var j = nearest(tOf(p.x));
-      if (j >= 0) startDrag(j, e);
-    });
-
-    svgW.addEventListener('pointermove', function (e) {
-      var p = localX(svgW, e);
-      if (dragging < 0) {
-        if (rewards.length > 64) {
-          var j = nearest(tOf(p.x));
-          if (j !== hover) { hover = j; scheduleRender(); }
-        }
-        return;
-      }
-      pend = { i: dragging, v: Math.round(tOf(p.x) * 100) / 100 };
-      scheduleRender();
-    });
-
-    function stopDrag() {
-      if (dragging < 0) return;
-      dragging = -1;
-      if (pend) { rewards[pend.i] = pend.v; pend = null; }
-      if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
-      render();
-    }
-    svgW.addEventListener('pointerup', stopDrag);
-    svgW.addEventListener('pointercancel', stopDrag);
-    svgW.addEventListener('pointerleave', function () { if (dragging < 0 && hover !== -1) { hover = -1; scheduleRender(); } });
-
-    // ---- Panel B: advantages ----
-    function drawAdv() {
-      while (svgA.firstChild) svgA.removeChild(svgA.firstChild);
-      var res = tailrl(rewards), idx = res.idx, n = rewards.length, sz = sizing();
-      var focus = hover >= 0 ? hover : idx[n - 1];
-      var rank = new Array(n);
-      idx.forEach(function (i, k) { rank[i] = k; });
-      var methods = [
-        { name: 'TailRL', A: res.A, color: C.tailrl },
-        { name: 'GRPO', A: grpo(rewards), color: C.grpo },
-        { name: 'RLOO', A: rloo(rewards), color: C.rloo }
-      ];
-      var panelW = 220, gap = 30, x0 = 40, yTop = 40, yBot = 200;
-      methods.forEach(function (m, mi) {
-        var px = x0 + mi * (panelW + gap);
-        var maxAbs = m.A.reduce(function (s, v) { return Math.max(s, Math.abs(v)); }, 0) || 1;
-        var yMid = (yTop + yBot) / 2, scale = (yBot - yTop) / 2 / maxAbs * 0.92;
-        text(svgA, px + panelW / 2, 22, m.name + ' advantage', 'svg-title');
-        el('line', { x1: px, x2: px + panelW, y1: yMid, y2: yMid, stroke: C.muted, 'stroke-width': 1 }, svgA);
-        text(svgA, px - 6, yTop + 4, '+' + maxAbs.toFixed(2), 'svg-tick', 'end');
-        text(svgA, px - 6, yBot + 4, '−' + maxAbs.toFixed(2), 'svg-tick', 'end');
-
-        if (sz.bars) {
-          var bw = panelW / n;
-          idx.forEach(function (i, k) {
-            var v = m.A[i], h = Math.abs(v) * scale;
-            var rect = el('rect', { x: px + k * bw + bw * 0.15, y: v >= 0 ? yMid - h : yMid, width: bw * 0.7, height: Math.max(h, 0.5), fill: m.color, opacity: i === focus ? 1 : 0.45, 'data-i': i }, svgA);
-            rect.style.cursor = 'pointer';
-            rect.addEventListener('pointerenter', function () { if (dragging < 0) { hover = i; scheduleRender(); } });
-          });
-        } else {
-          // sorted profile: the same information as the bars, drawn as an area
-          var stepW = panelW / n, dLine = '', dArea = 'M' + px + ' ' + yMid, xa, xb, yv;
-          idx.forEach(function (i, k) {
-            yv = yMid - m.A[i] * scale;
-            xa = px + k * stepW; xb = xa + stepW;
-            dLine += (k === 0 ? 'M' : 'L') + xa + ' ' + yv + 'L' + xb + ' ' + yv;
-            dArea += 'L' + xa + ' ' + yv + 'L' + xb + ' ' + yv;
-          });
-          dArea += 'L' + (px + panelW) + ' ' + yMid + 'Z';
-          el('path', { d: dArea, fill: m.color, opacity: 0.35 }, svgA);
-          el('path', { d: dLine, fill: 'none', stroke: m.color, 'stroke-width': 1.5 }, svgA);
-          var xf = px + (rank[focus] + 0.5) * stepW;
-          el('line', { x1: xf, x2: xf, y1: yMid, y2: yMid - m.A[focus] * scale, stroke: m.color, 'stroke-width': 2 }, svgA);
-          var hit = el('rect', { x: px, y: yTop, width: panelW, height: yBot - yTop, fill: 'transparent' }, svgA);
-          hit.style.cursor = 'pointer';
-          hit.addEventListener('pointermove', function (e) {
-            if (dragging >= 0) return;
-            var q = localX(svgA, e);
-            var kk = Math.min(n - 1, Math.max(0, Math.floor((q.x - px) / panelW * n)));
-            if (idx[kk] !== hover) { hover = idx[kk]; scheduleRender(); }
-          });
-        }
-        text(svgA, px + panelW / 2, yBot + 22, 'rollouts sorted by reward →', 'svg-tick');
-      });
-    }
-    // registered once: re-registering inside drawAdv() leaked a listener per render
-    svgA.addEventListener('pointerleave', function () { if (dragging < 0 && hover !== -1) { hover = -1; scheduleRender(); } });
-
-    function drawReadout() {
-      var res = tailrl(rewards), n = rewards.length, g = grpo(rewards), l = rloo(rewards);
-      var i = hover >= 0 ? hover : res.idx[n - 1];
-      readout.innerHTML =
-        'rollout ' + (i + 1) + ': r = ' + rewards[i].toFixed(2) +
-        ' &nbsp;|&nbsp; ω = ' + res.w[i].toFixed(dec(res.w[i])) +
-        ' &nbsp;|&nbsp; <span class="m-tailrl">A<sub>TailRL</sub> = ' + fmt(res.A[i]) + '</span>' +
-        ' &nbsp; <span class="m-grpo">A<sub>GRPO</sub> = ' + fmt(g[i]) + '</span>' +
-        ' &nbsp; <span class="m-rloo">A<sub>RLOO</sub> = ' + fmt(l[i]) + '</span><br>' +
-        'Σ ω = ' + res.w.reduce(function (s, v) { return s + v; }, 0).toFixed(3) + ' = max r  &nbsp;|&nbsp; ω̄ = max r / N = ' + res.wbar.toFixed(dec(res.wbar)) +
-        (preset === 'binary' ? ' &nbsp;|&nbsp; binary rewards: A<sub>TailRL</sub> = (r − μ̂) / (N μ̂), the MaxRL advantage up to the 1/N averaging' : '');
-    }
-
-    function render() { drawWeights(); drawAdv(); drawReadout(); }
-
-    // ---- Controls ----
-    var nSlider = document.getElementById('ex-n-slider'), nValue = document.getElementById('ex-n-value');
-    var pBox = document.getElementById('ex-preset-buttons');
-    nSlider.addEventListener('input', function () {
-      N = Math.pow(2, parseInt(nSlider.value, 10));
-      rewards = presets[preset](N);
-      hover = -1; dragging = -1; pend = null;
-      nValue.textContent = String(N);
-      render();
-    });
-    Object.keys(presets).forEach(function (key) {
-      var b = document.createElement('button'); b.textContent = presetLabels[key]; b.type = 'button';
-      if (key === preset) b.classList.add('active');
-      b.addEventListener('click', function () {
-        preset = key; rewards = presets[key](N); hover = -1;
-        pBox.querySelectorAll('button').forEach(function (x) { x.classList.toggle('active', x === b); });
-        render();
-      });
-      pBox.appendChild(b);
-    });
-
-    rewards = presets[preset](N);
-    nValue.textContent = String(N);
-    render();
-  })();
-</script>
 
 </body>
 </html>

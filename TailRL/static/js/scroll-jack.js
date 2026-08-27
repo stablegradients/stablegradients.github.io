@@ -1,5 +1,5 @@
 /* ===========================================================================
-   Card snap-scroll for the TailRL project page.
+   Presentation mode (opt-in card snap-scroll) for the TailRL project page.
 
    The page is partitioned into cards at load time: runs of content blocks are
    packed into groups that fit a fixed design budget, each group is wrapped in
@@ -7,9 +7,10 @@
    Cards whose content still overflows the real viewport are scaled to fit, so
    a card never bleeds into its neighbour.
 
-   Cards are built as real DOM wrappers but styled only under `body.sj-on`;
-   with snapping off they collapse to `display: contents` and the page reflows
-   exactly as it did before.
+   OFF BY DEFAULT. Ordinary browser scrolling, find-in-page, anchors and
+   trackpad behavior are untouched unless the reader opts in. The card wrappers
+   are not even built until the first time the mode is switched on, so the
+   default page pays nothing for this file.
 
    Vanilla ES5, no dependencies, no globals.
    ========================================================================= */
@@ -273,10 +274,10 @@
   function setEnabled(on) {
     enabled = !!on && allowed();
     document.body.classList.toggle('sj-on', enabled);
-    toggle.textContent = enabled ? 'Snap scroll: on' : 'Snap scroll: off';
+    toggle.textContent = enabled ? 'Presentation mode: on' : 'Presentation mode';
     toggle.setAttribute('aria-pressed', enabled ? 'true' : 'false');
     if (enabled) {
-      requestAnimationFrame(function () {
+      buildOnce(function () {
         layout(); buildRail(); index = nearestIndex(); markActive();
         goTo(index);
       });
@@ -359,14 +360,31 @@
     if (e.data && typeof e.data.tailrlCodeHeight === 'number' && enabled) setTimeout(layout, 80);
   });
 
+  /* Cards are built on first opt-in only. Images must be loaded first or the
+     packing would size figure cards from zero-height lazy images. */
+  var building = false;
+  function buildOnce(then) {
+    if (built) { requestAnimationFrame(then); return; }
+    if (building) return;
+    building = true;
+    toggle.textContent = 'Presentation mode: preparing…';
+    loadImages().then(function () {
+      buildCards();
+      building = false;
+      requestAnimationFrame(then);
+    });
+  }
+
   function boot() {
     document.body.appendChild(rail);
     document.body.appendChild(toggle);
     if (!allowed()) { toggle.style.display = 'none'; return; }
-    loadImages().then(function () {
-      buildCards();
-      setEnabled(stored() !== 'off');
-    });
+    toggle.textContent = 'Presentation mode';
+    toggle.setAttribute('aria-pressed', 'false');
+    toggle.setAttribute('title', 'Snap through the page one card at a time');
+    // deliberately not restoring a stored "on": the page always opens in
+    // ordinary scrolling, and only an explicit click turns the mode on
+    if (stored() === 'on') store('off');
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();

@@ -357,12 +357,12 @@
       : 'differ by ' + d3(dm);
 
     out.innerHTML = l1 + '<br>' +
-      'Best-of-' + k + ': &nbsp; ' + spanA('A ' + d3(bA)) + ' &nbsp; ' + spanB('B ' + d3(bB)) + '<br>' +
-      'Order-' + k + ' tail likelihood J<sup>(' + k + ')</sup>: &nbsp; ' +
+      'TailRL objective J<sup>(' + k + ')</sup>: &nbsp; ' +
       spanA('A ' + sig(jA)) + ' &nbsp; ' + spanB('B ' + sig(jB)) +
       ' &nbsp;|&nbsp; population J: &nbsp; ' +
       spanA('A ' + sig(pA) + (pA === -Infinity ? ' (reward 1 unreachable)' : '')) + ' &nbsp; ' +
-      spanB('B ' + sig(pB) + (pB === -Infinity ? ' (reward 1 unreachable)' : ''));
+      spanB('B ' + sig(pB) + (pB === -Infinity ? ' (reward 1 unreachable)' : '')) + '<br>' +
+      'Best-of-' + k + ': &nbsp; ' + spanA('A ' + d3(bA)) + ' &nbsp; ' + spanB('B ' + d3(bB));
 
     if (lock && !painting && dm > 1e-6) {
       hint.textContent = 'Means differ by ' + d3(dm) +
@@ -490,6 +490,18 @@
     kExp = parseInt(kSlider.value, 10);
     kLabel.textContent = 'rollout budget k = ' + kOf();
     render();
+  });
+
+  var resetBtn = document.getElementById('smt-reset');
+  if (resetBtn) resetBtn.addEventListener('click', function () {
+    kExp = 4; lock = true; painting = null;
+    kSlider.value = '4';
+    lockBox.checked = true;
+    kLabel.textContent = 'rollout budget k = ' + kOf();
+    loadPreset('peaked');
+    pBox.querySelectorAll('button').forEach(function (x, i) { x.classList.toggle('active', i === 0); });
+    paint();
+    resetBtn.blur();
   });
 
   wireHist(document.getElementById('smt-hist-a'), 'A');
