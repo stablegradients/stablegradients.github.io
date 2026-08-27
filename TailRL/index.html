@@ -68,11 +68,11 @@
 </nav>
 
 <!-- ==================== HERO ==================== -->
-<header class="section" style="padding-top: 2.5rem; padding-bottom: 1.5rem;">
-  <div class="container is-max-desktop">
-
-    <div class="hero-grid">
-      <div>
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-widescreen">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
         <h1 class="title is-2" style="color: var(--tailrl); font-family: Georgia, 'Times New Roman', serif; font-weight: 400; margin-bottom: 0.9rem;">
           Tail-Likelihood Reinforcement Learning
         </h1>
@@ -97,13 +97,13 @@
           Carnegie Mellon University &nbsp;·&nbsp; <sup>&dagger;</sup>Joint advising &nbsp;·&nbsp; Preprint, 2026
         </div>
 
-        <p class="hook">RL optimizes the mean. <span class="em">TailRL shapes the tail.</span></p>
-        <p class="subhead">
+        <p class="hook has-text-centered">RL optimizes the mean. <span class="em">TailRL shapes the tail.</span></p>
+        <p class="subhead has-text-centered">
           A likelihood objective for continuous rewards that keeps rare, high-reward rollouts influential,
           scales with sampling compute, and reduces exactly to MaxRL on binary rewards.
         </p>
 
-        <div class="btn-row">
+        <div class="btn-row is-centered">
           <span class="btn" aria-disabled="true" role="link" title="The preprint is not public yet">
             <span class="icon"><img src="./static/images/arxiv-logomark-small.svg" alt="" width="14" height="14" style="vertical-align: middle;"></span>
             <span>Paper</span> <span class="btn-note">soon</span>
@@ -113,19 +113,26 @@
           </span>
           <a href="#idea" class="btn btn-primary">Explore the idea →</a>
         </div>
-      </div>
 
-      <figure class="hero-figure" style="margin: 0;">
-        <img src="./static/images/decomposition_teaser.gif"
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== TEASER ==================== -->
+<section class="section section-white" style="padding-top: 1rem; padding-bottom: 0.5rem;">
+  <div class="container is-max-desktop">
+    <figure class="figure-container" style="margin-top: 0;">
+      <img src="./static/images/decomposition_teaser.gif"
              data-static="./static/images/teaser_decomposition.png"
              width="1650" height="550"
              alt="A rollout's continuous reward is compared against a ladder of reward levels; each comparison is a pass/fail test, and averaging the passes across a group of rollouts traces the tail-probability curve.">
-        <figcaption class="figure-caption">
-          <strong>A continuous reward contains a success test at every reward level.</strong>
-          A rollout passes every level below its reward; TailRL learns from the resulting tail-probability curve.
-        </figcaption>
-      </figure>
-    </div>
+      <figcaption class="figure-caption">
+        <strong>A continuous reward contains a success test at every reward level.</strong>
+        A rollout passes every level below its reward; TailRL learns from the resulting tail-probability curve.
+      </figcaption>
+    </figure>
 
     <div class="evidence">
       <a href="#gui">
@@ -141,15 +148,14 @@
         <span class="ev-sub">TailRL at $N=16$ exceeds expected-reward baselines at $N=1024$ on ImageNet.</span>
       </a>
     </div>
-
   </div>
-</header>
+</section>
 
 <!-- ==================== 1. SAME MEAN, DIFFERENT FUTURE ==================== -->
 <section class="section section-narrow section-gray" id="idea">
   <div class="container is-max-desktop">
     <h2 class="title is-3 section-title">Same mean. Different future.</h2>
-    <div class="prose">
+    <div class="content has-text-justified">
       <p>
         Two policies can have the same expected reward and radically different odds of producing an exceptional sample.
         Expected-reward RL cannot tell them apart. Best-of-$k$ can.
@@ -181,7 +187,7 @@
       <div class="hint" id="smt-hint"></div>
     </div>
 
-    <p class="keyline" style="max-width: 780px;">
+    <p class="keyline">
       The mean is the same. The policy with the stronger tail keeps improving as sampling compute grows.
     </p>
   </div>
@@ -215,7 +221,7 @@
         $J_{\mathrm{TailRL}}(\theta;x) = \displaystyle\int_0^1 \log p_\theta(x,\tau)\,d\tau$
       </p>
     </div>
-    <div class="prose">
+    <div class="content has-text-justified">
       <p style="text-align: center; color: var(--text-muted); font-size: 0.95rem;">
         Here $p_\theta(x,\tau)$ is the probability that one rollout exceeds reward level $\tau$.
       </p>
@@ -264,7 +270,7 @@
     </details>
 
     <h3 class="title is-5" style="margin-top: 2.25rem; margin-bottom: 0.6rem;">Sampling compute changes the objective</h3>
-    <div class="prose">
+    <div class="content has-text-justified">
       <p>
         Truncating the logarithm gives a compute-indexed family. Its first member is expected-reward RL; increasing the
         order moves the objective toward the full tail likelihood.
@@ -306,7 +312,7 @@
 <section class="section section-narrow section-gray">
   <div class="container is-max-desktop">
     <h2 class="title is-3 section-title">Rare reward levels should not vanish into the mean</h2>
-    <div class="prose">
+    <div class="content has-text-justified">
       <p>
         Expected reward and TailRL can see the same rollouts and make different updates.
         The difference is how much each reward level matters.
@@ -342,7 +348,7 @@
       </figcaption>
     </figure>
 
-    <p class="keyline" style="max-width: 780px;">
+    <p class="keyline">
       Rare, exceptional rollouts remain visible to the update instead of disappearing into the mean.
     </p>
   </div>
@@ -352,7 +358,7 @@
 <section class="section section-narrow section-white" id="estimator">
   <div class="container is-max-desktop">
     <h2 class="title is-3 section-title">A new objective, not a new training stack</h2>
-    <div class="prose">
+    <div class="content has-text-justified">
       <p>
         TailRL uses the same rollout groups as GRPO and RLOO. Sort the rewards, divide each reward gap among the
         rollouts that reach it, mean-center the resulting weights, and use them as advantages.
@@ -369,13 +375,13 @@
     <div style="margin: 0 0 0.5rem 0;">
       <iframe id="tailrl-code-frame" src="./code.html" title="TailRL advantage computation as a diff against GRPO"
               width="900" height="662"
-              style="border: none; overflow: hidden; max-width: 100%; display: block; margin: 0 auto;"
+              style="border: none; overflow: hidden; width: 100%; display: block;"
               scrolling="no"></iframe>
     </div>
     <p class="figure-caption">In a group-based RL pipeline, only the advantage computation changes.</p>
 
     <h3 class="title is-5" style="margin-top: 2.25rem; margin-bottom: 0.6rem;">Play with the rollout group</h3>
-    <div class="prose">
+    <div class="content has-text-justified">
       <p>
         Drag the rewards. TailRL splits each reward gap among the rollouts that reach it, so a rare top gap belongs to
         fewer rollouts and carries more weight.
@@ -438,7 +444,7 @@
 <section class="section section-narrow section-gray" id="results">
   <div class="container is-max-desktop">
     <h2 class="title is-3 section-title">TailRL moves the sampling-compute frontier</h2>
-    <div class="prose">
+    <div class="content has-text-justified">
       <p>
         Across every tested model and task, TailRL improves the performance-versus-sampling-compute frontier over
         expected-reward baselines. The largest gaps appear when exceptional outcomes are rare or when a safe, moderate
@@ -470,7 +476,7 @@
           <p style="margin-bottom: 0;">
             A ResNet-50 backbone feeds four categorical heads that sample a bounding box centre, width and height. The
             reward is the box's IoU with the ground truth. Because the policy is a tractable categorical distribution
-            over a finite box set, the exact policy-induced reward distribution — and so the population objective — can
+            over a finite box set, the exact policy-induced reward distribution, and so the population objective, can
             be computed directly. Metrics are CorLoc@$\delta$, mean IoU and Best-of-$k$ IoU on held-out validation images.
           </p>
         </div>
@@ -547,7 +553,7 @@
       </p>
     </div>
 
-    <div class="prose" style="margin-top: 2rem;">
+    <div class="content has-text-justified" style="margin-top: 2rem;">
       <p>
         Expected-reward training fails in two ways: it overlooks rare good outcomes, or it collapses to a frequent
         moderate one. TailRL addresses both by keeping rarely reached reward levels influential.
