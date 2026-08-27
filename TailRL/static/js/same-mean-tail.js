@@ -1,0 +1,502 @@
+/* ===========================================================================
+   "Same mean, different tail" -- interactive widget for the TailRL page.
+
+   Two reward distributions over 21 levels with equal expected reward. The
+   mean cannot tell them apart; Best-of-k and the tail likelihood can.
+
+   Vanilla ES5, no dependencies, no globals. Exits before building any UI if
+   #smt-widget is absent.
+   ========================================================================= */
+(function () {
+  'use strict';
+
+  var NS = 'http://www.w3.org/2000/svg';
+  var CA = '#2A7F9E', CB = '#C8811A';
+  var INK = '#1f2937', MUTED = '#9ca3af', GRID = '#e5e7eb';
+
+  /* ------------------------------------------------------------------ model
+     21 reward levels X[i] = i/20, i = 0..20, so 0 and 1 are exact and the
+     binary case is representable without rounding. A policy is a vector of
+     raw nonnegative weights w[i] in [0,1]; probabilities are w / sum(w).     */
+  var L = 21, DX = 1 / (L - 1), X = [], li;
+  for (li = 0; li < L; li++) X.push(li * DX);
+
+  function total(w) { var s = 0, i; for (i = 0; i < w.length; i++) s += w[i]; return s; }
+
+  function normalize(w) {
+    var s = total(w), p, i;
+    if (!(s > 0)) return null;
+    p = new Array(w.length);
+    for (i = 0; i < w.length; i++) p[i] = w[i] / s;
+    return p;
+  }
+
+  function mean(p) { var m = 0, i; for (i = 0; i < L; i++) m += p[i] * X[i]; return m; }
+
+  /* S[i] = Pr(r > X[i]) for i = 0 .. L-2. The tail curve is a step function
+     equal to S[i] on [X[i], X[i+1]), so any integral over tau collapses to
+     DX * sum_i f(S[i]) -- exact, no numerical integration. */
+  function surv(p) {
+    var S = new Array(L - 1), acc = 0, i;
+    for (i = L - 1; i >= 1; i--) { acc += p[i]; S[i - 1] = acc; }
+    return S;
+  }
+
+  function bestOfK(p, k) {
+    var S = surv(p), s = 0, i;
+    for (i = 0; i < S.length; i++) s += 1 - Math.pow(1 - S[i], k);
+    return DX * s;
+  }
+
+  /* Order-T tail likelihood: DX * sum_i g_T(S[i]) with
+     g_T(S) = -sum_{k=1..T} (1-S)^k / k.  g_T(0) = -H_T, so always finite. */
+  function jTrunc(p, T) {
+    var S = surv(p), s = 0, i, k, q, term;
+    for (i = 0; i < S.length; i++) {
+      q = 1 - S[i]; term = 0;
+      for (k = 1; k <= T; k++) term += Math.pow(q, k) / k;
+      s -= term;
+    }
+    return DX * s;
+  }
+
+  /* Population tail likelihood: -Infinity when the top reward is unreachable. */
+  function jPop(p) {
+    var S = surv(p), s = 0, i;
+    for (i = 0; i < S.length; i++) {
+      if (!(S[i] > 0)) return -Infinity;
+      s += Math.log(S[i]);
+    }
+    return DX * s;
+  }
+
+  /* ------------------------------------------------------------- mean lock
+     Multiply every movable bin by (1 + lam (X[i] - m)). The mean condition
+     sum_i w_i (X[i] - m) = 0 then gives
+        lam = -(mu - m) / sum_{i != fixed} p_i (X[i] - m)^2.
+     Clamping the factors to be nonnegative breaks exactness, hence the loop. */
+  function tilt(w, m, fixed) {
+    var cur = w.slice(), prev, p, mu, den, lam, mx, pf, i, it;
+    for (it = 0; it < 50; it++) {
+      p = normalize(cur);
+      if (!p) return { w: w.slice(), ok: false };
+      mu = mean(p);
+      if (Math.abs(mu - m) < 1e-12) break;
+      den = 0;
+      for (i = 0; i < L; i++) if (i !== fixed) den += p[i] * (X[i] - m) * (X[i] - m);
+      if (den < 1e-12) return { w: cur, ok: false };   // all movable mass on one level
+      lam = -(mu - m) / den;
+      prev = cur.slice();
+      for (i = 0; i < L; i++) if (i !== fixed) cur[i] = cur[i] * Math.max(0, 1 + lam * (X[i] - m));
+      if (!(total(cur) > 1e-12)) return { w: prev, ok: false };  // tilt would annihilate all mass
+    }
+    mx = 0;
+    for (i = 0; i < L; i++) if (cur[i] > mx) mx = cur[i];
+    if (mx > 1) for (i = 0; i < L; i++) cur[i] = cur[i] / mx;
+    pf = normalize(cur);
+    return { w: cur, ok: !!pf && Math.abs(mean(pf) - m) < 1e-9 };
+  }
+
+  /* ---------------------------------------------------------------- presets */
+  function zeros() { var a = [], i; for (i = 0; i < L; i++) a.push(0); return a; }
+
+  function bump(c, s) {
+    var a = [], i;
+    for (i = 0; i < L; i++) a.push(Math.exp(-(X[i] - c) * (X[i] - c) / (2 * s * s)));
+    return a;
+  }
+
+  function addTo(a, b, scale) { var i; for (i = 0; i < L; i++) a[i] += scale * b[i]; return a; }
+
+  function at(spec) {
+    var a = zeros(), key;
+    for (key in spec) if (spec.hasOwnProperty(key)) a[Math.round(parseFloat(key) * (L - 1))] = spec[key];
+    return a;
+  }
+
+  /* Scaling all weights by a constant leaves p, and therefore every quantity
+     above, unchanged -- it only sets how tall the painted bars render. */
+  function scaleToUnit(a) {
+    var mx = 0, i;
+    for (i = 0; i < L; i++) if (a[i] > mx) mx = a[i];
+    if (mx > 0) for (i = 0; i < L; i++) a[i] = a[i] / mx;
+    return a;
+  }
+
+  var PRESETS = {
+    peaked: {
+      label: 'Peaked vs. thin tail',
+      make: function () {
+        var a = bump(0.5, 0.07), b = bump(0.45, 0.07);
+        addTo(b, bump(0.95, 0.05), 0.12);
+        return [a, b];
+      }
+    },
+    shortcut: {
+      label: 'Safe shortcut vs. risky rewrites',
+      make: function () {
+        return [at({ 0.35: 0.15, 0.40: 0.70, 0.45: 0.15 }),
+                at({ 0.00: 0.50, 0.50: 0.20, 1.00: 0.30 })];
+      }
+    },
+    ushape: {
+      label: 'Uniform vs. U-shaped',
+      make: function () {
+        var a = [], b = [], i;
+        for (i = 0; i < L; i++) a.push(1);
+        for (i = 0; i < L; i++) b.push(0.15 + 6 * (X[i] - 0.5) * (X[i] - 0.5));
+        return [a, b];
+      }
+    },
+    binary: {
+      label: 'Binary, same pass rate',
+      make: function () { var a = at({ 0: 0.7, 1: 0.3 }); return [a, a.slice()]; }
+    }
+  };
+
+  /* Build a preset pair, then tilt B onto A's mean so the pair starts exactly
+     equal regardless of how the recipe rounds onto the 21-level grid. */
+  function makePair(key) {
+    var pair = PRESETS[key].make();
+    var a = scaleToUnit(pair[0]), b = scaleToUnit(pair[1]);
+    var pa = normalize(a);
+    return { a: a, b: tilt(b, mean(pa), null).w };
+  }
+
+  /* Test hook: creates no global of its own, only calls one the page defines. */
+  if (typeof window !== 'undefined' && typeof window.__smtTestHook === 'function') {
+    window.__smtTestHook({
+      X: X, L: L, DX: DX, normalize: normalize, mean: mean, surv: surv,
+      bestOfK: bestOfK, jTrunc: jTrunc, jPop: jPop, tilt: tilt,
+      PRESETS: PRESETS, makePair: makePair
+    });
+  }
+
+  var root = document.getElementById('smt-widget');
+  if (!root) return;
+
+  /* ------------------------------------------------------------------- state */
+  var wA = [], wB = [], preset = 'peaked', kExp = 4, lock = true;
+  var painting = null;                 // { which: 'A'|'B', last: binIndex }
+  var hot = { A: -1, B: -1 };
+  var rafId = 0;
+
+  function kOf() { return Math.pow(2, kExp); }
+
+  /* ---------------------------------------------------------------- svg utils */
+  function el(name, attrs, parent) {
+    var e = document.createElementNS(NS, name), k;
+    for (k in attrs) if (attrs.hasOwnProperty(k)) e.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+  function text(parent, x, y, s, cls, anchor, fill) {
+    var t = el('text', { x: x, y: y, 'class': cls || 'svg-label', 'text-anchor': anchor || 'middle' }, parent);
+    if (fill) t.setAttribute('fill', fill);
+    t.textContent = s;
+    return t;
+  }
+  function clear(svg) { while (svg.firstChild) svg.removeChild(svg.firstChild); }
+  function localPt(svg, e) {
+    var pt = svg.createSVGPoint();
+    pt.x = e.clientX; pt.y = e.clientY;
+    return pt.matrixTransform(svg.getScreenCTM().inverse());
+  }
+  function d3(v) { return v.toFixed(3); }
+  /* U+2212 for a real minus sign, matching the existing explorer readout. */
+  function sig(v) {
+    var s;
+    if (v === -Infinity) return '−∞';
+    s = v.toFixed(3);
+    if (/^-0(\.0*)?$/.test(s)) s = s.slice(1);
+    return s.charAt(0) === '-' ? '−' + s.slice(1) : s;
+  }
+
+  /* --------------------------------------------------------------- histograms */
+  var HG = { x0: 36, x1: 336, yTop: 46, yBase: 168 };
+  function hx(v) { return HG.x0 + v * (HG.x1 - HG.x0); }
+
+  function drawHist(svg, which) {
+    var w = which === 'A' ? wA : wB;
+    var color = which === 'A' ? CA : CB;
+    var p = normalize(w), mu = p ? mean(p) : 0;
+    var bw = (HG.x1 - HG.x0) / (L - 1) * 0.78, full = HG.yBase - HG.yTop, i, h, t, ts;
+
+    clear(svg);
+
+    t = text(svg, 10, 18, 'Policy ' + which, 'svg-title', 'start', color);
+    ts = el('tspan', { fill: MUTED }, t);
+    ts.textContent = '   mean = ' + d3(mu);
+    text(svg, 10, 36, 'relative mass', 'svg-tick', 'start');
+
+    /* Faint full-height tracks so empty bins stay visible and paintable. */
+    for (i = 0; i < L; i++) {
+      el('rect', { x: hx(X[i]) - bw / 2, y: HG.yTop, width: bw, height: full,
+                   fill: color, opacity: 0.07 }, svg);
+    }
+    for (i = 0; i < L; i++) {
+      h = w[i] * full;
+      if (h <= 0) continue;
+      el('rect', { x: hx(X[i]) - bw / 2, y: HG.yBase - h, width: bw, height: h,
+                   fill: color, opacity: hot[which] === i ? 1 : 0.85 }, svg);
+    }
+
+    el('line', { x1: hx(mu), x2: hx(mu), y1: HG.yTop - 8, y2: HG.yBase,
+                 stroke: color, 'stroke-width': 1.5, 'stroke-dasharray': '4,3' }, svg);
+
+    el('line', { x1: HG.x0 - 12, x2: HG.x1 + 12, y1: HG.yBase, y2: HG.yBase,
+                 stroke: INK, 'stroke-width': 1.2 }, svg);
+    [0, 0.25, 0.5, 0.75, 1].forEach(function (v) {
+      el('line', { x1: hx(v), x2: hx(v), y1: HG.yBase, y2: HG.yBase + 4, stroke: MUTED, 'stroke-width': 1 }, svg);
+      text(svg, hx(v), HG.yBase + 17, v.toFixed(2), 'svg-tick');
+    });
+    text(svg, (HG.x0 + HG.x1) / 2, HG.yBase + 34, 'reward', 'svg-label');
+  }
+
+  /* ------------------------------------------------------------- tail curves */
+  var PL = { x0: 44, x1: 344, yTop: 44, yBase: 168 };
+  function plx(v) { return PL.x0 + v * (PL.x1 - PL.x0); }
+  function ply(v) { return PL.yBase - v * (PL.yBase - PL.yTop); }
+
+  function stepPath(S) {
+    var d = 'M' + plx(0) + ' ' + ply(S[0]), i, next;
+    for (i = 0; i < S.length; i++) {
+      d += 'L' + plx(X[i + 1]) + ' ' + ply(S[i]);
+      next = (i + 1 < S.length) ? S[i + 1] : 0;
+      d += 'L' + plx(X[i + 1]) + ' ' + ply(next);
+    }
+    return d;
+  }
+
+  function drawTail(svg) {
+    clear(svg);
+    text(svg, 10, 18, 'Tail-probability p(τ) = Pr(r > τ)', 'svg-title', 'start');
+    [0, 0.5, 1].forEach(function (v) {
+      el('line', { x1: PL.x0, x2: PL.x1, y1: ply(v), y2: ply(v), stroke: GRID, 'stroke-width': 1 }, svg);
+      text(svg, PL.x0 - 7, ply(v) + 4, v.toFixed(1), 'svg-tick', 'end');
+    });
+    el('line', { x1: PL.x0, x2: PL.x1, y1: PL.yBase, y2: PL.yBase, stroke: INK, 'stroke-width': 1.2 }, svg);
+    [0, 0.25, 0.5, 0.75, 1].forEach(function (v) {
+      el('line', { x1: plx(v), x2: plx(v), y1: PL.yBase, y2: PL.yBase + 4, stroke: MUTED, 'stroke-width': 1 }, svg);
+      text(svg, plx(v), PL.yBase + 17, v.toFixed(2), 'svg-tick');
+    });
+    text(svg, (PL.x0 + PL.x1) / 2, PL.yBase + 34, 'reward threshold τ', 'svg-label');
+
+    [[wB, CB], [wA, CA]].forEach(function (pair) {
+      var p = normalize(pair[0]);
+      if (!p) return;
+      el('path', { d: stepPath(surv(p)), fill: 'none', stroke: pair[1], 'stroke-width': 2.2 }, svg);
+    });
+  }
+
+  /* --------------------------------------------------------------- Best-of-k */
+  var BK = { x0: 44, x1: 344, yTop: 44, yBase: 168 };
+  function bkx(e2) { return BK.x0 + (e2 / 10) * (BK.x1 - BK.x0); }
+  function bky(v) { return BK.yBase - v * (BK.yBase - BK.yTop); }
+
+  function drawBok(svg) {
+    var k = kOf(), e2, marks = [];
+    clear(svg);
+    text(svg, 10, 18, 'Best-of-k', 'svg-title', 'start');
+    [0, 0.5, 1].forEach(function (v) {
+      el('line', { x1: BK.x0, x2: BK.x1, y1: bky(v), y2: bky(v), stroke: GRID, 'stroke-width': 1 }, svg);
+      text(svg, BK.x0 - 7, bky(v) + 4, v.toFixed(1), 'svg-tick', 'end');
+    });
+    el('line', { x1: BK.x0, x2: BK.x1, y1: BK.yBase, y2: BK.yBase, stroke: INK, 'stroke-width': 1.2 }, svg);
+    [0, 2, 4, 6, 8, 10].forEach(function (e) {
+      el('line', { x1: bkx(e), x2: bkx(e), y1: BK.yBase, y2: BK.yBase + 4, stroke: MUTED, 'stroke-width': 1 }, svg);
+      text(svg, bkx(e), BK.yBase + 17, String(Math.pow(2, e)), 'svg-tick');
+    });
+    text(svg, (BK.x0 + BK.x1) / 2, BK.yBase + 34, 'rollout budget k', 'svg-label');
+
+    el('line', { x1: bkx(kExp), x2: bkx(kExp), y1: BK.yTop - 6, y2: BK.yBase,
+                 stroke: MUTED, 'stroke-width': 1.5, 'stroke-dasharray': '4,3' }, svg);
+
+    [[wA, CA], [wB, CB]].forEach(function (pair) {
+      var p = normalize(pair[0]), d = '', v;
+      if (!p) return;
+      for (e2 = 0; e2 <= 10; e2++) {
+        v = bestOfK(p, Math.pow(2, e2));
+        d += (e2 === 0 ? 'M' : 'L') + bkx(e2) + ' ' + bky(v);
+      }
+      el('path', { d: d, fill: 'none', stroke: pair[1], 'stroke-width': 2.2 }, svg);
+      marks.push({ v: bestOfK(p, k), c: pair[1] });
+    });
+
+    marks.forEach(function (m) {
+      var right = bkx(kExp) < BK.x1 - 70, lbl;
+      el('circle', { cx: bkx(kExp), cy: bky(m.v), r: 4, fill: m.c }, svg);
+      lbl = text(svg, bkx(kExp) + (right ? 8 : -8), bky(m.v) + 4, d3(m.v), 'svg-tick',
+                 right ? 'start' : 'end', m.c);
+      // halo, so the value stays readable where it overlaps the curve
+      lbl.setAttribute('stroke', '#fff');
+      lbl.setAttribute('stroke-width', '3');
+      lbl.setAttribute('paint-order', 'stroke');
+      lbl.setAttribute('font-weight', '600');
+    });
+  }
+
+  /* ---------------------------------------------------------------- readouts */
+  function spanA(s) { return '<span class="smt-a">' + s + '</span>'; }
+  function spanB(s) { return '<span class="smt-b">' + s + '</span>'; }
+
+  function drawText() {
+    var pa = normalize(wA), pb = normalize(wB);
+    var k = kOf(), out = document.getElementById('smt-readout'), hint = document.getElementById('smt-hint');
+    var mA, mB, dm, bA, bB, jA, jB, pA, pB, l1, lead, dB, dJ, msg;
+    if (!pa || !pb) return;
+
+    mA = mean(pa); mB = mean(pb); dm = Math.abs(mA - mB);
+    bA = bestOfK(pa, k); bB = bestOfK(pb, k);
+    jA = jTrunc(pa, k); jB = jTrunc(pb, k);
+    pA = jPop(pa); pB = jPop(pb);
+
+    l1 = 'J<sub>RL</sub> (mean): &nbsp; ' + spanA('A ' + d3(mA)) + ' &nbsp; ' + spanB('B ' + d3(mB)) + ' &nbsp; → ';
+    l1 += dm <= 1e-6
+      ? 'identical: expected-reward RL sees the same objective'
+      : 'differ by ' + d3(dm);
+
+    out.innerHTML = l1 + '<br>' +
+      'Best-of-' + k + ': &nbsp; ' + spanA('A ' + d3(bA)) + ' &nbsp; ' + spanB('B ' + d3(bB)) + '<br>' +
+      'Order-' + k + ' tail likelihood J<sup>(' + k + ')</sup>: &nbsp; ' +
+      spanA('A ' + sig(jA)) + ' &nbsp; ' + spanB('B ' + sig(jB)) +
+      ' &nbsp;|&nbsp; population J: &nbsp; ' +
+      spanA('A ' + sig(pA) + (pA === -Infinity ? ' (reward 1 unreachable)' : '')) + ' &nbsp; ' +
+      spanB('B ' + sig(pB) + (pB === -Infinity ? ' (reward 1 unreachable)' : ''));
+
+    if (lock && !painting && dm > 1e-6) {
+      hint.textContent = 'Means differ by ' + d3(dm) +
+        ': spread some mass over more levels to let the lock hold.';
+      return;
+    }
+    if (dm > 1e-6) {
+      hint.textContent = 'Means differ. Turn on "Lock means" or reload a preset to compare tails at equal expected reward.';
+      return;
+    }
+    lead = bB >= bA ? 'B' : 'A';
+    dB = lead === 'B' ? bB - bA : bA - bB;
+    dJ = lead === 'B' ? jB - jA : jA - jB;
+    if (dB < 0.001 && Math.abs(dJ) < 0.001) {
+      hint.textContent = 'At k = ' + k + ' the two policies are still indistinguishable; raise k or thicken one tail.';
+      return;
+    }
+    msg = 'At k = 1 both policies are indistinguishable to expected-reward RL. At k = ' + k +
+      ', policy ' + lead + "'s Best-of-k is " + d3(dB) + ' higher and its order-' + k +
+      ' tail likelihood is ' + d3(Math.abs(dJ)) + ' nats ' + (dJ >= 0 ? 'higher' : 'lower') +
+      ': the tail likelihood is the objective that prefers the policy with the better tail.';
+    hint.textContent = msg;
+  }
+
+  /* ------------------------------------------------------------------ render */
+  function paint() {
+    drawHist(document.getElementById('smt-hist-a'), 'A');
+    drawHist(document.getElementById('smt-hist-b'), 'B');
+    drawTail(document.getElementById('smt-tail'));
+    drawBok(document.getElementById('smt-bok'));
+    drawText();
+  }
+  function render() {
+    if (rafId) return;
+    rafId = requestAnimationFrame(function () { rafId = 0; paint(); });
+  }
+
+  /* --------------------------------------------------------------- painting */
+  function binAt(svg, e) {
+    var q = localPt(svg, e);
+    var i = Math.round((q.x - HG.x0) / (HG.x1 - HG.x0) * (L - 1));
+    return { i: Math.min(L - 1, Math.max(0, i)), y: q.y };
+  }
+
+  function applyPaint(which, svg, e) {
+    var b = binAt(svg, e), w = which === 'A' ? wA : wB;
+    var v = 1 - (b.y - HG.yTop) / (HG.yBase - HG.yTop);
+    var old = w[b.i];
+    w[b.i] = Math.min(1, Math.max(0, v));
+    if (!(total(w) > 0)) w[b.i] = old;    // never leave a policy with no mass
+    painting.last = b.i;
+    hot[which] = b.i;
+  }
+
+  function endPaint() {
+    var which, fixedIdx, other, po, res;
+    if (!painting) return;
+    which = painting.which; fixedIdx = painting.last;
+    painting = null;
+    if (lock) {
+      other = which === 'A' ? wB : wA;
+      po = normalize(other);
+      if (po) {
+        res = tilt(which === 'A' ? wA : wB, mean(po), fixedIdx);
+        if (which === 'A') wA = res.w; else wB = res.w;
+      }
+    }
+    render();
+  }
+
+  function wireHist(svg, which) {
+    svg.addEventListener('pointerdown', function (e) {
+      painting = { which: which, last: -1 };
+      if (svg.setPointerCapture) { try { svg.setPointerCapture(e.pointerId); } catch (err) {} }
+      applyPaint(which, svg, e);
+      render();
+      e.preventDefault();
+    });
+    svg.addEventListener('pointermove', function (e) {
+      if (painting && painting.which === which) { applyPaint(which, svg, e); render(); return; }
+      if (painting) return;
+      var b = binAt(svg, e);
+      if (hot[which] !== b.i) { hot[which] = b.i; render(); }
+    });
+    svg.addEventListener('pointerup', endPaint);
+    svg.addEventListener('pointercancel', endPaint);
+    svg.addEventListener('pointerleave', function () {
+      if (!painting && hot[which] !== -1) { hot[which] = -1; render(); }
+    });
+  }
+
+  /* --------------------------------------------------------------- controls */
+  function loadPreset(key) {
+    var pair = makePair(key);
+    preset = key; wA = pair.a; wB = pair.b;
+    hot.A = -1; hot.B = -1;
+  }
+
+  var pBox = document.getElementById('smt-presets');
+  Object.keys(PRESETS).forEach(function (key) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = PRESETS[key].label;
+    if (key === preset) b.classList.add('active');
+    b.addEventListener('click', function () {
+      loadPreset(key);
+      pBox.querySelectorAll('button').forEach(function (x) { x.classList.toggle('active', x === b); });
+      render();
+    });
+    pBox.appendChild(b);
+  });
+
+  var lockBox = document.getElementById('smt-lock');
+  lockBox.addEventListener('change', function () {
+    lock = lockBox.checked;
+    if (lock) {
+      var po = normalize(wA);
+      if (po) wB = tilt(wB, mean(po), null).w;
+    }
+    render();
+  });
+
+  var kSlider = document.getElementById('smt-k'), kLabel = document.getElementById('smt-k-value');
+  kSlider.addEventListener('input', function () {
+    kExp = parseInt(kSlider.value, 10);
+    kLabel.textContent = 'rollout budget k = ' + kOf();
+    render();
+  });
+
+  wireHist(document.getElementById('smt-hist-a'), 'A');
+  wireHist(document.getElementById('smt-hist-b'), 'B');
+  window.addEventListener('pointerup', endPaint);
+
+  loadPreset(preset);
+  kLabel.textContent = 'rollout budget k = ' + kOf();
+  paint();
+})();

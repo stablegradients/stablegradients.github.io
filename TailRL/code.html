@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TailRL Advantage Diff</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css" rel="stylesheet" />
+
+    <style>
+        body { background: #f9fafb; padding: 0px 20px 24px 20px; margin: 0; }
+
+        .code-window {
+            background: #2d2d2d;
+            border-radius: 12px;
+            box-shadow: none;
+            overflow: hidden;
+            max-width: 900px;
+            margin: 0 auto;
+            border: 1px solid #444;
+            font-family: 'Fira Code', monospace;
+            font-size: 14px;
+        }
+
+        .window-header {
+            background: #1f1f1f;
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #333;
+        }
+        .dot { width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; }
+        .red-dot { background-color: #ff5f56; } .yellow-dot { background-color: #ffbd2e; } .green-dot { background-color: #27c93f; }
+        .title { color: #888; margin-left: 10px; font-size: 13px; }
+
+        pre[class*="language-"] {
+            margin: 0 !important; border: none !important; background: transparent !important; padding: 20px !important;
+            line-height: 1.6;
+        }
+
+        /* Pin an explicit, font-independent line-height so the JS diff-highlight
+           math lines up identically across platforms/fonts. */
+        pre.line-numbers,
+        pre.line-numbers > code,
+        pre.line-numbers .line-numbers-rows,
+        pre.line-numbers .line-numbers-rows > span {
+            line-height: 1.6 !important;
+        }
+        pre.line-numbers { padding: 20px !important; position: relative; }
+
+        .line-numbers .line-numbers-rows {
+            border-right: 1.5px solid #6c6c6c;
+            padding-right: 6px;
+        }
+
+        pre[class*="language-"] { position: relative; }
+
+        .line-highlight-bg {
+            position: absolute;
+            left: 0;
+            right: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .line-highlight-bg.delete {
+            background: rgba(244, 67, 54, 0.15) !important;
+            border-left: 4px solid #f44336;
+        }
+        .line-highlight-bg.add {
+            background: rgba(76, 175, 80, 0.15) !important;
+            border-left: 4px solid #4caf50;
+        }
+
+        code[class*="language-"] {
+            position: relative;
+            z-index: 1;
+        }
+
+        .line-numbers-rows > span.line-delete::after {
+            position: absolute; right: 5px; color: #ff6666; font-weight: bold;
+        }
+        .line-numbers-rows > span.line-add::after {
+            position: absolute; right: 5px; color: #66ff66; font-weight: bold;
+        }
+        .line-numbers-rows > span { position: relative; }
+    </style>
+</head>
+<body>
+
+    <div class="code-window">
+        <div class="window-header">
+            <span class="dot red-dot"></span>
+            <span class="dot yellow-dot"></span>
+            <span class="dot green-dot"></span>
+            <span class="title">verl/trainer/ppo/core_algos.py</span>
+        </div>
+
+        <pre class="line-numbers">
+<code class="language-python">def compute_outcome_advantage(
+    token_level_rewards: torch.Tensor, response_mask: torch.Tensor,
+    index: np.ndarray, epsilon: float = 1e-6,
+):
+    """Maps the N rewards of each prompt group to N advantages."""
+    scores = token_level_rewards.sum(dim=-1)
+    id2score = group_by_prompt(scores, index)   # unchanged verl grouping: {prompt: (N,)}
+    id2adv = {}
+
+    with torch.no_grad():
+        for idx, r in id2score.items():
+            N = r.numel()
+
+            # GRPO: standardize within the group
+<span class="line-delete">            id2adv[idx] = (r - r.mean()) / (r.std() + epsilon)</span>
+
+            # TailRL: w_(i) = sum_{k&lt;=i} (r_(k) - r_(k-1)) / (N - k + 1)
+<span class="line-add">            rs, perm = torch.sort(r)                          # ascending rewards</span>
+<span class="line-add">            w = (rs.diff(prepend=r.new_zeros(1)) / torch.arange(N, 0, -1).to(r)).cumsum(0)</span>
+<span class="line-add">            id2adv[idx] = (w - w.mean())[perm.argsort()]      # mean-center, unsort</span>
+
+    adv = scatter_to_batch(id2adv, index) * response_mask   # unchanged verl scatter
+    return adv, adv
+</code>
+        </pre>
+    </div>
+
+    <script>
+        // Save original HTML before Prism processes it
+        (function() {
+            const codeElement = document.querySelector('code.language-python');
+            if (codeElement) {
+                window.originalCodeHTML = codeElement.innerHTML;
+            }
+        })();
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+
+    <script>
+        // Create full-line highlights and mark line numbers after Prism renders,
+        // then report the document height to the parent so the iframe can size itself.
+        (function() {
+            var lastReported = -1;
+            function reportHeight() {
+                try {
+                    // Measure the content box, not documentElement.scrollHeight: inside an iframe
+                    // the latter is never smaller than the frame itself and would feed back on resize.
+                    var cw = document.querySelector('.code-window');
+                    var h = Math.ceil(cw.getBoundingClientRect().bottom + window.scrollY + 24);
+                    if (Math.abs(h - lastReported) < 2) return;
+                    lastReported = h;
+                    window.parent.postMessage({ tailrlCodeHeight: h }, '*');
+                } catch (e) {}
+            }
+
+            function markDiffLines() {
+                const preElement = document.querySelector('pre.line-numbers');
+                const codeElement = document.querySelector('code.language-python');
+                if (!preElement || !codeElement) return;
+
+                const lineNumberSpans = preElement.querySelectorAll('.line-numbers-rows > span');
+                if (lineNumberSpans.length === 0) return;
+
+                const originalHTML = window.originalCodeHTML || codeElement.innerHTML;
+                const htmlLines = originalHTML.split('\n');
+                const preRect = preElement.getBoundingClientRect();
+
+                htmlLines.forEach(function(htmlLine, index) {
+                    const isDelete = htmlLine.includes('line-delete');
+                    const isAdd = htmlLine.includes('line-add');
+                    if (!isDelete && !isAdd) return;
+
+                    const span = lineNumberSpans[index];
+                    if (!span) return;
+                    span.classList.add(isDelete ? 'line-delete' : 'line-add');
+
+                    const spanRect = span.getBoundingClientRect();
+                    const bg = document.createElement('div');
+                    bg.className = 'line-highlight-bg ' + (isDelete ? 'delete' : 'add');
+                    bg.style.top = (spanRect.top - preRect.top) + 'px';
+                    bg.style.height = spanRect.height + 'px';
+                    preElement.appendChild(bg);
+                });
+                reportHeight();
+            }
+
+            function runWhenReady() {
+                if (typeof Prism !== 'undefined' && document.querySelector('.line-numbers-rows')) {
+                    setTimeout(markDiffLines, 500);
+                } else {
+                    setTimeout(runWhenReady, 100);
+                }
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', runWhenReady);
+            } else {
+                runWhenReady();
+            }
+            window.addEventListener('load', reportHeight);
+            window.addEventListener('resize', reportHeight);
+        })();
+    </script>
+</body>
+</html>
