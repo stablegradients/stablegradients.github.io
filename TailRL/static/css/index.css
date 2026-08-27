@@ -102,7 +102,13 @@ h4.subsection-title {
   border: none;
   margin: 1.5rem 0;
 }
-.figure-container img { border-radius: 4px; }
+.figure-container img {
+  border-radius: 4px;
+  /* plots centre in the column even when they are narrower than it */
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
 .figure-caption { font-size: 0.9rem; color: var(--text-muted); margin-top: 1rem; text-align: center; }
 
 .result-card {
@@ -477,7 +483,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--tailrl); outlin
   border-left: 3px solid var(--tailrl); padding-left: 0.9rem; margin-top: 1.1rem;
   font-size: 0.97rem; color: var(--text-dark);
 }
-.inset-figure { max-width: 330px; }
+.inset-figure { max-width: 330px; margin-left: auto; margin-right: auto; }
 @media (max-width: 640px) { .inset-figure { max-width: 100%; } }
 
 /* ---- disclosures --------------------------------------------------------- */
