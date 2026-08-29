@@ -30,17 +30,17 @@
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="./static/css/bulma.min.css">
-  <link rel="stylesheet" href="./static/css/index.css?v=4">
+  <link rel="stylesheet" href="./static/css/index.css?v=5">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
 
-  <script defer src="./static/js/same-mean-tail.js?v=4"></script>
-  <script defer src="./static/js/tailrl-explorer.js?v=4"></script>
-  <script defer src="./static/js/index.js?v=4"></script>
-  <script defer src="./static/js/scroll-jack.js?v=4"></script>
+  <script defer src="./static/js/same-mean-tail.js?v=5"></script>
+  <script defer src="./static/js/tailrl-explorer.js?v=5"></script>
+  <script defer src="./static/js/index.js?v=5"></script>
+  <script defer src="./static/js/scroll-jack.js?v=5"></script>
 </head>
 <body>
 
@@ -102,12 +102,6 @@
           Carnegie Mellon University &nbsp;·&nbsp; <sup>&dagger;</sup>Joint advising &nbsp;·&nbsp; Preprint, 2026
         </div>
 
-        <p class="hook has-text-centered">RL optimizes the mean. <span class="em">TailRL shapes the tail.</span></p>
-        <p class="subhead has-text-centered">
-          A likelihood objective for continuous rewards that keeps rare, high-reward rollouts influential,
-          scales with sampling compute, and reduces exactly to MaxRL on binary rewards.
-        </p>
-
         <div class="btn-row is-centered">
           <span class="btn" aria-disabled="true" role="link" title="The preprint is not public yet">
             <span class="icon"><img src="./static/images/arxiv-logomark-small.svg" alt="" width="14" height="14" style="vertical-align: middle;"></span>
@@ -119,23 +113,34 @@
           <a href="#tail" class="btn btn-primary">Start with the tail →</a>
         </div>
 
-        <div class="evidence">
-          <a href="#gui">
-            <span class="ev-num">128× / 256× less inference sampling</span>
-            <span class="ev-sub">Matches RLOO's Pass@1024 at 3B / 7B.</span>
-          </a>
-          <a href="#code-opt">
-            <span class="ev-num">7.7× Best-of-1024 code speedup</span>
-            <span class="ev-sub">GRPO and RLOO remain below 1×.</span>
-          </a>
-          <a href="#imagenet">
-            <span class="ev-num">1/64 the training rollouts</span>
-            <span class="ev-sub">TailRL at $N=16$ exceeds expected-reward baselines at $N=1024$ on ImageNet.</span>
-          </a>
-        </div>
-
         </div>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== THE PITCH ==================== -->
+<section class="section section-narrow section-white" id="pitch">
+  <div class="container is-max-desktop">
+    <p class="hook has-text-centered">RL optimizes the mean. <span class="em">TailRL shapes the tail.</span></p>
+    <p class="subhead has-text-centered">
+      A likelihood objective for continuous rewards that keeps rare, high-reward rollouts influential,
+      scales with sampling compute, and reduces exactly to MaxRL on binary rewards.
+    </p>
+
+    <div class="evidence">
+      <a href="#gui">
+        <span class="ev-num">128× / 256× less inference sampling</span>
+        <span class="ev-sub">Matches RLOO's Pass@1024 at 3B / 7B.</span>
+      </a>
+      <a href="#code-opt">
+        <span class="ev-num">7.7× Best-of-1024 code speedup</span>
+        <span class="ev-sub">GRPO and RLOO remain below 1×.</span>
+      </a>
+      <a href="#imagenet">
+        <span class="ev-num">1/64 the training rollouts</span>
+        <span class="ev-sub">TailRL at $N=16$ exceeds expected-reward baselines at $N=1024$ on ImageNet.</span>
+      </a>
     </div>
   </div>
 </section>

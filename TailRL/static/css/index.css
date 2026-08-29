@@ -550,8 +550,11 @@ body.sj-on .pagenav { display: none; }
    presentation mode is on, and restore it on the way out. */
 body.sj-on section.section,
 body.sj-on section.hero,
+body.sj-on #pitch,
 body.sj-on .hero .hero-body,
 body.sj-on footer.footer { padding-top: 0; padding-bottom: 0; }
+/* the title slide is a card like any other once presentation mode is on */
+body.sj-on .hero { min-height: 0; display: block; }
 @media print { .sj-toggle { display: none !important; } }
 @media (max-width: 768px) { .sj-toggle { display: none !important; } }
 
@@ -576,11 +579,20 @@ body.sj-on footer.footer { padding-top: 0; padding-bottom: 0; }
 .content.has-text-justified { text-justify: inter-word; }
 @media (max-width: 768px) { .content.has-text-justified { text-align: left !important; } }
 
-/* ---- evidence strip inside the centred hero ------------------------------
-   The hero column is `has-text-centered`; the evidence cards are left-ruled,
-   so they set their own alignment back to the left. */
-.hero .evidence { text-align: left; max-width: 900px; margin-left: auto; margin-right: auto; }
-@media (max-width: 768px) { .hero .evidence { margin-top: 1.6rem; padding-top: 1.1rem; } }
+/* ---- the pitch band ------------------------------------------------------
+   The hero is the title slide and holds nothing but the title block, so the
+   hook, the subhead and the headline numbers live in their own band under it. */
+#pitch { padding-top: 2.5rem; padding-bottom: 2.75rem; }
+#pitch .hook { margin-top: 0; }
+#pitch .evidence { text-align: left; max-width: 900px; margin-left: auto; margin-right: auto; }
+@media (max-width: 768px) { #pitch .evidence { margin-top: 1.6rem; padding-top: 1.1rem; } }
+
+/* The title slide owns the first screen: nothing but the title block is
+   visible until the reader scrolls. */
+.hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; }
+.hero .hero-body { display: flex; align-items: center; width: 100%; padding-top: 2rem; padding-bottom: 2rem; }
+.hero .hero-body > .container { width: 100%; }
+@supports (min-height: 100svh) { .hero { min-height: 100svh; } }
 
 /* ---- advantage explorer: the reward strip sits above the two panels ------ */
 #tailrl-explorer #ex-svg-rewards { margin-bottom: 0.25rem; }
