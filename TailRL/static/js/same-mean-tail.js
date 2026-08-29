@@ -224,8 +224,10 @@
 
     clear(svg);
 
-    t = text(svg, 10, 18, 'Policy ' + which, 'svg-title', 'start', color);
-    ts = el('tspan', { fill: MUTED }, t);
+    t = text(svg, 10, 18, 'Policy \u03c0', 'svg-title', 'start', color);
+    ts = el('tspan', { fill: color, 'font-size': '10', dy: '3' }, t);
+    ts.textContent = which;
+    ts = el('tspan', { fill: MUTED, dy: '-3' }, t);
     ts.textContent = '   mean = ' + d3(mu);
     text(svg, 10, 36, 'relative mass', 'svg-tick', 'start');
 
@@ -339,6 +341,8 @@
   /* ---------------------------------------------------------------- readouts */
   function spanA(s) { return '<span class="smt-a">' + s + '</span>'; }
   function spanB(s) { return '<span class="smt-b">' + s + '</span>'; }
+  /* the two policies are named \u03c0_A and \u03c0_B throughout the page */
+  function pol(which) { return '\u03c0<sub>' + which + '</sub>'; }
 
   function drawText() {
     var pa = normalize(wA), pb = normalize(wB);
@@ -351,18 +355,18 @@
     jA = jTrunc(pa, k); jB = jTrunc(pb, k);
     pA = jPop(pa); pB = jPop(pb);
 
-    l1 = 'J<sub>RL</sub> (mean): &nbsp; ' + spanA('A ' + d3(mA)) + ' &nbsp; ' + spanB('B ' + d3(mB)) + ' &nbsp; → ';
+    l1 = 'J<sub>RL</sub> (mean): &nbsp; ' + spanA(pol('A') + ' ' + d3(mA)) + ' &nbsp; ' + spanB(pol('B') + ' ' + d3(mB)) + ' &nbsp; → ';
     l1 += dm <= 1e-6
       ? 'identical: expected-reward RL sees the same objective'
       : 'differ by ' + d3(dm);
 
     out.innerHTML = l1 + '<br>' +
       'TailRL objective J<sup>(' + k + ')</sup>: &nbsp; ' +
-      spanA('A ' + sig(jA)) + ' &nbsp; ' + spanB('B ' + sig(jB)) +
+      spanA(pol('A') + ' ' + sig(jA)) + ' &nbsp; ' + spanB(pol('B') + ' ' + sig(jB)) +
       ' &nbsp;|&nbsp; population J: &nbsp; ' +
-      spanA('A ' + sig(pA) + (pA === -Infinity ? ' (reward 1 unreachable)' : '')) + ' &nbsp; ' +
-      spanB('B ' + sig(pB) + (pB === -Infinity ? ' (reward 1 unreachable)' : '')) + '<br>' +
-      'Best-of-' + k + ': &nbsp; ' + spanA('A ' + d3(bA)) + ' &nbsp; ' + spanB('B ' + d3(bB));
+      spanA(pol('A') + ' ' + sig(pA) + (pA === -Infinity ? ' (reward 1 unreachable)' : '')) + ' &nbsp; ' +
+      spanB(pol('B') + ' ' + sig(pB) + (pB === -Infinity ? ' (reward 1 unreachable)' : '')) + '<br>' +
+      'Best-of-' + k + ': &nbsp; ' + spanA(pol('A') + ' ' + d3(bA)) + ' &nbsp; ' + spanB(pol('B') + ' ' + d3(bB));
 
     if (lock && !painting && dm > 1e-6) {
       hint.textContent = 'Means differ by ' + d3(dm) +
@@ -381,7 +385,7 @@
       return;
     }
     msg = 'At k = 1 both policies are indistinguishable to expected-reward RL. At k = ' + k +
-      ', policy ' + lead + "'s Best-of-k is " + d3(dB) + ' higher and its order-' + k +
+      ', policy \u03c0' + lead + "'s Best-of-k is " + d3(dB) + ' higher and its order-' + k +
       ' tail likelihood is ' + d3(Math.abs(dJ)) + ' nats ' + (dJ >= 0 ? 'higher' : 'lower') +
       ': the tail likelihood is the objective that prefers the policy with the better tail.';
     hint.textContent = msg;
