@@ -13,7 +13,7 @@
   --rloo: #1D9E75;
 }
 
-body { color: var(--text-dark); }
+body { color: var(--text-dark); font-family: 'Noto Sans', sans-serif; }
 
 .hero { background: #f3f4f6; border-bottom: 1px solid #e5e7eb; overflow: visible !important; }
 .hero .hero-body { padding-top: 2rem; padding-bottom: 0.8rem; overflow: visible !important; }
@@ -659,3 +659,30 @@ body.sj-on .hero { min-height: 0; display: block; }
 #smt-widget .explorer-head { justify-content: center; }
 #smt-widget .explorer-head .reset { margin-left: 0; }
 #smt-widget .hint { text-align: center; }
+
+/* ===========================================================================
+   Type scale matched to the MaxRL project page (measured at 1440x900)
+     body   16/24    Noto Sans      title    48/54  Georgia
+     h2     32/36    Google Sans    authors  20/30  Google Sans
+     caption 14.4/21.6 Noto Sans    card p   16/27.2 Noto Sans
+   Body copy and h2 already matched; the rest is brought in line here. The
+   page-wide Noto Sans above is what fixes the captions, footer, card copy and
+   widget chrome, all of which were falling through to system-ui.
+   ========================================================================= */
+.hero .title.is-2 { font-size: 3rem; line-height: 1.125; }
+.author-line { font-size: 1.25rem; line-height: 1.5; }
+.publication-affiliations { font-size: 0.95rem; line-height: 1.55; }
+.publication-contact { font-size: 0.9rem; }
+.result-card > p { font-size: 1rem; line-height: 1.7; }
+.result-note { font-size: 0.95rem; }
+.takeaway-line { font-size: 1rem; }
+/* our links are pills rather than Bulma buttons, so they sit just under
+   MaxRL's 16px rather than at it */
+.btn { font-size: 0.95rem; }
+@media (max-width: 1024px) { .hero .title.is-2 { font-size: 2.4rem; } }
+@media (max-width: 768px) {
+  .hero .title.is-2 { font-size: 1.8rem; line-height: 1.2; }
+  .author-line { font-size: 1rem; line-height: 1.55; }
+  .publication-affiliations { font-size: 0.82rem; }
+  .publication-contact { font-size: 0.78rem; }
+}
