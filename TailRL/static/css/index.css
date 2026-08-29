@@ -224,11 +224,11 @@ footer a:hover { color: #bfdbfe; }
 .explorer svg { width: 100%; height: auto; display: block; touch-action: none; user-select: none; -webkit-user-select: none; }
 .explorer .svg-label { font-family: 'Google Sans', sans-serif; font-size: 12px; fill: #6b7280; }
 .explorer .svg-title { font-family: 'Google Sans', sans-serif; font-size: 13px; font-weight: 600; fill: #1f2937; }
-.explorer .svg-tick { font-family: 'Noto Sans', sans-serif; font-size: 11px; fill: #9ca3af; }
+.explorer .svg-tick { font-family: 'KaTeX_Main', 'Noto Sans', serif; font-size: 11px; fill: #9ca3af; }
 .explorer .rollout { cursor: grab; }
 .explorer .rollout:active { cursor: grabbing; }
 .explorer .readout {
-  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-family: 'KaTeX_Main', Georgia, serif;
   font-size: 0.82rem;
   color: #374151;
   background: #f9fafb;
@@ -623,3 +623,39 @@ body.sj-on .hero { min-height: 0; display: block; }
 
 /* ---- advantage explorer: the reward strip sits above the two panels ------ */
 #tailrl-explorer #ex-svg-rewards { margin-bottom: 0.25rem; }
+
+/* ---- advantage explorer: centred control bar ----------------------------
+   Requested for this widget only; the same-mean widget keeps its left-aligned
+   head. `.reset` normally floats right on `margin-left: auto`, which would
+   fight the centring, so it joins the row here. */
+#tailrl-explorer .explorer-head { justify-content: center; }
+#tailrl-explorer .explorer-head .reset { margin-left: 0; }
+#tailrl-explorer .hint { text-align: center; }
+
+/* ---- LaTeX typography inside the widgets --------------------------------
+   The KaTeX webfonts are already loaded for the page's display math, so the
+   widget labels use the same faces: KaTeX_Math italic for variables, and
+   KaTeX_Main upright for numbers and words. Same glyphs as the rendered
+   equations, no sans-serif stand-ins. */
+.explorer tspan.sv-math,
+.explorer .sv-math {
+  font-family: 'KaTeX_Math', 'Latin Modern Math', Georgia, serif;
+  font-style: italic;
+}
+.explorer tspan.sv-text,
+.explorer .sv-text {
+  font-family: 'KaTeX_Main', Georgia, serif;
+  font-style: normal;
+}
+/* numbers the widgets print live: upright roman, as in LaTeX */
+.explorer .readout .knum {
+  font-family: 'KaTeX_Main', Georgia, serif;
+  font-variant-numeric: tabular-nums;
+}
+.explorer .readout .katex { font-size: 1em; }
+.explorer .readout .katex .mord.text { font-family: 'KaTeX_Main', Georgia, serif; }
+
+/* both widget control bars centre their contents */
+#smt-widget .explorer-head { justify-content: center; }
+#smt-widget .explorer-head .reset { margin-left: 0; }
+#smt-widget .hint { text-align: center; }

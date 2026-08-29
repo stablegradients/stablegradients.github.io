@@ -30,17 +30,17 @@
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="./static/css/bulma.min.css">
-  <link rel="stylesheet" href="./static/css/index.css?v=7">
+  <link rel="stylesheet" href="./static/css/index.css?v=9">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
 
-  <script defer src="./static/js/same-mean-tail.js?v=7"></script>
-  <script defer src="./static/js/tailrl-explorer.js?v=7"></script>
-  <script defer src="./static/js/index.js?v=7"></script>
-  <script defer src="./static/js/scroll-jack.js?v=7"></script>
+  <script defer src="./static/js/same-mean-tail.js?v=9"></script>
+  <script defer src="./static/js/tailrl-explorer.js?v=9"></script>
+  <script defer src="./static/js/index.js?v=9"></script>
+  <script defer src="./static/js/scroll-jack.js?v=9"></script>
 </head>
 <body>
 
@@ -342,7 +342,8 @@
     <div class="content has-text-justified">
       <p>
         Two policies can have the same expected reward and very different odds of producing an exceptional sample.
-        Shape $\pi_A$ and $\pi_B$ below, keep their means locked, and raise the rollout budget $k$.
+        Shape $\pi_A$ and $\pi_B$ below. Their means stay locked to each other, so every difference you see in the
+        tail and in Best-of-$k$ is invisible to expected-reward RL.
       </p>
       <p style="color: var(--text-muted); font-size: 0.95rem;">
         Drag inside either histogram to move mass between reward levels.
@@ -353,11 +354,7 @@
       <div class="explorer-head">
         <span class="label-text">Presets</span>
         <span id="smt-presets"></span>
-        <label class="smt-check"><input type="checkbox" id="smt-lock" checked> Lock means</label>
-        <input type="range" id="smt-k" min="0" max="10" step="1" value="4"
-               aria-label="Rollout budget k, powers of two from 1 to 1024">
-        <span id="smt-k-value" class="label-text smt-value">rollout budget k = 16</span>
-        <button type="button" class="reset" id="smt-reset" aria-label="Reset the same-mean widget to its default state">Reset</button>
+        <button type="button" class="reset" id="smt-reset" aria-label="Reset the same-mean widget to a fresh random pair">Reset</button>
       </div>
       <div class="smt-grid">
         <svg id="smt-hist-a" viewBox="0 0 360 220" role="img" aria-label="Editable reward distribution for policy pi A"></svg>
@@ -383,36 +380,42 @@
     <h2 class="title is-3 section-title">A new objective, not a new training stack</h2>
     <div class="content has-text-justified">
       <p>
-        TailRL consumes the same rollout groups as GRPO and RLOO. Sort the $N$ rewards, divide each reward gap among
-        the rollouts that reach it, mean-center, and use the result as advantages:
+        In an existing RL system this is a few lines inside the advantage computation: the same rollout groups as
+        GRPO and RLOO, no critic, and no new hyperparameter. The weights are read straight off the empirical tail
+        probability, because the number of rollouts still surviving a reward level is exactly
+        $N\,\hat p_\theta(x,\tau)$. Nothing extra is modelled, fitted or tuned.
       </p>
     </div>
 
-    <div class="formula-box" style="margin: 1.25rem 0 0.75rem 0;">
-      <p style="font-size: 1.1rem; margin: 0;">
-        $\omega\!\left(r_{(i)}\right) = \displaystyle\sum_{k=1}^{i}\frac{r_{(k)}-r_{(k-1)}}{N-k+1},
-        \qquad A_i = \omega(r_i) - \bar\omega$
-      </p>
-    </div>
-    <p class="figure-caption" style="margin-bottom: 1.5rem;">
-      Rewards sorted increasingly as $r_{(1)}\le\cdots\le r_{(N)}$, with $r_{(0)}:=0$ and
-      $\bar\omega=\frac{1}{N}\sum_j \omega(r_j)$. The divisor $N-k+1$ counts the rollouts still surviving at that gap.
-    </p>
-
-    <div class="badges">
-      <span class="badge">No critic</span>
-      <span class="badge">No tail-probability model</span>
-      <span class="badge">No new hyperparameter</span>
-      <span class="badge">One sort + linear passes</span>
-    </div>
-
-    <div style="margin: 0 0 0.5rem 0;">
-      <iframe id="tailrl-code-frame" src="./code.html" title="TailRL advantage computation as a diff against GRPO"
-              width="900" height="662"
-              style="border: none; overflow: hidden; width: 100%; display: block;"
-              scrolling="no"></iframe>
-    </div>
-    <p class="figure-caption">In a group-based RL pipeline, only the advantage computation changes.</p>
+    <details class="deep">
+      <summary>Show the pseudocode</summary>
+      <div class="deep-body">
+        <p>
+          Sort the $N$ rewards, divide each reward gap among the rollouts that reach it, mean-center, and use the
+          result as advantages:
+        </p>
+        <div class="formula-box">
+          <p style="font-size: 1.1rem; margin: 0;">
+            $\omega\!\left(r_{(i)}\right) = \displaystyle\sum_{k=1}^{i}\frac{r_{(k)}-r_{(k-1)}}{N-k+1},
+            \qquad A_i = \omega(r_i) - \bar\omega$
+          </p>
+        </div>
+        <p class="figure-caption" style="margin-bottom: 1.25rem;">
+          Rewards sorted increasingly as $r_{(1)}\le\cdots\le r_{(N)}$, with $r_{(0)}:=0$ and
+          $\bar\omega=\frac{1}{N}\sum_j \omega(r_j)$. The divisor $N-k+1$ counts the rollouts still surviving at
+          that gap.
+        </p>
+        <div style="margin: 0 0 0.5rem 0;">
+          <iframe id="tailrl-code-frame" src="./code.html" title="TailRL advantage computation as a diff against GRPO"
+                  width="900" height="662"
+                  style="border: none; overflow: hidden; width: 100%; display: block;"
+                  scrolling="no"></iframe>
+        </div>
+        <p class="figure-caption" style="margin-bottom: 0;">
+          In a group-based RL pipeline, only the advantage computation changes.
+        </p>
+      </div>
+    </details>
 
     <details class="deep">
       <summary>Show the estimator theorem</summary>

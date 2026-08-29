@@ -123,7 +123,24 @@
     return a;
   }
 
+  /* Two random shapes over the 21 levels, then B tilted onto A's mean. A is
+     kept unimodal-ish and B is given a detached lump somewhere, so the pair
+     almost always differs in the tail rather than only in the middle. */
+  function randPair() {
+    var a, b, i, n;
+    a = bump(0.25 + 0.5 * Math.random(), 0.05 + 0.06 * Math.random());
+    n = 1 + Math.floor(Math.random() * 2);
+    for (i = 0; i < n; i++) addTo(a, bump(Math.random(), 0.04 + 0.05 * Math.random()), 0.15 + 0.3 * Math.random());
+    b = bump(0.2 + 0.4 * Math.random(), 0.05 + 0.06 * Math.random());
+    addTo(b, bump(0.75 + 0.24 * Math.random(), 0.03 + 0.04 * Math.random()), 0.08 + 0.22 * Math.random());
+    return [a, b];
+  }
+
   var PRESETS = {
+    random: {
+      label: 'Randomize',
+      make: randPair
+    },
     peaked: {
       label: 'Peaked vs. thin tail',
       make: function () {
@@ -157,10 +174,22 @@
   /* Build a preset pair, then tilt B onto A's mean so the pair starts exactly
      equal regardless of how the recipe rounds onto the 21-level grid. */
   function makePair(key) {
-    var pair = PRESETS[key].make();
-    var a = scaleToUnit(pair[0]), b = scaleToUnit(pair[1]);
-    var pa = normalize(a);
-    return { a: a, b: tilt(b, mean(pa), null).w };
+    var tries = key === 'random' ? 12 : 1, t, pair, a, b, pa, tb, pb;
+    for (t = 0; t < tries; t++) {
+      pair = PRESETS[key].make();
+      a = scaleToUnit(pair[0]); b = scaleToUnit(pair[1]);
+      pa = normalize(a);
+      if (!pa) continue;
+      tb = tilt(b, mean(pa), null).w;
+      pb = normalize(tb);
+      // a random draw can be untiltable onto A's mean; redraw rather than
+      // opening with two policies whose means visibly differ
+      if (pb && Math.abs(mean(pb) - mean(pa)) < 1e-6) return { a: a, b: tb };
+    }
+    // deterministic fallback so the widget always opens in a valid state
+    pair = PRESETS.peaked.make();
+    a = scaleToUnit(pair[0]); b = scaleToUnit(pair[1]);
+    return { a: a, b: tilt(b, mean(normalize(a)), null).w };
   }
 
   /* Test hook: creates no global of its own, only calls one the page defines. */
@@ -176,7 +205,8 @@
   if (!root) return;
 
   /* ------------------------------------------------------------------- state */
-  var wA = [], wB = [], preset = 'peaked', kExp = 4, lock = true;
+  // the mean lock is now unconditional and k is fixed at the largest budget
+  var wA = [], wB = [], preset = 'random', kExp = 10, lock = true;
   var painting = null;                 // { which: 'A'|'B', last: binIndex }
   var hot = { A: -1, B: -1 };
   var rafId = 0;
@@ -196,6 +226,33 @@
     t.textContent = s;
     return t;
   }
+  /* Mixed prose/symbol label: segments between | are set in KaTeX_Math
+     italic, the rest in KaTeX_Main upright, matching the page's equations. */
+  function mtext(parent, x, y, spec, cls, anchor, fill) {
+    var t = el('text', { x: x, y: y, 'class': cls || 'svg-label', 'text-anchor': anchor || 'middle' }, parent);
+    if (fill) t.setAttribute('fill', fill);
+    spec.split('|').forEach(function (seg, i) {
+      if (seg === '') return;
+      var ts = el('tspan', { 'class': (i % 2) ? 'sv-math' : 'sv-text' }, t);
+      ts.textContent = seg;
+    });
+    return t;
+  }
+  function tex(src) {
+    try { return katex.renderToString(src, { throwOnError: false, output: 'html' }); }
+    catch (e) { return src; }
+  }
+  /* Static symbols typeset once; only the numbers change per frame. */
+  var TEX = (typeof katex !== 'undefined') ? {
+    jrl:  tex('J_{\\mathrm{RL}}'),
+    jpop: tex('J_{\\mathrm{TailRL}}'),
+    jk:   tex('J^{(k)}_{\\mathrm{TailRL}}'),
+    bok:  tex('\\text{Best-of-}k'),
+    pa:   tex('\\pi_A'),
+    pb:   tex('\\pi_B')
+  } : { jrl: 'J_RL', jpop: 'J_TailRL', jk: 'J^(k)', bok: 'Best-of-k', pa: 'A', pb: 'B' };
+  function num(v) { return '<span class="knum">' + v + '</span>'; }
+
   function clear(svg) { while (svg.firstChild) svg.removeChild(svg.firstChild); }
   function localPt(svg, e) {
     var pt = svg.createSVGPoint();
@@ -224,12 +281,13 @@
 
     clear(svg);
 
-    t = text(svg, 10, 18, 'Policy \u03c0', 'svg-title', 'start', color);
-    ts = el('tspan', { fill: color, 'font-size': '10', dy: '3' }, t);
-    ts.textContent = which;
-    ts = el('tspan', { fill: MUTED, dy: '-3' }, t);
-    ts.textContent = '   mean = ' + d3(mu);
-    text(svg, 10, 36, 'relative mass', 'svg-tick', 'start');
+    t = el('text', { x: 10, y: 18, 'class': 'svg-title', 'text-anchor': 'start' }, svg);
+    t.setAttribute('fill', color);
+    ts = el('tspan', { 'class': 'sv-text' }, t); ts.textContent = 'Policy ';
+    ts = el('tspan', { 'class': 'sv-math' }, t); ts.textContent = '\u03c0';
+    ts = el('tspan', { 'class': 'sv-math', 'font-size': '10', dy: '3' }, t); ts.textContent = which;
+    ts = el('tspan', { 'class': 'sv-text', fill: MUTED, dy: '-3' }, t); ts.textContent = '   mean = ' + d3(mu);
+    mtext(svg, 10, 36, 'relative mass', 'svg-tick', 'start');
 
     /* Faint full-height tracks so empty bins stay visible and paintable. */
     for (i = 0; i < L; i++) {
@@ -252,7 +310,7 @@
       el('line', { x1: hx(v), x2: hx(v), y1: HG.yBase, y2: HG.yBase + 4, stroke: MUTED, 'stroke-width': 1 }, svg);
       text(svg, hx(v), HG.yBase + 17, v.toFixed(2), 'svg-tick');
     });
-    text(svg, (HG.x0 + HG.x1) / 2, HG.yBase + 34, 'reward', 'svg-label');
+    mtext(svg, (HG.x0 + HG.x1) / 2, HG.yBase + 34, 'reward', 'svg-label');
   }
 
   /* ------------------------------------------------------------- tail curves */
@@ -272,7 +330,7 @@
 
   function drawTail(svg) {
     clear(svg);
-    text(svg, 10, 18, 'Tail-probability p(τ) = Pr(r > τ)', 'svg-title', 'start');
+    mtext(svg, 10, 18, 'Tail probability  |p|(|τ|) = Pr(|r| > |τ|)', 'svg-title', 'start');
     [0, 0.5, 1].forEach(function (v) {
       el('line', { x1: PL.x0, x2: PL.x1, y1: ply(v), y2: ply(v), stroke: GRID, 'stroke-width': 1 }, svg);
       text(svg, PL.x0 - 7, ply(v) + 4, v.toFixed(1), 'svg-tick', 'end');
@@ -282,7 +340,7 @@
       el('line', { x1: plx(v), x2: plx(v), y1: PL.yBase, y2: PL.yBase + 4, stroke: MUTED, 'stroke-width': 1 }, svg);
       text(svg, plx(v), PL.yBase + 17, v.toFixed(2), 'svg-tick');
     });
-    text(svg, (PL.x0 + PL.x1) / 2, PL.yBase + 34, 'reward threshold τ', 'svg-label');
+    mtext(svg, (PL.x0 + PL.x1) / 2, PL.yBase + 34, 'reward threshold |τ|', 'svg-label');
 
     [[wB, CB], [wA, CA]].forEach(function (pair) {
       var p = normalize(pair[0]);
@@ -299,7 +357,7 @@
   function drawBok(svg) {
     var k = kOf(), e2, marks = [];
     clear(svg);
-    text(svg, 10, 18, 'Best-of-k', 'svg-title', 'start');
+    mtext(svg, 10, 18, 'Best-of-|k|', 'svg-title', 'start');
     [0, 0.5, 1].forEach(function (v) {
       el('line', { x1: BK.x0, x2: BK.x1, y1: bky(v), y2: bky(v), stroke: GRID, 'stroke-width': 1 }, svg);
       text(svg, BK.x0 - 7, bky(v) + 4, v.toFixed(1), 'svg-tick', 'end');
@@ -309,10 +367,11 @@
       el('line', { x1: bkx(e), x2: bkx(e), y1: BK.yBase, y2: BK.yBase + 4, stroke: MUTED, 'stroke-width': 1 }, svg);
       text(svg, bkx(e), BK.yBase + 17, String(Math.pow(2, e)), 'svg-tick');
     });
-    text(svg, (BK.x0 + BK.x1) / 2, BK.yBase + 34, 'rollout budget k', 'svg-label');
+    mtext(svg, (BK.x0 + BK.x1) / 2, BK.yBase + 34, 'rollout budget |k|', 'svg-label');
 
-    el('line', { x1: bkx(kExp), x2: bkx(kExp), y1: BK.yTop - 6, y2: BK.yBase,
-                 stroke: MUTED, 'stroke-width': 1.5, 'stroke-dasharray': '4,3' }, svg);
+    /* k is no longer a control, so there is no cursor to draw; the curves run
+       the whole budget range and the endpoint dots carry the Best-of-1024
+       values. */
 
     [[wA, CA], [wB, CB]].forEach(function (pair) {
       var p = normalize(pair[0]), d = '', v;
@@ -325,11 +384,22 @@
       marks.push({ v: bestOfK(p, k), c: pair[1] });
     });
 
+    /* Push the two endpoint labels to a fixed minimum separation when the
+       curves finish close together. A fixed nudge is not enough: the label box
+       is about 12 user units tall, so the gap has to be set, not incremented. */
+    if (marks.length === 2) {
+      var y0 = bky(marks[0].v), y1 = bky(marks[1].v);
+      var gap = Math.abs(y0 - y1), MIN = 14, push;
+      if (gap < MIN) {
+        push = (MIN - gap) / 2;
+        marks[0].dy = (y0 <= y1) ? -push : push;
+        marks[1].dy = (y0 <= y1) ? push : -push;
+      }
+    }
     marks.forEach(function (m) {
-      var right = bkx(kExp) < BK.x1 - 70, lbl;
+      var lbl;
       el('circle', { cx: bkx(kExp), cy: bky(m.v), r: 4, fill: m.c }, svg);
-      lbl = text(svg, bkx(kExp) + (right ? 8 : -8), bky(m.v) + 4, d3(m.v), 'svg-tick',
-                 right ? 'start' : 'end', m.c);
+      lbl = text(svg, bkx(kExp) - 8, bky(m.v) + 4 + (m.dy || 0), d3(m.v), 'svg-tick', 'end', m.c);
       // halo, so the value stays readable where it overlaps the curve
       lbl.setAttribute('stroke', '#fff');
       lbl.setAttribute('stroke-width', '3');
@@ -342,7 +412,7 @@
   function spanA(s) { return '<span class="smt-a">' + s + '</span>'; }
   function spanB(s) { return '<span class="smt-b">' + s + '</span>'; }
   /* the two policies are named \u03c0_A and \u03c0_B throughout the page */
-  function pol(which) { return '\u03c0<sub>' + which + '</sub>'; }
+  function pol(which) { return which === 'A' ? TEX.pa : TEX.pb; }
 
   function drawText() {
     var pa = normalize(wA), pb = normalize(wB);
@@ -355,40 +425,49 @@
     jA = jTrunc(pa, k); jB = jTrunc(pb, k);
     pA = jPop(pa); pB = jPop(pb);
 
-    l1 = 'J<sub>RL</sub> (mean): &nbsp; ' + spanA(pol('A') + ' ' + d3(mA)) + ' &nbsp; ' + spanB(pol('B') + ' ' + d3(mB)) + ' &nbsp; → ';
+    l1 = TEX.jrl + ' (mean): &nbsp; ' + spanA(pol('A') + ' ' + num(d3(mA))) + ' &nbsp; ' + spanB(pol('B') + ' ' + num(d3(mB))) + ' &nbsp; → ';
     l1 += dm <= 1e-6
       ? 'identical: expected-reward RL sees the same objective'
       : 'differ by ' + d3(dm);
 
     out.innerHTML = l1 + '<br>' +
-      'TailRL objective J<sup>(' + k + ')</sup>: &nbsp; ' +
-      spanA(pol('A') + ' ' + sig(jA)) + ' &nbsp; ' + spanB(pol('B') + ' ' + sig(jB)) +
-      ' &nbsp;|&nbsp; population J: &nbsp; ' +
-      spanA(pol('A') + ' ' + sig(pA) + (pA === -Infinity ? ' (reward 1 unreachable)' : '')) + ' &nbsp; ' +
-      spanB(pol('B') + ' ' + sig(pB) + (pB === -Infinity ? ' (reward 1 unreachable)' : '')) + '<br>' +
-      'Best-of-' + k + ': &nbsp; ' + spanA(pol('A') + ' ' + d3(bA)) + ' &nbsp; ' + spanB(pol('B') + ' ' + d3(bB));
+      TEX.jk + ' at ' + num('k = ' + k) + ': &nbsp; ' +
+      spanA(pol('A') + ' ' + num(sig(jA))) + ' &nbsp; ' + spanB(pol('B') + ' ' + num(sig(jB))) +
+      ' &nbsp;|&nbsp; population ' + TEX.jpop + ': &nbsp; ' +
+      spanA(pol('A') + ' ' + num(sig(pA)) + (pA === -Infinity ? ' (reward 1 unreachable)' : '')) + ' &nbsp; ' +
+      spanB(pol('B') + ' ' + num(sig(pB)) + (pB === -Infinity ? ' (reward 1 unreachable)' : '')) + '<br>' +
+      TEX.bok + ' at ' + num('k = ' + k) + ': &nbsp; ' +
+      spanA(pol('A') + ' ' + num(d3(bA))) + ' &nbsp; ' + spanB(pol('B') + ' ' + num(d3(bB)));
 
-    if (lock && !painting && dm > 1e-6) {
-      hint.textContent = 'Means differ by ' + d3(dm) +
-        ': spread some mass over more levels to let the lock hold.';
-      return;
-    }
     if (dm > 1e-6) {
-      hint.textContent = 'Means differ. Turn on "Lock means" or reload a preset to compare tails at equal expected reward.';
+      hint.innerHTML = 'Means differ by ' + num(d3(dm)) +
+        ': spread some mass over more levels to let the lock hold.';
       return;
     }
     lead = bB >= bA ? 'B' : 'A';
     dB = lead === 'B' ? bB - bA : bA - bB;
     dJ = lead === 'B' ? jB - jA : jA - jB;
     if (dB < 0.001 && Math.abs(dJ) < 0.001) {
-      hint.textContent = 'At k = ' + k + ' the two policies are still indistinguishable; raise k or thicken one tail.';
+      hint.innerHTML = 'At ' + num('k = 1') + ' and at ' + num('k = ' + k) +
+        ' the two policies are still hard to tell apart; thicken one tail to separate them.';
       return;
     }
-    msg = 'At k = 1 both policies are indistinguishable to expected-reward RL. At k = ' + k +
-      ', policy \u03c0' + lead + "'s Best-of-k is " + d3(dB) + ' higher and its order-' + k +
-      ' tail likelihood is ' + d3(Math.abs(dJ)) + ' nats ' + (dJ >= 0 ? 'higher' : 'lower') +
-      ': the tail likelihood is the objective that prefers the policy with the better tail.';
-    hint.textContent = msg;
+    /* The two verdicts can genuinely disagree: J is a 1/k-weighted sum over
+       every budget up to k, so it can prefer the policy that leads at small k
+       even when the other wins Best-of-k at the top budget. Say that plainly
+       rather than asserting they always agree. */
+    msg = 'At ' + num('k = 1') + ' both policies are indistinguishable to expected-reward RL. At ' +
+      num('k = ' + k) + ', ' + pol(lead) + ' has the higher Best-of-' + num(k) + ' by ' + num(d3(dB));
+    if (dJ >= 0) {
+      msg += ' and the higher order-' + num(k) + ' tail likelihood by ' + num(d3(dJ)) +
+        ' nats: the tail likelihood prefers the policy with the better tail.';
+    } else {
+      msg += ', while ' + pol(lead === 'B' ? 'A' : 'B') + ' has the higher order-' + num(k) +
+        ' tail likelihood by ' + num(d3(-dJ)) + ' nats. The objective sums Best-of-' + num('j') +
+        ' over every budget ' + num('j \u2264 ' + k) + ' with weight ' + num('1/j') +
+        ', so it can favour the policy that leads at the smaller budgets.';
+    }
+    hint.innerHTML = msg;
   }
 
   /* ------------------------------------------------------------------ render */
@@ -479,30 +558,10 @@
     pBox.appendChild(b);
   });
 
-  var lockBox = document.getElementById('smt-lock');
-  lockBox.addEventListener('change', function () {
-    lock = lockBox.checked;
-    if (lock) {
-      var po = normalize(wA);
-      if (po) wB = tilt(wB, mean(po), null).w;
-    }
-    render();
-  });
-
-  var kSlider = document.getElementById('smt-k'), kLabel = document.getElementById('smt-k-value');
-  kSlider.addEventListener('input', function () {
-    kExp = parseInt(kSlider.value, 10);
-    kLabel.textContent = 'rollout budget k = ' + kOf();
-    render();
-  });
-
   var resetBtn = document.getElementById('smt-reset');
   if (resetBtn) resetBtn.addEventListener('click', function () {
-    kExp = 4; lock = true; painting = null;
-    kSlider.value = '4';
-    lockBox.checked = true;
-    kLabel.textContent = 'rollout budget k = ' + kOf();
-    loadPreset('peaked');
+    painting = null;
+    loadPreset('random');
     pBox.querySelectorAll('button').forEach(function (x, i) { x.classList.toggle('active', i === 0); });
     paint();
     resetBtn.blur();
@@ -513,6 +572,5 @@
   window.addEventListener('pointerup', endPaint);
 
   loadPreset(preset);
-  kLabel.textContent = 'rollout budget k = ' + kOf();
   paint();
 })();

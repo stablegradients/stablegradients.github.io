@@ -54,6 +54,34 @@
     var t = el('text', { x: x, y: y, 'class': cls || 'svg-label', 'text-anchor': anchor || 'middle' }, parent);
     t.textContent = s; return t;
   }
+  /* Labels that mix prose and symbols. Segments between | are set in
+     KaTeX_Math italic, the rest in KaTeX_Main upright, so the widget uses the
+     same faces as the page's rendered equations. */
+  function mtext(parent, x, y, spec, cls, anchor) {
+    var t = el('text', { x: x, y: y, 'class': cls || 'svg-label', 'text-anchor': anchor || 'middle' }, parent);
+    spec.split('|').forEach(function (seg, i) {
+      if (seg === '') return;
+      var ts = el('tspan', { 'class': (i % 2) ? 'sv-math' : 'sv-text' }, t);
+      ts.textContent = seg;
+    });
+    return t;
+  }
+  /* KaTeX is loaded before this script (both deferred, declared earlier), so
+     the static symbols are typeset once and reused every frame; only the
+     numbers change, and they are set in KaTeX_Main. */
+  function tex(src) {
+    try { return katex.renderToString(src, { throwOnError: false, output: 'html' }); }
+    catch (e) { return src; }
+  }
+  var TEX = (typeof katex !== 'undefined') ? {
+    r:      tex('r'),
+    aRein:  tex('A_{\\mathrm{REINFORCE}}'),
+    aTail:  tex('A_{\\mathrm{TailRL}}'),
+    rShare: tex('r/\\!\\sum r'),
+    wShare: tex('\\omega/\\!\\sum\\omega'),
+    times:  tex('\\times')
+  } : { r: 'r', aRein: 'A_REINFORCE', aTail: 'A_TailRL', rShare: 'r / \u03a3r', wShare: '\u03c9 / \u03a3\u03c9', times: '\u00d7' };
+  function num(v) { return '<span class="knum">' + v + '</span>'; }
   // At N = 1024 the interesting advantages are around 1/1024, so widen the
   // precision rather than printing a row of zeros.
   function dec(v) { var a = Math.abs(v); return (a > 0 && a < 0.01) ? 4 : 3; }
@@ -93,7 +121,7 @@
   function drawRewards() {
     while (svgR.firstChild) svgR.removeChild(svgR.firstChild);
     var res = tailrl(rewards), idx = res.idx, n = rewards.length, sz = sizing();
-    text(svgR, PA.x0, 20, 'The rollout group: ' + n + ' rewards on [0, 1]', 'svg-title', 'start');
+    mtext(svgR, PA.x0, 20, 'The rollout group: ' + n + ' rewards on [0, 1]', 'svg-title', 'start');
 
     // reward axis
     el('line', { x1: PA.x0, x2: PA.x1, y1: PA.yRoll, y2: PA.yRoll, stroke: C.ink, 'stroke-width': 1.2 }, svgR);
@@ -101,14 +129,14 @@
       el('line', { x1: xOf(v), x2: xOf(v), y1: PA.yRoll - 4, y2: PA.yRoll + 4, stroke: C.ink, 'stroke-width': 1 }, svgR);
       text(svgR, xOf(v), PA.yRoll + 20, v.toFixed(1), 'svg-tick');
     });
-    text(svgR, PA.x1, PA.yRoll + 38, 'reward r  (drag the rollouts)', 'svg-label', 'end');
+    mtext(svgR, PA.x1, PA.yRoll + 38, 'reward |r|  (drag the rollouts)', 'svg-label', 'end');
 
     var focus = hover >= 0 ? hover : idx[n - 1];
 
     // drawn last, so the focused rollout always sits on top
     function focusDecor(parent, r) {
       el('circle', { cx: xOf(r), cy: PA.yRoll, r: sz.r * 1.4, fill: C.tailrl, stroke: C.tailrl, 'stroke-width': 2 }, parent);
-      var t = text(parent, xOf(r), PA.yRoll - sz.r * 1.4 - 8, 'r = ' + r.toFixed(2), 'svg-tick');
+      var t = mtext(parent, xOf(r), PA.yRoll - sz.r * 1.4 - 8, '|r| = ' + r.toFixed(2), 'svg-tick');
       t.setAttribute('fill', C.tailrl);
     }
 
@@ -201,7 +229,7 @@
       var maxAbs = m.A.reduce(function (s, v) { return Math.max(s, Math.abs(v)); }, 0) || 1;
       var yMid = (yTop + yBot) / 2, scale = (yBot - yTop) / 2 / maxAbs * 0.92;
       text(svgA, px + panelW / 2, 20, m.name + ' advantage', 'svg-title').setAttribute('fill', m.color);
-      text(svgA, px + panelW / 2, 36, m.sub, 'svg-tick');
+      mtext(svgA, px + panelW / 2, 36, m.sub, 'svg-tick');
       el('line', { x1: px, x2: px + panelW, y1: yMid, y2: yMid, stroke: C.muted, 'stroke-width': 1 }, svgA);
       text(svgA, px - 6, yTop + 4, '+' + maxAbs.toFixed(dec(maxAbs)), 'svg-tick', 'end');
       text(svgA, px - 6, yBot + 4, '−' + maxAbs.toFixed(dec(maxAbs)), 'svg-tick', 'end');
@@ -258,13 +286,13 @@
     var sR = share(rewards, i), sT = share(res.w, i);
     var ratio = sR > 1e-9 ? (sT / sR) : 0;
     readout.innerHTML =
-      'rollout ' + (i + 1) + ': r = ' + rewards[i].toFixed(2) +
-      ' &nbsp;|&nbsp; <span class="m-grpo">A<sub>REINFORCE</sub> = ' + fmt(rf[i]) + '</span>' +
-      ' &nbsp; <span class="m-tailrl">A<sub>TailRL</sub> = ' + fmt(res.A[i]) + '</span><br>' +
+      'rollout ' + num(i + 1) + ': ' + TEX.r + ' = ' + num(rewards[i].toFixed(2)) +
+      ' &nbsp;|&nbsp; <span class="m-grpo">' + TEX.aRein + ' = ' + num(fmt(rf[i])) + '</span>' +
+      ' &nbsp; <span class="m-tailrl">' + TEX.aTail + ' = ' + num(fmt(res.A[i])) + '</span><br>' +
       'share of the group\u2019s total weight: ' +
-      '<span class="m-grpo">' + sR.toFixed(1) + '%</span> under REINFORCE (r / \u03a3r), ' +
-      '<span class="m-tailrl">' + sT.toFixed(1) + '%</span> under TailRL (\u03c9 / \u03a3\u03c9)' +
-      (ratio > 0 ? ' &nbsp;\u2192&nbsp; ' + ratio.toFixed(2) + '\u00d7 the influence' : '') +
+      '<span class="m-grpo">' + num(sR.toFixed(1) + '%') + '</span> under REINFORCE (' + TEX.rShare + '), ' +
+      '<span class="m-tailrl">' + num(sT.toFixed(1) + '%') + '</span> under TailRL (' + TEX.wShare + ')' +
+      (ratio > 0 ? ' &nbsp;\u2192&nbsp; ' + num(ratio.toFixed(2)) + TEX.times + ' the influence' : '') +
       (preset === 'binary'
         ? '<br>binary rewards: A<sub>TailRL</sub> = (r \u2212 \u03bc\u0302) / (N \u03bc\u0302), the MaxRL advantage up to the 1/N averaging, so every success carries equal weight under both'
         : '');
