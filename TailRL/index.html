@@ -30,17 +30,17 @@
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="./static/css/bulma.min.css">
-  <link rel="stylesheet" href="./static/css/index.css?v=6">
+  <link rel="stylesheet" href="./static/css/index.css?v=7">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
 
-  <script defer src="./static/js/same-mean-tail.js?v=6"></script>
-  <script defer src="./static/js/tailrl-explorer.js?v=6"></script>
-  <script defer src="./static/js/index.js?v=6"></script>
-  <script defer src="./static/js/scroll-jack.js?v=6"></script>
+  <script defer src="./static/js/same-mean-tail.js?v=7"></script>
+  <script defer src="./static/js/tailrl-explorer.js?v=7"></script>
+  <script defer src="./static/js/index.js?v=7"></script>
+  <script defer src="./static/js/scroll-jack.js?v=7"></script>
 </head>
 <body>
 
@@ -82,24 +82,42 @@
           Tail-Likelihood Reinforcement Learning
         </h1>
 
-        <div class="is-size-6 publication-authors">
-          <span class="author-block"><a href="https://stablegradients.github.io">Shrinivas Ramasubramanian</a>,</span>
-          <span class="author-block"><a href="https://daman1209arora.github.io/">Daman Arora</a>,</span>
-          <span class="author-block"><a href="https://tajwarfahim.github.io/">Fahim Tajwar</a>,</span>
-          <span class="author-block"><a href="https://scholar.google.com/citations?user=SU6ooAQAAAAJ">Guanning Zeng</a>,</span>
-          <span class="author-block">Qingyang Wu,</span>
-          <span class="author-block">Zhongzhu Zhou,</span>
-          <span class="author-block">Chenfeng Xu,</span>
-          <span class="author-block"><a href="https://havenfeng.github.io/">Haiwen Feng</a>,</span>
-          <span class="author-block"><a href="https://yudasong.github.io/">Yuda Song</a>,</span>
-          <span class="author-block"><a href="https://www.cs.cmu.edu/~aarti/">Aarti Singh</a>,</span>
-          <span class="author-block"><a href="https://www.cs.cmu.edu/~rsalakhu/">Ruslan Salakhutdinov</a>,</span>
-          <span class="author-block">Drew Bagnell,</span>
-          <span class="author-block"><a href="https://www.cs.cmu.edu/~schneide/">Jeff Schneider</a><sup>&dagger;</sup>,</span>
-          <span class="author-block"><a href="https://azanette.com">Andrea Zanette</a><sup>&dagger;</sup></span>
+        <div class="publication-authors">
+          <div class="author-line">
+            <a href="https://stablegradients.github.io">Shrinivas Ramasubramanian</a><sup>1</sup>,
+            <a href="https://daman1209arora.github.io/">Daman Arora</a><sup>1</sup>,
+            <a href="https://tajwarfahim.github.io/">Fahim Tajwar</a><sup>1</sup>,
+            <a href="https://scholar.google.com/citations?user=SU6ooAQAAAAJ">Guanning Zeng</a><sup>1</sup>
+          </div>
+          <div class="author-line">
+            Qingyang Wu<sup>4</sup>,
+            Zhongzhu Zhou<sup>4</sup>,
+            Chenfeng Xu<sup>4</sup>
+          </div>
+          <div class="author-line">
+            <a href="https://havenfeng.github.io/">Haiwen Feng</a><sup>2,3</sup>,
+            <a href="https://yudasong.github.io/">Yuda Song</a><sup>1</sup>,
+            <a href="https://www.cs.cmu.edu/~aarti/">Aarti Singh</a><sup>1</sup>,
+            <a href="https://www.cs.cmu.edu/~rsalakhu/">Ruslan Salakhutdinov</a><sup>1</sup>
+          </div>
+          <div class="author-line">
+            Drew Bagnell<sup>1</sup>,
+            <a href="https://www.cs.cmu.edu/~schneide/">Jeff Schneider</a><sup>1,&dagger;</sup>,
+            <a href="https://azanette.com">Andrea Zanette</a><sup>1,&dagger;</sup>
+          </div>
         </div>
-        <div class="is-size-7 publication-authors" style="margin-top: 0.3rem; color: var(--text-muted);">
-          Carnegie Mellon University &nbsp;·&nbsp; <sup>&dagger;</sup>Joint advising &nbsp;·&nbsp; Preprint, 2026
+
+        <div class="publication-affiliations">
+          <sup>1</sup>Carnegie Mellon University &nbsp;&nbsp;
+          <sup>2</sup>University of California, Berkeley &nbsp;&nbsp;
+          <sup>3</sup>Impossible, Inc. &nbsp;&nbsp;
+          <sup>4</sup>Together AI<br>
+          <sup>&dagger;</sup>Joint advising
+        </div>
+
+        <div class="publication-contact">
+          <code>{shrinivr, jeff4, azenette}@andrew.cmu.edu</code>
+          &nbsp;·&nbsp; Preprint, 2026
         </div>
 
         <div class="btn-row is-centered">
@@ -444,9 +462,14 @@
     <div class="explorer" id="tailrl-explorer">
       <div class="explorer-head">
         <span class="label-text">Rollouts $N$</span>
-        <input type="range" id="ex-n-slider" min="1" max="10" step="1" value="3"
-               aria-label="Number of rollouts, powers of two from 2 to 1024">
-        <span id="ex-n-value" class="label-text" style="min-width: 3.5em; color: var(--text-dark); font-weight: 600;">8</span>
+        <input type="range" id="ex-n-slider" min="0" max="3" step="1" value="1"
+               list="ex-n-stops"
+               aria-label="Number of rollouts: 16, 64, 256 or 1024">
+        <datalist id="ex-n-stops">
+          <option value="0" label="16"></option><option value="1" label="64"></option>
+          <option value="2" label="256"></option><option value="3" label="1024"></option>
+        </datalist>
+        <span id="ex-n-value" class="label-text" style="min-width: 3.5em; color: var(--text-dark); font-weight: 600;">64</span>
         <span class="label-text" style="margin-left: 0.5rem;">Presets</span>
         <span id="ex-preset-buttons"></span>
         <button type="button" class="reset" id="ex-reset" aria-label="Reset the rollout explorer to its default state">Reset</button>
@@ -454,7 +477,7 @@
       <svg id="ex-svg-rewards" viewBox="0 0 760 125" role="img" aria-label="The rollout group drawn on the reward axis, draggable"></svg>
       <svg id="ex-svg-adv" viewBox="0 0 760 250" role="img" aria-label="Advantages assigned by REINFORCE and by TailRL to the same rollout group"></svg>
       <div class="readout" id="ex-readout"></div>
-      <div class="hint">Each panel is scaled by its own largest magnitude, so compare the shape; the printed bounds carry the scale. Move the slider to change the group from 2 to 1024 rollouts.</div>
+      <div class="hint">Each panel is scaled by its own largest magnitude, so compare the shape; the printed bounds carry the scale. Move the slider through the rollout budgets the paper trains at: 16, 64, 256 and 1024.</div>
     </div>
 
     <p class="keyline">

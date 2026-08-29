@@ -587,12 +587,39 @@ body.sj-on .hero { min-height: 0; display: block; }
 #pitch .evidence { text-align: left; max-width: 900px; margin-left: auto; margin-right: auto; }
 @media (max-width: 768px) { #pitch .evidence { margin-top: 1.6rem; padding-top: 1.1rem; } }
 
-/* The title slide owns the first screen: nothing but the title block is
-   visible until the reader scrolls. */
-.hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; }
-.hero .hero-body { display: flex; align-items: center; width: 100%; padding-top: 2rem; padding-bottom: 2rem; }
+/* The title slide is a third of the screen, so the pitch under it is visible
+   without scrolling. min-height, not height: the block still grows if the
+   author list wraps onto more lines on a narrow viewport. */
+.hero { min-height: 33.333vh; display: flex; flex-direction: column; justify-content: center; }
+.hero .hero-body { display: flex; align-items: center; width: 100%; padding-top: 1.75rem; padding-bottom: 1.75rem; }
 .hero .hero-body > .container { width: 100%; }
-@supports (min-height: 100svh) { .hero { min-height: 100svh; } }
+@supports (min-height: 33.333svh) { .hero { min-height: 33.333svh; } }
+
+/* ---- author block --------------------------------------------------------
+   Line breaks follow the paper's \author block exactly; each .author-line is
+   one line there. */
+.publication-authors { margin-top: 0.15rem; }
+.author-line {
+  font-family: 'Google Sans', sans-serif; font-size: 1rem; line-height: 1.75;
+  color: #4b5563;
+}
+.author-line a { color: #374151; }
+.author-line a:hover { color: var(--tailrl); text-decoration: underline; }
+.author-line sup { font-size: 0.7em; color: var(--text-muted); }
+.publication-affiliations {
+  margin-top: 0.7rem; font-size: 0.85rem; line-height: 1.6; color: var(--text-muted);
+}
+.publication-affiliations sup { color: var(--text-muted); }
+.publication-contact { margin-top: 0.45rem; font-size: 0.82rem; color: var(--text-muted); }
+.publication-contact code {
+  background: transparent; color: var(--text-muted); padding: 0;
+  font-size: 0.95em;
+}
+@media (max-width: 768px) {
+  .author-line { font-size: 0.88rem; line-height: 1.65; }
+  .publication-affiliations { font-size: 0.76rem; }
+  .publication-contact { font-size: 0.74rem; }
+}
 
 /* ---- advantage explorer: the reward strip sits above the two panels ------ */
 #tailrl-explorer #ex-svg-rewards { margin-bottom: 0.25rem; }

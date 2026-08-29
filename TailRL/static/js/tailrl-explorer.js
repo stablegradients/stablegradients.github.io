@@ -17,7 +17,9 @@
   var NS = 'http://www.w3.org/2000/svg';
   var C = { tailrl: '#C0392B', reinforce: '#46628F', ink: '#1f2937', muted: '#9ca3af', grid: '#e5e7eb' };
 
-  var N = 8, rewards = [], hover = -1, dragging = -1, preset = 'rare';
+  // the rollout budgets the paper trains at; the slider steps over these only
+  var STOPS = [16, 64, 256, 1024], START = 1;
+  var N = STOPS[START], rewards = [], hover = -1, dragging = -1, preset = 'rare';
 
   var presets = {
     rare:   function (n) { var a = []; for (var i = 0; i < n; i++) a.push(0.12 + 0.28 * ((i * 7919) % n) / n); a[n - 1] = 0.92; return a; },
@@ -274,7 +276,7 @@
   var nSlider = document.getElementById('ex-n-slider'), nValue = document.getElementById('ex-n-value');
   var pBox = document.getElementById('ex-preset-buttons');
   nSlider.addEventListener('input', function () {
-    N = Math.pow(2, parseInt(nSlider.value, 10));
+    N = STOPS[parseInt(nSlider.value, 10)] || STOPS[START];
     rewards = presets[preset](N);
     hover = -1; dragging = -1; pend = null;
     nValue.textContent = String(N);
@@ -293,8 +295,8 @@
 
   var resetBtn = document.getElementById('ex-reset');
   if (resetBtn) resetBtn.addEventListener('click', function () {
-    N = 8; preset = 'rare'; hover = -1; dragging = -1; pend = null;
-    nSlider.value = '3';
+    N = STOPS[START]; preset = 'rare'; hover = -1; dragging = -1; pend = null;
+    nSlider.value = String(START);
     nValue.textContent = String(N);
     rewards = presets[preset](N);
     pBox.querySelectorAll('button').forEach(function (x, i) { x.classList.toggle('active', i === 0); });
