@@ -39,7 +39,7 @@
   --rloo: #1D9E75;
 }
 
-body { color: var(--text-dark); font-family: var(--cm); font-size: 2rem; }
+body { color: var(--text-dark); font-family: var(--cm); }
 
 .hero { background: #f3f4f6; border-bottom: 1px solid #e5e7eb; overflow: visible !important; }
 .hero .hero-body { padding-top: 2rem; padding-bottom: 0.8rem; overflow: visible !important; }
@@ -74,7 +74,7 @@ h4.subsection-title,
 }
 
 h4.subsection-title {
-  font-size: 1.25rem;
+  font-size: 0.625rem;
   font-family: var(--cm);
   margin-top: 2rem;
   margin-bottom: 1rem;
@@ -83,7 +83,7 @@ h4.subsection-title {
 /* Body text */
 .content p, .content li {
   font-family: var(--cm);
-  font-size: 2rem;
+  font-size: 1rem;
   line-height: 1.7;
 }
 
@@ -100,7 +100,7 @@ h4.subsection-title {
 }
 .insight-box p {
   font-family: var(--cm);
-  font-size: 2.2rem;
+  font-size: 1.1rem;
 }
 
 .math-comparison {
@@ -119,7 +119,7 @@ h4.subsection-title {
   border: 1px solid var(--border-light);
 }
 .math-box h4 { font-weight: 600; margin-bottom: 1rem; color: var(--text-dark); }
-.math-box .math-note { color: var(--text-muted); font-size: 1.8rem; margin-top: 1rem; text-align: center; }
+.math-box .math-note { color: var(--text-muted); font-size: 0.9rem; margin-top: 1rem; text-align: center; }
 
 .figure-container {
   background: transparent;
@@ -135,7 +135,7 @@ h4.subsection-title {
   margin-left: auto;
   margin-right: auto;
 }
-.figure-caption { font-size: 1.8rem; color: var(--text-muted); margin-top: 1rem; text-align: center; }
+.figure-caption { font-size: 0.9rem; color: var(--text-muted); margin-top: 1rem; text-align: center; }
 
 .result-card {
   background: #fff;
@@ -148,7 +148,7 @@ h4.subsection-title {
 .result-card .task-tag {
   display: inline-block;
   font-family: var(--cm);
-  font-size: 1.56rem;
+  font-size: 0.78rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--text-muted);
@@ -165,7 +165,7 @@ h4.subsection-title {
 }
 .takeaway-box p { margin: 0; font-family: var(--cm); }
 .takeaway-box .takeaway-title { font-weight: 600; color: var(--tailrl); display: block; margin-bottom: 0.25rem; }
-.takeaway-box .takeaway-body { color: var(--text-dark); font-size: 1.96rem; }
+.takeaway-box .takeaway-body { color: var(--text-dark); font-size: 0.98rem; }
 
 table.comparison-table {
   width: 100%;
@@ -200,7 +200,7 @@ pre code { display: block; padding: 1rem; background: #1f2937; color: #e5e7eb; b
 .bibtex-box pre { margin: 0; background: transparent; }
 .bibtex-box code {
   font-family: 'JetBrains Mono', 'Fira Code', 'Monaco', monospace;
-  font-size: 1.7rem;
+  font-size: 0.85rem;
   line-height: 1.6;
   color: #e5e7eb;
   background: transparent;
@@ -233,10 +233,10 @@ footer a:hover { color: #bfdbfe; }
   font-family: var(--cm);
 }
 .explorer .explorer-head { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; align-items: center; margin-bottom: 0.75rem; }
-.explorer .explorer-head .label-text { font-family: var(--cm); font-size: 1.7rem; color: var(--text-muted); margin-right: 0.25rem; }
+.explorer .explorer-head .label-text { font-family: var(--cm); font-size: 0.85rem; color: var(--text-muted); margin-right: 0.25rem; }
 .explorer button {
   font-family: var(--cm);
-  font-size: 1.7rem;
+  font-size: 0.85rem;
   padding: 0.3rem 0.7rem;
   border: 1px solid #d1d5db;
   border-radius: 999px;
@@ -255,7 +255,7 @@ footer a:hover { color: #bfdbfe; }
 .explorer .rollout:active { cursor: grabbing; }
 .explorer .readout {
   font-family: var(--cm);
-  font-size: 1.64rem;
+  font-size: 0.82rem;
   color: #1f2937;
   background: #f9fafb;
   border: 1px solid var(--border-light);
@@ -265,7 +265,7 @@ footer a:hover { color: #bfdbfe; }
   line-height: 1.6;
   min-height: 3.6em;
 }
-.explorer .hint { font-size: 1.7rem; color: var(--text-muted); margin-top: 0.5rem; }
+.explorer .hint { font-size: 0.9rem; color: var(--text-muted); margin-top: 0.5rem; }
 .explorer .readout .m-tailrl { color: var(--tailrl); font-weight: 600; }
 .explorer .readout .m-grpo { color: var(--grpo); font-weight: 600; }
 .explorer .readout .m-rloo { color: var(--rloo); font-weight: 600; }
@@ -275,7 +275,7 @@ footer a:hover { color: #bfdbfe; }
 @media (max-width: 768px) { .smt-grid { grid-template-columns: 1fr; } }
 .explorer .smt-check {
   display: inline-flex; align-items: center; gap: 0.4em;
-  font-family: var(--cm); font-size: 1.7rem;
+  font-family: var(--cm); font-size: 0.85rem;
   color: var(--text-dark); cursor: pointer;
 }
 .explorer .smt-check input { accent-color: var(--tailrl); cursor: pointer; }
@@ -291,52 +291,52 @@ footer a:hover { color: #bfdbfe; }
 
 /* ==================== MOBILE RESPONSIVE STYLES ==================== */
 @media (max-width: 1024px) {
-  .hero .title.is-1 { font-size: 4.4rem; }
+  .hero .title.is-1 { font-size: 2.2rem; }
 }
 @media (max-width: 768px) {
   .hero .hero-body { padding-top: 1.2rem; padding-bottom: 0.6rem; }
-  .hero .title.is-1 { font-size: 3rem; white-space: normal !important; line-height: 1.3; }
-  .publication-authors { font-size: 1.8rem !important; }
+  .hero .title.is-1 { font-size: 1.5rem; white-space: normal !important; line-height: 1.3; }
+  .publication-authors { font-size: 0.9rem !important; }
   .publication-authors .author-block { display: inline; white-space: nowrap; }
-  .is-size-6.publication-authors { font-size: 1.6rem !important; }
+  .is-size-6.publication-authors { font-size: 0.8rem !important; }
   .section { padding: 2rem 1rem; }
-  h2.title.is-3, .title.is-3.section-title { font-size: 1.4rem; }
-  h4.subsection-title { font-size: 1.1rem; }
+  h2.title.is-3, .title.is-3.section-title { font-size: 0.7rem; }
+  h4.subsection-title { font-size: 0.55rem; }
   .math-comparison { gap: 1rem; }
   .math-box { padding: 1rem; }
-  .math-box p { font-size: 1.9rem; }
+  .math-box p { font-size: 0.95rem; }
   .formula-box { overflow-x: auto; padding: 0.5rem; }
-  .formula-box p { font-size: 1.8rem; }
+  .formula-box p { font-size: 0.9rem; }
   .insight-box { padding: 1rem 1.25rem; }
-  .insight-box p { font-size: 2rem; }
+  .insight-box p { font-size: 1rem; }
   .result-card { padding: 1.25rem; }
-  .result-card h4 { font-size: 2.2rem; }
-  .figure-caption { font-size: 1.6rem; }
-  table.comparison-table { min-width: 500px; font-size: 1.7rem; }
+  .result-card h4 { font-size: 1.1rem; }
+  .figure-caption { font-size: 0.8rem; }
+  table.comparison-table { min-width: 500px; font-size: 0.85rem; }
   table.comparison-table th, table.comparison-table td { padding: 0.5rem 0.75rem; }
   .bibtex-box { padding: 1rem; }
-  .bibtex-box code { font-size: 1.4rem; }
-  .publication-links .button { font-size: 1.7rem; padding: 0.4rem 0.8rem; }
+  .bibtex-box code { font-size: 0.7rem; }
+  .publication-links .button { font-size: 0.85rem; padding: 0.4rem 0.8rem; }
   footer.footer { padding: 1.5rem 1rem; }
   footer.footer img { height: 60px !important; }
-  footer p { font-size: 1.7rem; }
-  .hero .hero-body p[style*="Castoro"] { font-size: 1.9rem !important; }
+  footer p { font-size: 0.85rem; }
+  .hero .hero-body p[style*="Castoro"] { font-size: 0.95rem !important; }
   .explorer { padding: 1rem; }
   .takeaway-box { padding: 1rem 1.25rem; }
 }
 @media (max-width: 480px) {
-  .hero .title.is-1 { font-size: 2.5rem; }
-  .publication-authors { font-size: 1.6rem !important; }
-  h2.title.is-3, .title.is-3.section-title { font-size: 1.25rem; }
-  .content p, .content li { font-size: 1.8rem; }
-  .math-box h4 { font-size: 1.9rem; }
-  .math-box p { font-size: 1.7rem; }
+  .hero .title.is-1 { font-size: 1.25rem; }
+  .publication-authors { font-size: 0.8rem !important; }
+  h2.title.is-3, .title.is-3.section-title { font-size: 0.625rem; }
+  .content p, .content li { font-size: 0.9rem; }
+  .math-box h4 { font-size: 0.95rem; }
+  .math-box p { font-size: 0.85rem; }
   .result-card { padding: 1rem; }
-  .result-card h4 { font-size: 2rem; }
-  .formula-box p { font-size: 1.7rem; }
+  .result-card h4 { font-size: 1rem; }
+  .formula-box p { font-size: 0.85rem; }
   .result-card[style*="border-left"] { padding: 1rem; }
-  .result-card[style*="border-left"] h4 { font-size: 2rem; }
-  .result-card[style*="border-left"] div[style*="text-align: center"] { font-size: 1.8rem !important; }
+  .result-card[style*="border-left"] h4 { font-size: 1rem; }
+  .result-card[style*="border-left"] div[style*="text-align: center"] { font-size: 0.9rem !important; }
 }
 
 img { max-width: 100%; height: auto; }
@@ -372,10 +372,10 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--tailrl); outlin
 }
 .pagenav .brand {
   font-family: var(--cm); font-weight: 600;
-  color: var(--tailrl); font-size: 1.8rem; margin-right: auto;
+  color: var(--tailrl); font-size: 0.9rem; margin-right: auto;
 }
 .pagenav a {
-  font-family: var(--cm); font-size: 1.7rem;
+  font-family: var(--cm); font-size: 0.85rem;
   color: var(--text-muted); text-decoration: none; padding: 0.2rem 0;
   border-bottom: 2px solid transparent;
 }
@@ -387,7 +387,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--tailrl); outlin
 @media (max-width: 768px) {
   .pagenav .links { display: none; }
   .pagenav .jump {
-    display: block; font-family: var(--cm); font-size: 1.7rem;
+    display: block; font-family: var(--cm); font-size: 0.85rem;
     padding: 0.3rem 0.5rem; border: 1px solid var(--border-light); border-radius: 6px;
     background: #fff; color: var(--text-dark);
   }
@@ -402,7 +402,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--tailrl); outlin
 .btn-row.is-centered { justify-content: center; }
 .btn {
   display: inline-flex; align-items: center; gap: 0.45em;
-  font-family: var(--cm); font-size: 1.8rem;
+  font-family: var(--cm); font-size: 0.9rem;
   padding: 0.45rem 0.95rem; border-radius: 999px;
   border: 1px solid #d1d5db; background: #fff; color: #1f2937;
   text-decoration: none; cursor: pointer;
@@ -416,28 +416,28 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--tailrl); outlin
   opacity: 0.5; cursor: not-allowed; pointer-events: none; background: #f9fafb;
 }
 .btn[aria-disabled="true"] .btn-note {
-  font-size: 1.5rem; color: var(--text-muted); font-style: italic;
+  font-size: 0.75rem; color: var(--text-muted); font-style: italic;
 }
 
 /* ---- three-step story ---------------------------------------------------- */
 .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin: 1.75rem 0; }
 @media (max-width: 860px) { .steps { grid-template-columns: 1fr; gap: 1.1rem; } }
 .step .step-n {
-  font-family: var(--cm); font-size: 1.5rem; font-weight: 600;
+  font-family: var(--cm); font-size: 0.75rem; font-weight: 600;
   letter-spacing: 0.08em; text-transform: uppercase; color: var(--tailrl);
 }
 .step h4 {
-  font-family: var(--cm); font-weight: 600; font-size: 2.04rem;
+  font-family: var(--cm); font-weight: 600; font-size: 1.02rem;
   color: var(--text-dark); margin: 0.3rem 0 0.4rem 0;
 }
-.step p { font-size: 1.9rem; line-height: 1.6; color: #1f2937; margin: 0; }
+.step p { font-size: 0.95rem; line-height: 1.6; color: #1f2937; margin: 0; }
 
 /* ---- key line (replaces most bordered boxes) ----------------------------- */
 .keyline {
   border-left: 3px solid var(--tailrl); padding: 0.15rem 0 0.15rem 1.1rem;
   text-align: left;
   margin: 1.5rem 0; font-family: var(--cm);
-  font-size: 2.24rem; line-height: 1.55; color: var(--text-dark);
+  font-size: 1.12rem; line-height: 1.55; color: var(--text-dark);
 }
 
 /* ---- gradient-weight comparison ------------------------------------------ */
@@ -448,22 +448,22 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--tailrl); outlin
 .wcard.grpo { border-top-color: var(--grpo); }
 .wcard.tail { border-top-color: var(--tailrl); }
 .wcard .wname {
-  font-family: var(--cm); font-weight: 600; font-size: 1.9rem;
+  font-family: var(--cm); font-weight: 600; font-size: 0.95rem;
   margin-bottom: 0.35rem;
 }
 .wcard.rl .wname { color: var(--rloo); }
 .wcard.grpo .wname { color: var(--grpo); }
 .wcard.tail .wname { color: var(--tailrl); }
-.wcard p { font-size: 1.86rem; line-height: 1.55; color: #1f2937; margin: 0 0 0.6rem 0; }
+.wcard p { font-size: 0.93rem; line-height: 1.55; color: #1f2937; margin: 0 0 0.6rem 0; }
 .wcard .wformula {
-  font-size: 1.8rem; color: var(--text-dark);
+  font-size: 0.9rem; color: var(--text-dark);
   background: var(--bg-gray); border-radius: 4px; padding: 0.4rem 0.6rem;
 }
 
 /* ---- badges -------------------------------------------------------------- */
 .badges { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1.1rem 0 1.5rem 0; }
 .badge {
-  font-family: var(--cm); font-size: 1.6rem;
+  font-family: var(--cm); font-size: 0.8rem;
   color: var(--text-dark); background: var(--bg-gray);
   border: 1px solid var(--border-light); border-radius: 999px; padding: 0.28rem 0.7rem;
 }
@@ -471,15 +471,15 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--tailrl); outlin
 
 /* ---- results ------------------------------------------------------------- */
 .eyebrow {
-  display: block; font-family: var(--cm); font-size: 1.6rem;
+  display: block; font-family: var(--cm); font-size: 0.8rem;
   font-weight: 600; color: var(--tailrl); margin-bottom: 0.3rem;
 }
 .result-card h4 { margin-top: 0; }
-.result-card > p { font-size: 1.94rem; }
-.result-note { font-size: 1.8rem; color: var(--text-muted); }
+.result-card > p { font-size: 0.97rem; }
+.result-note { font-size: 0.9rem; color: var(--text-muted); }
 .takeaway-line {
   border-left: 3px solid var(--tailrl); padding-left: 0.9rem; margin-top: 1.1rem;
-  font-size: 1.94rem; color: var(--text-dark);
+  font-size: 0.97rem; color: var(--text-dark);
 }
 .inset-figure { max-width: 330px; margin-left: auto; margin-right: auto; }
 @media (max-width: 640px) { .inset-figure { max-width: 100%; } }
@@ -491,7 +491,7 @@ details.deep {
 }
 details.deep > summary {
   cursor: pointer; padding: 0.7rem 1rem; list-style: none;
-  font-family: var(--cm); font-size: 1.8rem; color: var(--text-dark);
+  font-family: var(--cm); font-size: 0.9rem; color: var(--text-dark);
 }
 details.deep > summary::-webkit-details-marker { display: none; }
 details.deep > summary::before { content: "▸ "; color: var(--tailrl); font-weight: 700; }
@@ -499,31 +499,31 @@ details.deep[open] > summary::before { content: "▾ "; }
 details.deep > summary:hover { color: var(--tailrl); }
 details.deep > summary:focus-visible { outline: 2px solid var(--tailrl); outline-offset: -2px; }
 details.deep .deep-body { padding: 0 1rem 1rem 1rem; border-top: 1px solid var(--border-light); }
-details.deep .deep-body p { font-size: 1.88rem; }
+details.deep .deep-body p { font-size: 0.94rem; }
 
 /* ---- closing band -------------------------------------------------------- */
 .closing { background: var(--bg-gray); border-top: 1px solid var(--border-light); text-align: center; }
 .closing .closing-line {
-  font-family: var(--cm); font-size: 2.7rem; color: var(--text-dark);
+  font-family: var(--cm); font-size: 1.35rem; color: var(--text-dark);
   margin-bottom: 1.2rem;
 }
 .closing .btn-row { justify-content: center; }
-@media (max-width: 480px) { .closing .closing-line { font-size: 2.2rem; } }
+@media (max-width: 480px) { .closing .closing-line { font-size: 1.1rem; } }
 
 /* ---- widget reset control ------------------------------------------------ */
 .explorer .reset {
-  margin-left: auto; font-size: 1.6rem; color: var(--text-muted);
+  margin-left: auto; font-size: 0.8rem; color: var(--text-muted);
   border-color: var(--border-light);
 }
 .explorer .reset:hover { color: var(--tailrl); border-color: var(--tailrl); }
 
 /* ---- copy-to-clipboard feedback ------------------------------------------ */
-.copy-ok { color: var(--rloo); font-size: 1.7rem; margin-left: 0.5rem; }
+.copy-ok { color: var(--rloo); font-size: 0.85rem; margin-left: 0.5rem; }
 
 /* ---- presentation mode (opt-in only) ------------------------------------- */
 .sj-toggle {
   position: fixed; right: 16px; bottom: 16px; z-index: 60;
-  font-family: var(--cm); font-size: 1.5rem;
+  font-family: var(--cm); font-size: 0.75rem;
   padding: 0.35rem 0.75rem; border-radius: 999px; cursor: pointer;
   border: 1px solid var(--border-light); background: rgba(255, 255, 255, 0.92);
   color: var(--text-muted); backdrop-filter: blur(4px);
@@ -589,25 +589,25 @@ body.sj-on .hero { min-height: 0; display: block; }
    one line there. */
 .publication-authors { margin-top: 0.15rem; }
 .author-line {
-  font-family: var(--cm); font-size: 2rem; line-height: 1.75;
+  font-family: var(--cm); font-size: 1rem; line-height: 1.75;
   color: #1f2937;
 }
 .author-line a { color: #1f2937; }
 .author-line a:hover { color: var(--tailrl); text-decoration: underline; }
 .author-line sup { font-size: 0.7em; color: var(--text-muted); }
 .publication-affiliations {
-  margin-top: 0.7rem; font-size: 1.7rem; line-height: 1.6; color: var(--text-muted);
+  margin-top: 0.7rem; font-size: 0.85rem; line-height: 1.6; color: var(--text-muted);
 }
 .publication-affiliations sup { color: var(--text-muted); }
-.publication-contact { margin-top: 0.45rem; font-size: 1.64rem; color: var(--text-muted); }
+.publication-contact { margin-top: 0.45rem; font-size: 0.82rem; color: var(--text-muted); }
 .publication-contact code {
   background: transparent; color: var(--text-muted); padding: 0;
   font-size: 0.95em;
 }
 @media (max-width: 768px) {
-  .author-line { font-size: 1.76rem; line-height: 1.65; }
-  .publication-affiliations { font-size: 1.52rem; }
-  .publication-contact { font-size: 1.48rem; }
+  .author-line { font-size: 0.88rem; line-height: 1.65; }
+  .publication-affiliations { font-size: 0.76rem; }
+  .publication-contact { font-size: 0.74rem; }
 }
 
 /* ---- advantage explorer: the reward strip sits above the two panels ------ */
@@ -658,29 +658,31 @@ body.sj-on .hero { min-height: 0; display: block; }
    page-wide Noto Sans above is what fixes the captions, footer, card copy and
    widget chrome, all of which were falling through to system-ui.
    ========================================================================= */
-.hero .title.is-2 { font-size: 6rem; line-height: 1.125; }
-.author-line { font-size: 2.5rem; line-height: 1.5; }
-.publication-affiliations { font-size: 1.9rem; line-height: 1.55; }
-.publication-contact { font-size: 1.8rem; }
-.result-card > p { font-size: 2rem; line-height: 1.7; }
-.result-note { font-size: 1.9rem; }
-.takeaway-line { font-size: 2rem; }
+.hero .title.is-2 { font-size: 3rem; line-height: 1.125; }
+.author-line { font-size: 1.25rem; line-height: 1.5; }
+.publication-affiliations { font-size: 0.95rem; line-height: 1.55; }
+.publication-contact { font-size: 0.9rem; }
+.result-card > p { font-size: 1rem; line-height: 1.7; }
+.result-note { font-size: 0.95rem; }
+.takeaway-line { font-size: 1rem; }
 /* our links are pills rather than Bulma buttons, so they sit just under
    MaxRL's 16px rather than at it */
-.btn { font-size: 1.9rem; }
-@media (max-width: 1024px) { .hero .title.is-2 { font-size: 4.8rem; } }
+.btn { font-size: 1rem; }
+@media (max-width: 1024px) { .hero .title.is-2 { font-size: 2.4rem; } }
 @media (max-width: 768px) {
-  .hero .title.is-2 { font-size: 3.6rem; line-height: 1.2; }
-  .author-line { font-size: 2rem; line-height: 1.55; }
-  .publication-affiliations { font-size: 1.64rem; }
-  .publication-contact { font-size: 1.56rem; }
+  .hero .title.is-2 { font-size: 1.8rem; line-height: 1.2; }
+  .author-line { font-size: 1rem; line-height: 1.55; }
+  .publication-affiliations { font-size: 0.82rem; }
+  .publication-contact { font-size: 0.78rem; }
 }
 
 /* Computer Modern runs lighter and smaller on the eye than Noto Sans at the
    same nominal size, so the running text gets a touch more size and leading. */
 body { font-family: var(--cm); }
-.content p, .content li { font-size: 2.125rem; line-height: 1.72; }
-.result-card > p { font-size: 2.125rem; }
+/* body and card copy at MaxRL's 16/27.2; the earlier bump for Computer
+   Modern is dropped in favour of matching the reference page. */
+.content p, .content li { font-size: 1rem; line-height: 1.7; }
+.result-card > p { font-size: 1rem; line-height: 1.7; }
 .hero .title.is-2 { font-weight: 700; }
 h2.title.is-3, .title.is-3.section-title { font-weight: 700; }
 code, pre, .bibtex-box code { font-family: 'JetBrains Mono', 'Fira Code', Monaco, monospace; }
@@ -703,7 +705,7 @@ code, pre, .bibtex-box code { font-family: 'JetBrains Mono', 'Fira Code', Monaco
   gap: 1rem;
 }
 .explain-split .notes p {
-  margin: 0; font-size: 2.125rem; line-height: 1.6; color: var(--text-dark);
+  margin: 0; font-size: 1rem; line-height: 1.7; color: var(--text-dark);
 }
 /* "tail-probability" was breaking at its hyphen across two lines, which reads
    badly for a term being defined; keep it whole */
@@ -712,7 +714,7 @@ code, pre, .bibtex-box code { font-family: 'JetBrains Mono', 'Fira Code', Monaco
 @media (max-width: 768px) {
   .explain-split { grid-template-columns: 1fr; gap: 1.1rem; }
   .explain-split .notes { gap: 0.9rem; }
-  .explain-split .notes p { font-size: 2rem; }
+  .explain-split .notes p { font-size: 1rem; }
 }
 
 /* the reshape teaser is blank until it scrolls into view, so hold its box */
@@ -725,7 +727,7 @@ img[data-play-in-view] { aspect-ratio: 962 / 663; width: 100%; height: auto; bac
   margin: 0; text-align: center;
   overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch;
 }
-.math-box h4 { text-align: center; font-size: 2rem; }
+.math-box h4 { text-align: center; font-size: 1rem; }
 
 /* ---- tinted comparison boxes ---------------------------------------------
    MaxRL's own boxes are neutral grey; the tints here follow the colour
@@ -763,9 +765,8 @@ img[data-play-in-view] { aspect-ratio: 962 / 663; width: 100%; height: auto; bac
   color: var(--text-dark);
 }
 
-/* ---- 2x type ------------------------------------------------------------
-   Every font on the page is doubled except the section headings, which keep
-   the sizes they had. Pinned in px so they cannot drift with the rest. */
+/* ---- heading sizes ------------------------------------------------------
+   Pinned in px, matching the MaxRL page: h2 32/36, h4 24. */
 h2.title.is-3, .title.is-3.section-title { font-size: 32px; line-height: 36px; }
 h2.section-title, h3.section-title, .title.section-title { font-size: 32px; }
 h2.title.is-4, .title.is-4.section-title { font-size: 24px; }

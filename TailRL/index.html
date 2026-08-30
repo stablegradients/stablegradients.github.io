@@ -30,17 +30,17 @@
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="./static/css/bulma.min.css">
-  <link rel="stylesheet" href="./static/css/index.css?v=28">
+  <link rel="stylesheet" href="./static/css/index.css?v=30">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
 
-  <script defer src="./static/js/same-mean-tail.js?v=28"></script>
-  <script defer src="./static/js/tailrl-explorer.js?v=28"></script>
-  <script defer src="./static/js/index.js?v=28"></script>
-  <script defer src="./static/js/scroll-jack.js?v=28"></script>
+  <script defer src="./static/js/same-mean-tail.js?v=30"></script>
+  <script defer src="./static/js/tailrl-explorer.js?v=30"></script>
+  <script defer src="./static/js/index.js?v=30"></script>
+  <script defer src="./static/js/scroll-jack.js?v=30"></script>
 </head>
 <body>
 
@@ -319,7 +319,7 @@
     </div>
 
     <div class="formula-box" style="margin: 1.25rem 0 1rem 0;">
-      <p style="font-size: 2.2rem; margin: 0;">
+      <p style="font-size: 1.1rem; margin: 0;">
         $r(x,z) \;=\; \displaystyle\int_0^1 \mathbf{1}\!\left\{r(x,z) > \tau\right\}d\tau$
       </p>
     </div>
@@ -332,7 +332,7 @@
     </div>
 
     <div class="formula-box" style="margin: 1.25rem 0 1rem 0;">
-      <p style="font-size: 2.2rem; margin: 0;">
+      <p style="font-size: 1.1rem; margin: 0;">
         $\mathbb{E}_{z\sim\pi_\theta}\!\left[r(x,z)\right] \;=\; \displaystyle\int_0^1 p_\theta(x,\tau)\,d\tau$
       </p>
     </div>
@@ -367,7 +367,7 @@
     </div>
 
     <div class="formula-box" style="margin: 1.25rem 0 0.75rem 0;">
-      <p style="font-size: 2.4rem; margin: 0;">
+      <p style="font-size: 1.2rem; margin: 0;">
         $J_{\mathrm{TailRL}}(\theta;x) \;=\; \displaystyle\int_0^1 \log p_\theta(x,\tau)\,d\tau$
       </p>
     </div>
@@ -429,7 +429,7 @@
     </div>
 
     <div class="formula-box" style="margin: 1.25rem 0 0.75rem 0;">
-      <p style="font-size: 2.3rem; margin: 0;">
+      <p style="font-size: 1.15rem; margin: 0;">
         $\nabla_\theta J_{\mathrm{TailRL}}^{(T)}(\theta;x) \;=\; \displaystyle\sum_{k=1}^{T}\frac{1}{k}\,\nabla_\theta\,\text{Best-of-}k(\theta;x)$
       </p>
     </div>
@@ -468,7 +468,7 @@
     </div>
 
     <div class="formula-box" style="margin: 1.25rem 0 0.75rem 0;">
-      <p style="font-size: 2.2rem; margin: 0;">
+      <p style="font-size: 1.1rem; margin: 0;">
         $\omega\!\left(r_{(i)}\right) = \displaystyle\sum_{k=1}^{i}\frac{r_{(k)}-r_{(k-1)}}{N-k+1},
         \qquad A_i = \omega(r_i) - \bar\omega$
       </p>
