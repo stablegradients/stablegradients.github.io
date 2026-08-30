@@ -30,17 +30,17 @@
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="./static/css/bulma.min.css">
-  <link rel="stylesheet" href="./static/css/index.css?v=37">
+  <link rel="stylesheet" href="./static/css/index.css?v=38">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
 
-  <script defer src="./static/js/same-mean-tail.js?v=37"></script>
-  <script defer src="./static/js/tailrl-explorer.js?v=37"></script>
-  <script defer src="./static/js/index.js?v=37"></script>
-  <script defer src="./static/js/scroll-jack.js?v=37"></script>
+  <script defer src="./static/js/same-mean-tail.js?v=38"></script>
+  <script defer src="./static/js/tailrl-explorer.js?v=38"></script>
+  <script defer src="./static/js/index.js?v=38"></script>
+  <script defer src="./static/js/scroll-jack.js?v=38"></script>
 </head>
 <body>
 
@@ -297,8 +297,9 @@
 
     <div class="content has-text-justified">
       <p>
-        The harmonic weights $1/k$ fall out of the logarithm. They are not selected or tuned. The sum runs over every
-        budget, so TailRL combines Best-of-$k$ objectives across inference budgets instead of committing to one.
+        The harmonic weights $1/k$ are derived from the Maclaurin series of the logarithm. They are not selected or
+        tuned. The sum runs over every budget, so TailRL combines Best-of-$k$ objectives across inference budgets
+        instead of committing to one.
       </p>
     </div>
   </div>
