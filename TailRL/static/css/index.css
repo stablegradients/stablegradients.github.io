@@ -718,7 +718,18 @@ code, pre, .bibtex-box code { font-family: 'JetBrains Mono', 'Fira Code', Monaco
 }
 
 /* the reshape teaser is blank until it scrolls into view, so hold its box */
-img[data-play-in-view] { aspect-ratio: 962 / 663; width: 100%; height: auto; background: transparent; }
+/* Half the area, so 1/sqrt(2) = 70.71% of the measure on each side. The
+   aspect-ratio box still reserves the space before the GIF is swapped in.
+   Phones keep the full width, where it is already small enough. */
+img[data-play-in-view] {
+  aspect-ratio: 962 / 663;
+  width: 70.71%;
+  height: auto;
+  margin-left: auto;
+  margin-right: auto;
+  background: transparent;
+}
+@media (max-width: 768px) { img[data-play-in-view] { width: 100%; } }
 
 /* ---- objective / gradient comparison boxes -------------------------------
    The gradient expressions are wide for a half-width column, so each formula
@@ -747,7 +758,7 @@ img[data-play-in-view] { aspect-ratio: 962 / 663; width: 100%; height: auto; bac
 
 /* a single full-width box, for a theorem rather than a two-way comparison */
 .math-comparison.one { grid-template-columns: minmax(0, 1fr); }
-.math-comparison.one .math-box { padding: 1.75rem 1.5rem; }
+.math-comparison.one .math-box { padding: 1.1rem 1.4rem; }
 
 /* Instructions under the widgets are directions to the reader, not asides:
    full-strength ink, bold, centred. */
@@ -786,3 +797,11 @@ h2.title.is-4, .title.is-4.section-title { font-size: 24px; }
 }
 .bibtex-box { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .bibtex-box pre { overflow-x: auto; }
+
+/* The gradient identities read as one line each; if a narrow screen cannot
+   hold that, .math-line already scrolls rather than wrapping mid-equation. */
+.grad-row .math-line { white-space: nowrap; }
+
+/* the Best-of-k box carries two equations and no heading, so it sits tight */
+.math-box.is-compact { padding: 1.1rem 1.4rem; }
+.math-box.is-compact .math-line { white-space: nowrap; }

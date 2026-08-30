@@ -30,17 +30,17 @@
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="./static/css/bulma.min.css">
-  <link rel="stylesheet" href="./static/css/index.css?v=33">
+  <link rel="stylesheet" href="./static/css/index.css?v=37">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
 
-  <script defer src="./static/js/same-mean-tail.js?v=33"></script>
-  <script defer src="./static/js/tailrl-explorer.js?v=33"></script>
-  <script defer src="./static/js/index.js?v=33"></script>
-  <script defer src="./static/js/scroll-jack.js?v=33"></script>
+  <script defer src="./static/js/same-mean-tail.js?v=37"></script>
+  <script defer src="./static/js/tailrl-explorer.js?v=37"></script>
+  <script defer src="./static/js/index.js?v=37"></script>
+  <script defer src="./static/js/scroll-jack.js?v=37"></script>
 </head>
 <body>
 
@@ -130,7 +130,6 @@
           <span class="btn" aria-disabled="true" role="link" title="The code release is not public yet">
             <span>Code</span> <span class="btn-note">soon</span>
           </span>
-          <a href="#tail" class="btn btn-primary">Start with the tail →</a>
         </div>
 
         </div>
@@ -246,18 +245,18 @@
       </p>
     </div>
 
-    <div class="math-comparison">
+    <div class="math-comparison grad-row">
       <div class="math-box is-rl">
         <h4>Expected-reward RL</h4>
         <p class="math-line">
-          $\nabla_\theta J_{\mathrm{RL}}(\theta;x) = \mathbb{E}_{z\sim\pi_\theta(\cdot\mid x)}\!\left[\,r(x,z)\,S(x,z)\right]$
+          $\nabla_\theta J_{\mathrm{RL}}(\theta;x) = \mathbb{E}_{z}\!\left[\,r(x,z)\,S(x,z)\right]$
         </p>
         <p class="math-note">Weight: the reward itself.</p>
       </div>
       <div class="math-box is-tail">
         <h4>TailRL</h4>
         <p class="math-line">
-          $\nabla_\theta J_{\mathrm{TailRL}}(\theta;x) = \mathbb{E}_{z\sim\pi_\theta(\cdot\mid x)}\!\left[\left(\displaystyle\int_0^{r(x,z)}\frac{d\tau}{p_\theta(x,\tau)}\right)S(x,z)\right]$
+          $\nabla_\theta J_{\mathrm{TailRL}}(\theta;x) = \mathbb{E}_{z}\!\left[\displaystyle\int_0^{r(x,z)}\frac{S(x,z)}{p_\theta(x,\tau)}\,d\tau\right]$
         </p>
         <p class="math-note">Weight: inverse tail-probability, integrated up to the rollout's own reward.
           Not computable during training: the estimator below replaces $1/p_\theta$ with a count over the
@@ -286,12 +285,11 @@
     </div>
 
     <div class="math-comparison one">
-      <div class="math-box is-tail">
-        <h4>Theorem: Best-of-$k$ decomposition</h4>
+      <div class="math-box is-tail is-compact">
         <p class="math-line">
           $J_{\mathrm{TailRL}}(\theta;x) = \displaystyle\sum_{k=1}^{\infty}\frac{\text{Best-of-}k(\theta;x)-1}{k}$
         </p>
-        <p class="math-line" style="margin-top: 1.1rem;">
+        <p class="math-line" style="margin-top: 0.6rem;">
           $\nabla_\theta J_{\mathrm{TailRL}}(\theta;x) = \displaystyle\sum_{k=1}^{\infty}\frac{1}{k}\,\nabla_\theta\,\text{Best-of-}k(\theta;x)$
         </p>
       </div>
