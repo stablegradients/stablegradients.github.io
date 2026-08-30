@@ -807,9 +807,21 @@ h2.title.is-4, .title.is-4.section-title { font-size: 24px; }
    hold that, .math-line already scrolls rather than wrapping mid-equation. */
 .grad-row .math-line { white-space: nowrap; }
 
-/* the Best-of-k box carries two equations and no heading, so it sits tight */
-.math-box.is-compact { padding: 1.1rem 1.4rem; }
+/* The Best-of-k box carries two equations and no heading, so it sits tight and
+   only as wide as it needs: the widest equation is 415px, so 1.5x that is
+   about 620px rather than the full 960px measure. */
+.math-box.is-compact {
+  /* width, not max-width: the auto margins below turn off the grid item's
+     stretch, so a max-width alone leaves it shrink-to-fit at the content's
+     own 462px rather than the 620px target. */
+  padding: 1.1rem 1.4rem;
+  width: 620px;
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
 .math-box.is-compact .math-line { white-space: nowrap; }
+@media (max-width: 700px) { .math-box.is-compact { max-width: 100%; } }
 
 /* The rollout slider and the presets each get their own centred row. Without
    flex-basis 100% they share a line and wrap unevenly as the labels grow. */

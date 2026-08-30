@@ -30,17 +30,17 @@
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="./static/css/bulma.min.css">
-  <link rel="stylesheet" href="./static/css/index.css?v=53">
+  <link rel="stylesheet" href="./static/css/index.css?v=55">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
 
-  <script defer src="./static/js/same-mean-tail.js?v=53"></script>
-  <script defer src="./static/js/tailrl-explorer.js?v=53"></script>
-  <script defer src="./static/js/index.js?v=53"></script>
-  <script defer src="./static/js/scroll-jack.js?v=53"></script>
+  <script defer src="./static/js/same-mean-tail.js?v=55"></script>
+  <script defer src="./static/js/tailrl-explorer.js?v=55"></script>
+  <script defer src="./static/js/index.js?v=55"></script>
+  <script defer src="./static/js/scroll-jack.js?v=55"></script>
 </head>
 <body>
 
@@ -227,14 +227,14 @@
         <p class="math-line">
           $J_{\mathrm{RL}}(\theta;x) := \mathbb{E}_{z\sim\pi_\theta(\cdot\mid x)}\!\left[\,r(x,z)\,\right]$
         </p>
-        <p class="math-note">The mean reward of a single rollout.</p>
+        <p class="math-note">Expected reward</p>
       </div>
       <div class="math-box is-tail">
         <h4>TailRL</h4>
         <p class="math-line">
           $J_{\mathrm{TailRL}}(\theta;x) := \displaystyle\int_0^1 \log p_\theta(x,\tau)\,d\tau$
         </p>
-        <p class="math-note">The mean log tail-probability across reward thresholds, for rewards in $[0,1]$.</p>
+        <p class="math-note">Expected log tail-probability across reward thresholds</p>
       </div>
     </div>
 
@@ -244,11 +244,11 @@
       </p>
       <p>
         On binary rewards every nontrivial threshold asks the same question, did the rollout succeed, so the integral
-        collapses to a single log-likelihood and TailRL reduces exactly to MaxRL.
-        <a href="https://zanette-labs.github.io/MaxRL" target="_blank" rel="noopener">Related project: MaxRL for binary rewards →</a>
+        collapses to a single log-likelihood and TailRL reduces exactly to
+        <a href="https://zanette-labs.github.io/MaxRL" target="_blank" rel="noopener">MaxRL</a>.
       </p>
       <p>
-        Both gradients are weighted sums of the score-function
+        The gradients of both objectives are a weighted sum of the score-function
         $S(x,z) := \nabla_\theta \log \pi_\theta(z \mid x)$.
       </p>
     </div>
