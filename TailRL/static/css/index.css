@@ -691,16 +691,29 @@ code, pre, .bibtex-box code { font-family: 'JetBrains Mono', 'Fira Code', Monaco
    Reproduces the layout of the original LaTeX figure, whose left column held
    the prose and whose right held the density. The text is real HTML now, so
    it reflows, is selectable and is read by screen readers. */
-/* Text wraps down the left of the figure, the way a LaTeX wrapfigure reads.
-   The figure floats right and comes first in source order, which is what lets
-   the prose flow beside it. 45.96% is the old 70.71% cut by 35%. */
-.explain-split { display: block; }
-.explain-split::after { content: ''; display: table; clear: both; }
-.explain-split img {
-  float: right;
+/* Prose to the left of the figure, the two sharing a horizontal line of
+   symmetry. Both blurbs are shorter than their figure, so nothing ever flowed
+   underneath it and a float bought nothing but a top-aligned ragged edge;
+   centring the pair reads as one balanced unit. The figure comes first in
+   source order and is ordered back to the right, which also puts it *below*
+   the prose once this collapses to a column on a phone.
+   45.96% is the old 70.71% cut by 35%. */
+.explain-split, .wrap-block {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+.explain-split img, .wrap-figure {
+  order: 2;
+  flex: 0 0 45.96%;
   width: 45.96%;
   height: auto;
-  margin: 0.2rem 0 1rem 2rem;
+  margin: 0;
+  padding: 0;
+}
+.explain-split .notes, .wrap-block .content {
+  flex: 1 1 0;
+  min-width: 0;          /* flex items floor at min-content without this */
 }
 .explain-split .notes { display: block; }
 .explain-split .notes p {
@@ -710,22 +723,17 @@ code, pre, .bibtex-box code { font-family: 'JetBrains Mono', 'Fira Code', Monaco
 /* "tail-probability" was breaking at its hyphen across two lines, which reads
    badly for a term being defined; keep it whole */
 .explain-split .notes strong { white-space: nowrap; }
+.wrap-figure img { width: 100%; display: block; }
+.content .wrap-prose { text-align: left; margin: 0; }
 
-.wrap-block::after { content: ''; display: table; clear: both; }
-.wrap-figure {
-  float: right;
-  width: 45.96%;
-  margin: 0.2rem 0 1rem 2rem;
-  padding: 0;
-}
-.wrap-figure img { width: 100%; }
-.content .wrap-prose { text-align: left; }
-
-/* a phone is too narrow to wrap around anything: stack instead */
+/* a phone is too narrow to set anything beside anything: stack instead */
 @media (max-width: 768px) {
-  .explain-split img, .wrap-figure {
-    float: none; width: 100%; margin: 0 0 1rem 0;
+  /* stays flex so `order` still holds: block layout ignores it and would
+     leave the figure stranded above the prose it illustrates */
+  .explain-split, .wrap-block {
+    flex-direction: column; align-items: stretch; gap: 1rem;
   }
+  .explain-split img, .wrap-figure { flex: none; width: 100%; }
 }
 
 /* the reshape teaser is blank until it scrolls into view, so hold its box */
