@@ -30,17 +30,17 @@
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="./static/css/bulma.min.css">
-  <link rel="stylesheet" href="./static/css/index.css?v=62">
+  <link rel="stylesheet" href="./static/css/index.css?v=65">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
 
-  <script defer src="./static/js/same-mean-tail.js?v=62"></script>
-  <script defer src="./static/js/tailrl-explorer.js?v=62"></script>
-  <script defer src="./static/js/index.js?v=62"></script>
-  <script defer src="./static/js/scroll-jack.js?v=62"></script>
+  <script defer src="./static/js/same-mean-tail.js?v=65"></script>
+  <script defer src="./static/js/tailrl-explorer.js?v=65"></script>
+  <script defer src="./static/js/index.js?v=65"></script>
+  <script defer src="./static/js/scroll-jack.js?v=65"></script>
 </head>
 <body>
 
@@ -206,7 +206,6 @@
         <svg id="smt-tail" viewBox="0 0 360 220" role="img" aria-label="Tail-probability curves for both policies"></svg>
         <svg id="smt-bok" viewBox="0 0 360 220" role="img" aria-label="Best-of-k against the rollout budget for both policies"></svg>
       </div>
-      <div class="hint" id="smt-hint"></div>
     </div>
 
     <p class="keyline">
@@ -392,7 +391,7 @@
     </p>
 
     <div style="margin: 0 0 0.5rem 0;">
-      <iframe id="tailrl-code-frame" src="./code.html" title="TailRL advantage computation as a diff against GRPO"
+      <iframe id="tailrl-code-frame" src="./code.html?v=65" title="TailRL advantage computation as a diff against GRPO"
               width="900" height="662"
               style="border: none; overflow: hidden; width: 100%; display: block;"
               scrolling="no"></iframe>

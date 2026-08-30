@@ -244,17 +244,6 @@
     });
     return t;
   }
-  function tex(src) {
-    try { return katex.renderToString(src, { throwOnError: false, output: 'html' }); }
-    catch (e) { return src; }
-  }
-  /* Static symbols typeset once; only the numbers change per frame. */
-  var TEX = (typeof katex !== 'undefined') ? {
-    pa:   tex('\\pi_A'),
-    pb:   tex('\\pi_B')
-  } : { pa: 'A', pb: 'B' };
-  function num(v) { return '<span class="knum">' + v + '</span>'; }
-
   function clear(svg) { while (svg.firstChild) svg.removeChild(svg.firstChild); }
   function localPt(svg, e) {
     var pt = svg.createSVGPoint();
@@ -408,53 +397,12 @@
     });
   }
 
-  /* ---------------------------------------------------------------- readouts */    /* the two policies are named \u03c0_A and \u03c0_B throughout the page */
-  function pol(which) { return which === 'A' ? TEX.pa : TEX.pb; }
-
-  function drawText() {
-    var pa = normalize(wA), pb = normalize(wB);
-    var k = kOf(), hint = document.getElementById('smt-hint');
-    var mA, mB, dm, bA, bB, jA, jB, lead, dB, dJ, msg;
-    if (!pa || !pb) return;
-
-    mA = mean(pa); mB = mean(pb); dm = Math.abs(mA - mB);
-    bA = bestOfK(pa, k); bB = bestOfK(pb, k);
-    jA = jTrunc(pa, k); jB = jTrunc(pb, k);
-    lead = bB >= bA ? 'B' : 'A';
-    dB = lead === 'B' ? bB - bA : bA - bB;
-    dJ = lead === 'B' ? jB - jA : jA - jB;
-    if (dB < 0.001 && Math.abs(dJ) < 0.001) {
-      hint.innerHTML = 'At ' + num('k = 1') + ' and at ' + num('k = ' + k) +
-        ' the two policies are still hard to tell apart; thicken one tail to separate them.';
-      return;
-    }
-    /* The two verdicts can genuinely disagree: J is a 1/k-weighted sum over
-       every budget up to k, so it can prefer the policy that leads at small k
-       even when the other wins Best-of-k at the top budget. Say that plainly
-       rather than asserting they always agree. */
-    msg = (dm <= 1e-6
-             ? 'The means are equal, so expected-reward RL cannot separate these two. At '
-             : 'The means differ by ' + num(d3(dm)) + '. At ') +
-      num('k = ' + k) + ', ' + pol(lead) + ' has the higher Best-of-' + num(k) + ' by ' + num(d3(dB));
-    if (dJ >= 0) {
-      msg += ' and the higher order-' + num(k) + ' tail likelihood by ' + num(d3(dJ)) +
-        ' nats: the tail likelihood prefers the policy with the better tail.';
-    } else {
-      msg += ', while ' + pol(lead === 'B' ? 'A' : 'B') + ' has the higher order-' + num(k) +
-        ' tail likelihood by ' + num(d3(-dJ)) + ' nats. The objective sums Best-of-' + num('j') +
-        ' over every budget ' + num('j \u2264 ' + k) + ' with weight ' + num('1/j') +
-        ', so it can favour the policy that leads at the smaller budgets.';
-    }
-    hint.innerHTML = msg;
-  }
-
   /* ------------------------------------------------------------------ render */
   function paint() {
     drawHist(document.getElementById('smt-hist-a'), 'A');
     drawHist(document.getElementById('smt-hist-b'), 'B');
     drawTail(document.getElementById('smt-tail'));
     drawBok(document.getElementById('smt-bok'));
-    drawText();
   }
   function render() {
     if (rafId) return;

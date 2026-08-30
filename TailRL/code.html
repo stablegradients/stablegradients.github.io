@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>TailRL Advantage Diff</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css" rel="stylesheet" />
@@ -57,7 +58,6 @@
         .line-highlight-bg {
             position: absolute;
             left: 0;
-            right: 0;
             pointer-events: none;
             z-index: 0;
         }
@@ -82,6 +82,19 @@
             position: absolute; right: 5px; color: #66ff66; font-weight: bold;
         }
         .line-numbers-rows > span { position: relative; }
+
+        /* The longest line is ~100 chars, so no phone fits it whole; shrink the
+           chrome to buy columns and let the rest scroll inside the window. */
+        @media (max-width: 600px) {
+            body { padding: 0 8px 16px 8px; }
+            .code-window { font-size: 11px; border-radius: 8px; }
+            .header { padding: 7px 10px; }
+            .title { font-size: 11px; margin-left: 6px; }
+            .dot { width: 9px; height: 9px; margin-right: 6px; }
+            pre[class*="language-"], pre.line-numbers { padding: 12px !important; }
+            pre.line-numbers { -webkit-overflow-scrolling: touch; }
+            pre.line-numbers > code { font-size: 11px; }
+        }
     </style>
 </head>
 <body>
@@ -153,6 +166,22 @@
                 } catch (e) {}
             }
 
+            /* The bands are absolutely positioned, so left:0/right:0 would size
+               them to the padding box and they would stop at the fold the moment
+               a long line is scrolled into view. Width comes from scrollWidth
+               instead -- re-read on load and resize, since the webfont lands
+               after first paint and shifts the measurement. */
+            function sizeBands() {
+                var pre = document.querySelector('pre.line-numbers');
+                if (!pre) return;
+                var bands = pre.querySelectorAll('.line-highlight-bg');
+                // collapse first: a band is in flow for scrollWidth, so measuring
+                // around them would ratchet the width up on every resync
+                [].forEach.call(bands, function (bg) { bg.style.width = '0'; });
+                var w = pre.scrollWidth;
+                [].forEach.call(bands, function (bg) { bg.style.width = w + 'px'; });
+            }
+
             function markDiffLines() {
                 const preElement = document.querySelector('pre.line-numbers');
                 const codeElement = document.querySelector('code.language-python');
@@ -181,6 +210,7 @@
                     bg.style.height = spanRect.height + 'px';
                     preElement.appendChild(bg);
                 });
+                sizeBands();
                 reportHeight();
             }
 
@@ -197,8 +227,10 @@
             } else {
                 runWhenReady();
             }
-            window.addEventListener('load', reportHeight);
-            window.addEventListener('resize', reportHeight);
+            function resync() { sizeBands(); reportHeight(); }
+            window.addEventListener('load', resync);
+            window.addEventListener('resize', resync);
+            if (document.fonts && document.fonts.ready) document.fonts.ready.then(resync);
         })();
     </script>
 </body>
