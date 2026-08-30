@@ -82,18 +82,53 @@
             position: absolute; right: 5px; color: #66ff66; font-weight: bold;
         }
         .line-numbers-rows > span { position: relative; }
+        /* one block per source line; on desktop this is purely structural */
+        .cl { display: block; }
 
-        /* The longest line is ~100 chars, so no phone fits it whole; shrink the
-           chrome to buy columns and let the rest scroll inside the window. */
+        /* The snippet needs ~900px to sit on one line each, so anything narrower
+           would otherwise ask the reader to swipe sideways through code. Below
+           that the lines soft-wrap instead, with a hanging indent so a
+           continuation is never mistaken for a new statement.
+
+           The gutter goes with it: Prism's line numbers are one row per logical
+           line and desynchronise the moment anything wraps. The per-line blocks
+           carry the diff tint directly here, so the measured overlay -- which
+           assumes no wrapping -- is switched off. */
+        @media (max-width: 900px) {
+            pre.line-numbers { overflow-x: hidden; padding-left: 20px !important; }
+            .line-numbers .line-numbers-rows { display: none !important; }
+            .line-highlight-bg { display: none !important; }
+            pre.line-numbers > code {
+                white-space: pre-wrap !important;
+                overflow-wrap: break-word;
+                word-break: break-word;
+            }
+            .cl {
+                text-indent: -2.2em;
+                padding-left: calc(2.2em + 16px);
+                padding-right: 20px;
+                margin: 0 -20px;
+                border-left: 4px solid transparent;
+            }
+            .cl-add { background: rgba(76, 175, 80, 0.15); border-left-color: #4caf50; }
+            .cl-delete { background: rgba(244, 67, 54, 0.15); border-left-color: #f44336; }
+        }
+
+        /* On a phone, also shrink the chrome and the face to buy columns. */
         @media (max-width: 600px) {
             body { padding: 0 8px 16px 8px; }
             .code-window { font-size: 11px; border-radius: 8px; }
             .header { padding: 7px 10px; }
             .title { font-size: 11px; margin-left: 6px; }
             .dot { width: 9px; height: 9px; margin-right: 6px; }
-            pre[class*="language-"], pre.line-numbers { padding: 12px !important; }
-            pre.line-numbers { -webkit-overflow-scrolling: touch; }
+            pre[class*="language-"], pre.line-numbers { padding: 10px 12px !important; }
+            pre.line-numbers { padding-left: 12px !important; }
             pre.line-numbers > code { font-size: 11px; }
+            .cl {
+                padding-left: calc(2.2em + 8px);
+                padding-right: 12px;
+                margin: 0 -12px;
+            }
         }
     </style>
 </head>
@@ -171,6 +206,32 @@
                a long line is scrolled into view. Width comes from scrollWidth
                instead -- re-read on load and resize, since the webfont lands
                after first paint and shifts the measurement. */
+            /* Prism leaves the code as one flat run of text, so a wrapped line
+               cannot be indented or tinted on its own. Split it into one block
+               per line -- safe here because no highlight token spans a newline
+               (asserted in the mobilecode suite) -- and hoist the diff class
+               onto the wrapper so the band is the line itself. */
+            function wrapLines() {
+                var code = document.querySelector('code.language-python');
+                if (!code || code.getAttribute('data-lines')) return;
+                /* Classify by line index against the pre-Prism source, the way
+                   markDiffLines does. Reading the classes back out of the
+                   highlighted markup does not work: Prism rebuilds the tree and
+                   the diff wrapper no longer opens where the line does. */
+                var src = (window.originalCodeHTML || '').split('\n');
+                var out = code.innerHTML.split('\n');
+                if (out.length && !out[out.length - 1].trim()) out.pop();
+                out = out.map(function (l, i) {
+                    var o = src[i] || '', cls = 'cl';
+                    if (o.indexOf('line-delete') !== -1) cls += ' cl-delete';
+                    else if (o.indexOf('line-add') !== -1) cls += ' cl-add';
+                    // an empty block has no height; a zero-width space keeps the row
+                    return '<span class="' + cls + '">' + (l.length ? l : '\u200b') + '</span>';
+                });
+                code.innerHTML = out.join('');
+                code.setAttribute('data-lines', out.length);
+            }
+
             function sizeBands() {
                 var pre = document.querySelector('pre.line-numbers');
                 if (!pre) return;
@@ -216,7 +277,7 @@
 
             function runWhenReady() {
                 if (typeof Prism !== 'undefined' && document.querySelector('.line-numbers-rows')) {
-                    setTimeout(markDiffLines, 500);
+                    setTimeout(function () { wrapLines(); markDiffLines(); }, 500);
                 } else {
                     setTimeout(runWhenReady, 100);
                 }
