@@ -691,35 +691,41 @@ code, pre, .bibtex-box code { font-family: 'JetBrains Mono', 'Fira Code', Monaco
    Reproduces the layout of the original LaTeX figure, whose left column held
    the prose and whose right held the density. The text is real HTML now, so
    it reflows, is selectable and is read by screen readers. */
-/* Notes stacked above the plot rather than beside it, both centred on the
-   same width so they read as one block. 70.71% keeps the plot at roughly the
-   size it had in the old two-column layout instead of stretching it to the
-   full measure. */
-.explain-split {
-  display: block;
-  margin: 1.5rem 0 0.5rem 0;
+/* Text wraps down the left of the figure, the way a LaTeX wrapfigure reads.
+   The figure floats right and comes first in source order, which is what lets
+   the prose flow beside it. 45.96% is the old 70.71% cut by 35%. */
+.explain-split { display: block; }
+.explain-split::after { content: ''; display: table; clear: both; }
+.explain-split img {
+  float: right;
+  width: 45.96%;
+  height: auto;
+  margin: 0.2rem 0 1rem 2rem;
 }
-.explain-split .notes {
-  /* Full content measure, starting on the same left edge as the section
-     heading, like the rest of the body prose. The figure below stays inset
-     and centred. */
-  display: flex; flex-direction: column; gap: 1rem;
-  margin: 0 0 1.5rem 0;
-  text-align: left;
-}
+.explain-split .notes { display: block; }
 .explain-split .notes p {
   margin: 0; font-size: 1.2rem; line-height: 1.7; color: var(--text-dark);
+  text-align: left;
 }
 /* "tail-probability" was breaking at its hyphen across two lines, which reads
    badly for a term being defined; keep it whole */
 .explain-split .notes strong { white-space: nowrap; }
-.explain-split img {
-  width: 70.71%; height: auto; display: block;
-  margin-left: auto; margin-right: auto;
+
+.wrap-block::after { content: ''; display: table; clear: both; }
+.wrap-figure {
+  float: right;
+  width: 45.96%;
+  margin: 0.2rem 0 1rem 2rem;
+  padding: 0;
 }
+.wrap-figure img { width: 100%; }
+.content .wrap-prose { text-align: left; }
+
+/* a phone is too narrow to wrap around anything: stack instead */
 @media (max-width: 768px) {
-  .explain-split .notes { gap: 0.9rem; margin-bottom: 1.1rem; }
-  .explain-split img { width: 100%; }
+  .explain-split img, .wrap-figure {
+    float: none; width: 100%; margin: 0 0 1rem 0;
+  }
 }
 
 /* the reshape teaser is blank until it scrolls into view, so hold its box */
@@ -728,13 +734,10 @@ code, pre, .bibtex-box code { font-family: 'JetBrains Mono', 'Fira Code', Monaco
    Phones keep the full width, where it is already small enough. */
 img[data-play-in-view] {
   aspect-ratio: 962 / 663;
-  width: 70.71%;
+  width: 100%;
   height: auto;
-  margin-left: auto;
-  margin-right: auto;
   background: transparent;
 }
-@media (max-width: 768px) { img[data-play-in-view] { width: 100%; } }
 
 /* ---- objective / gradient comparison boxes -------------------------------
    The gradient expressions are wide for a half-width column, so each formula
@@ -832,11 +835,6 @@ h2.title.is-4, .title.is-4.section-title { font-size: 24px; }
 }
 .explorer-head .ctl-line .reset { margin-left: 0; }
 
-/* Copy that introduces a centred, part-width figure reads as a caption above
-   it rather than as running text across the full measure. */
-.content .above-figure {
-  text-align: left;
-}
 
 /* Bulma's default link blue is 4.35:1 on the grey section band, under AA.
    This one clears it on both bands (5.9:1 grey, 6.2:1 white). */
