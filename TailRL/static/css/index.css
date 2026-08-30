@@ -842,3 +842,21 @@ h2.title.is-4, .title.is-4.section-title { font-size: 24px; }
    This one clears it on both bands (5.9:1 grey, 6.2:1 white). */
 .content a, .result-card a, footer .content a { color: #275fb5; }
 .content a:hover, .result-card a:hover { color: var(--tailrl); }
+
+/* The comparison equations run 20% smaller than the body, which also lets the
+   TailRL gradient keep its E[(integral) S] form on one line. The main equation
+   in each box reserves the same height so the two sit level across a row. */
+#tailrl .math-line { font-size: 0.8em; }
+#tailrl .math-comparison .math-box {
+  display: flex; flex-direction: column;
+}
+#tailrl .math-comparison .math-line {
+  display: flex; align-items: center; justify-content: center;
+  min-height: var(--eq-h, auto);
+}
+/* Each row reserves a height tall enough for its tallest equation, so the two
+   boxes centre their glyphs on the same line. Aligning by the .katex box will
+   not do it: a displaystyle integral overflows its own 22px inline strut. */
+#tailrl .obj-row  .math-line { --eq-h: 3.2em; }
+#tailrl .grad-row .math-line { --eq-h: 4.2em; }
+#tailrl .math-comparison .math-note { margin-top: auto; }

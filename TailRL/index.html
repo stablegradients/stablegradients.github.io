@@ -30,17 +30,17 @@
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="./static/css/bulma.min.css">
-  <link rel="stylesheet" href="./static/css/index.css?v=55">
+  <link rel="stylesheet" href="./static/css/index.css?v=57">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
 
-  <script defer src="./static/js/same-mean-tail.js?v=55"></script>
-  <script defer src="./static/js/tailrl-explorer.js?v=55"></script>
-  <script defer src="./static/js/index.js?v=55"></script>
-  <script defer src="./static/js/scroll-jack.js?v=55"></script>
+  <script defer src="./static/js/same-mean-tail.js?v=57"></script>
+  <script defer src="./static/js/tailrl-explorer.js?v=57"></script>
+  <script defer src="./static/js/index.js?v=57"></script>
+  <script defer src="./static/js/scroll-jack.js?v=57"></script>
 </head>
 <body>
 
@@ -221,7 +221,7 @@
   <div class="container is-max-desktop">
     <h2 class="title is-3 section-title">Tail-Likelihood Reinforcement Learning</h2>
 
-    <div class="math-comparison">
+    <div class="math-comparison obj-row">
       <div class="math-box is-rl">
         <h4>Expected-reward RL</h4>
         <p class="math-line">
@@ -259,16 +259,14 @@
         <p class="math-line">
           $\nabla_\theta J_{\mathrm{RL}}(\theta;x) = \mathbb{E}_{z}\!\left[\,r(x,z)\,S(x,z)\right]$
         </p>
-        <p class="math-note">Weight: the reward itself.</p>
+        <p class="math-note">Weight: the reward itself</p>
       </div>
       <div class="math-box is-tail">
         <h4>TailRL</h4>
         <p class="math-line">
-          $\nabla_\theta J_{\mathrm{TailRL}}(\theta;x) = \mathbb{E}_{z}\!\left[\displaystyle\int_0^{r(x,z)}\frac{S(x,z)}{p_\theta(x,\tau)}\,d\tau\right]$
+          $\nabla_\theta J_{\mathrm{TailRL}}(\theta;x) = \mathbb{E}_{z}\!\left[\left(\displaystyle\int_0^{r(x,z)}\frac{d\tau}{p_\theta(x,\tau)}\right)S(x,z)\right]$
         </p>
-        <p class="math-note">Weight: inverse tail-probability, integrated up to the rollout's own reward.
-          Not computable during training: the estimator below replaces $1/p_\theta$ with a count over the
-          rollout group.</p>
+        <p class="math-note">Weight: expected inverse tail-probability</p>
       </div>
     </div>
 
