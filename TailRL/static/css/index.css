@@ -700,11 +700,11 @@ code, pre, .bibtex-box code { font-family: 'JetBrains Mono', 'Fira Code', Monaco
   margin: 1.5rem 0 0.5rem 0;
 }
 .explain-split .notes {
-  /* the block stays over the plot, but the prose inside reads left-aligned
-     and starts on the figure's left edge */
+  /* Full content measure, starting on the same left edge as the section
+     heading, like the rest of the body prose. The figure below stays inset
+     and centred. */
   display: flex; flex-direction: column; gap: 1rem;
-  max-width: 70.71%;
-  margin: 0 auto 1.5rem auto;
+  margin: 0 0 1.5rem 0;
   text-align: left;
 }
 .explain-split .notes p {
@@ -718,7 +718,7 @@ code, pre, .bibtex-box code { font-family: 'JetBrains Mono', 'Fira Code', Monaco
   margin-left: auto; margin-right: auto;
 }
 @media (max-width: 768px) {
-  .explain-split .notes { gap: 0.9rem; max-width: 100%; margin-bottom: 1.1rem; }
+  .explain-split .notes { gap: 0.9rem; margin-bottom: 1.1rem; }
   .explain-split img { width: 100%; }
 }
 
@@ -824,11 +824,7 @@ h2.title.is-4, .title.is-4.section-title { font-size: 24px; }
    it rather than as running text across the full measure. */
 .content .above-figure {
   text-align: left;
-  max-width: 70.71%;
-  margin-left: auto;
-  margin-right: auto;
 }
-@media (max-width: 768px) { .content .above-figure { max-width: 100%; } }
 
 /* Bulma's default link blue is 4.35:1 on the grey section band, under AA.
    This one clears it on both bands (5.9:1 grey, 6.2:1 white). */
