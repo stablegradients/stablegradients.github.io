@@ -30,17 +30,17 @@
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="./static/css/bulma.min.css">
-  <link rel="stylesheet" href="./static/css/index.css?v=16">
+  <link rel="stylesheet" href="./static/css/index.css?v=17">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
 
-  <script defer src="./static/js/same-mean-tail.js?v=16"></script>
-  <script defer src="./static/js/tailrl-explorer.js?v=16"></script>
-  <script defer src="./static/js/index.js?v=16"></script>
-  <script defer src="./static/js/scroll-jack.js?v=16"></script>
+  <script defer src="./static/js/same-mean-tail.js?v=17"></script>
+  <script defer src="./static/js/tailrl-explorer.js?v=17"></script>
+  <script defer src="./static/js/index.js?v=17"></script>
+  <script defer src="./static/js/scroll-jack.js?v=17"></script>
 </head>
 <body>
 
@@ -368,62 +368,33 @@
       </p>
     </div>
 
-    <details class="deep">
-      <summary>Show the pseudocode</summary>
-      <div class="deep-body">
-        <p>
-          Sort the $N$ rewards, divide each reward gap among the rollouts that reach it, mean-center, and use the
-          result as advantages:
-        </p>
-        <div class="formula-box">
-          <p style="font-size: 1.1rem; margin: 0;">
-            $\omega\!\left(r_{(i)}\right) = \displaystyle\sum_{k=1}^{i}\frac{r_{(k)}-r_{(k-1)}}{N-k+1},
-            \qquad A_i = \omega(r_i) - \bar\omega$
-          </p>
-        </div>
-        <p class="figure-caption" style="margin-bottom: 1.25rem;">
-          Rewards sorted increasingly as $r_{(1)}\le\cdots\le r_{(N)}$, with $r_{(0)}:=0$ and
-          $\bar\omega=\frac{1}{N}\sum_j \omega(r_j)$. The divisor $N-k+1$ counts the rollouts still surviving at
-          that gap.
-        </p>
-        <div style="margin: 0 0 0.5rem 0;">
-          <iframe id="tailrl-code-frame" src="./code.html" title="TailRL advantage computation as a diff against GRPO"
-                  width="900" height="662"
-                  style="border: none; overflow: hidden; width: 100%; display: block;"
-                  scrolling="no"></iframe>
-        </div>
-        <p class="figure-caption" style="margin-bottom: 0;">
-          In a group-based RL pipeline, only the advantage computation changes.
-        </p>
-      </div>
-    </details>
+    <div class="content has-text-justified">
+      <p>
+        Sort the $N$ rewards, divide each reward gap among the rollouts that reach it, mean-center, and use the
+        result as advantages:
+      </p>
+    </div>
 
-    <details class="deep">
-      <summary>Show the estimator theorem</summary>
-      <div class="deep-body">
-        <p>
-          Given $N$ i.i.d. rollouts $z_1,\ldots,z_N\sim\pi_\theta(\cdot\mid x)$ with rewards $r_i:=r(x,z_i)$ and score
-          $S(x,z):=\nabla_\theta\log\pi_\theta(z\mid x)$, the estimator
-        </p>
-        <div class="formula-box">
-          <p style="margin: 0;">
-            $g^{(N)}_{\mathrm{TailRL}}(x) := \displaystyle\sum_{i=1}^{N}\omega(r_i)\,S(x,z_i), \qquad
-            \omega(r_i) := \int_0^{r_i}\frac{d\tau}{\sum_{j=1}^{N}\mathbf{1}\{r_j>\tau\}}$
-          </p>
-        </div>
-        <p>
-          is unbiased for $\nabla_\theta J^{(N)}_{\mathrm{TailRL}}(\theta;x)$. The denominator counts the survivors at
-          each level, so a level cleared by one rollout out of $N$ is worth $N$ times a level cleared by all. The
-          integrand is piecewise constant, which is why the weight has the closed form above.
-        </p>
-        <p style="margin-bottom: 0;">
-          The weights are nonnegative and sum to the largest reward in the group,
-          $\sum_i \omega(r_{(i)}) = \max_j r_j$, so the best reward observed controls the scale of the update.
-          Without centering the estimator targets the order-$N$ objective; with the mean-centering used in training it
-          targets order $N-1$.
-        </p>
-      </div>
-    </details>
+    <div class="formula-box" style="margin: 1.25rem 0 0.75rem 0;">
+      <p style="font-size: 1.1rem; margin: 0;">
+        $\omega\!\left(r_{(i)}\right) = \displaystyle\sum_{k=1}^{i}\frac{r_{(k)}-r_{(k-1)}}{N-k+1},
+        \qquad A_i = \omega(r_i) - \bar\omega$
+      </p>
+    </div>
+    <p class="figure-caption" style="margin-bottom: 1.5rem;">
+      Rewards sorted increasingly as $r_{(1)}\le\cdots\le r_{(N)}$, with $r_{(0)}:=0$ and
+      $\bar\omega=\frac{1}{N}\sum_j \omega(r_j)$. The divisor $N-k+1$ counts the rollouts still surviving at
+      that gap.
+    </p>
+
+    <div style="margin: 0 0 0.5rem 0;">
+      <iframe id="tailrl-code-frame" src="./code.html" title="TailRL advantage computation as a diff against GRPO"
+              width="900" height="662"
+              style="border: none; overflow: hidden; width: 100%; display: block;"
+              scrolling="no"></iframe>
+    </div>
+    <p class="figure-caption">In a group-based RL pipeline, only the advantage computation changes.</p>
+
   </div>
 </section>
 

@@ -24,23 +24,6 @@
     if (frame) frame.style.height = e.data.tailrlCodeHeight + 'px';
   });
 
-  /* The code frame now lives inside a closed <details>, so it has no layout
-     until the reader opens it and its load-time height report can be stale.
-     Poke it to re-measure on open; the reserved height covers the interim. */
-  (function () {
-    var frame = document.getElementById('tailrl-code-frame');
-    if (!frame) return;
-    var host = frame.closest && frame.closest('details');
-    if (!host) return;
-    host.addEventListener('toggle', function () {
-      if (!host.open) return;
-      try {
-        var w = frame.contentWindow;
-        if (w) w.dispatchEvent(new Event('resize'));
-      } catch (err) { /* cross-origin: the reserved height still applies */ }
-    });
-  })();
-
   /* ---- figures that start on first sight ---------------------------------
      The reshape teaser carries no Netscape loop block, so once it starts it
      runs through once and holds its final frame. What we control is when it
