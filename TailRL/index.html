@@ -30,17 +30,17 @@
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="./static/css/bulma.min.css">
-  <link rel="stylesheet" href="./static/css/index.css?v=14">
+  <link rel="stylesheet" href="./static/css/index.css?v=15">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
 
-  <script defer src="./static/js/same-mean-tail.js?v=14"></script>
-  <script defer src="./static/js/tailrl-explorer.js?v=14"></script>
-  <script defer src="./static/js/index.js?v=14"></script>
-  <script defer src="./static/js/scroll-jack.js?v=14"></script>
+  <script defer src="./static/js/same-mean-tail.js?v=15"></script>
+  <script defer src="./static/js/tailrl-explorer.js?v=15"></script>
+  <script defer src="./static/js/index.js?v=15"></script>
+  <script defer src="./static/js/scroll-jack.js?v=15"></script>
 </head>
 <body>
 
@@ -150,19 +150,6 @@
       <img src="./static/images/tailprob_density.png" width="1089" height="702"
            alt="A reward density over the unit interval. A dashed line at a threshold tau splits it, and the shaded mass to the right of tau is labelled as the probability that a rollout's reward exceeds tau.">
     </figure>
-
-    <div class="content has-text-justified">
-      <p>
-        Read as a function of $\tau$, this is not one number but a curve: the entire upper tail of that
-        distribution. Every point on it is a likelihood, the probability of the event
-        <em>this rollout is at least this good</em>. A policy with a thicker tail is more likely to produce an
-        exceptional sample, and it is more likely at every level where that matters.
-      </p>
-      <p class="keyline">
-        The tail likelihood asks how probable good outcomes are, level by level,
-        rather than how good outcomes are on average.
-      </p>
-    </div>
   </div>
 </section>
 

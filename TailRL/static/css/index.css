@@ -697,15 +697,20 @@ code, pre, .bibtex-box code { font-family: 'JetBrains Mono', 'Fira Code', Monaco
   margin: 1.5rem 0 0.5rem 0;
 }
 .explain-split .notes {
-  display: flex; flex-direction: column; justify-content: space-around;
-  gap: 2.75rem; align-self: stretch; padding: 1.5rem 0;
+  /* the pair sits as one block, vertically centred against the plot, rather
+     than spread to the figure's full height */
+  display: flex; flex-direction: column; justify-content: center;
+  gap: 1rem;
 }
 .explain-split .notes p {
   margin: 0; font-size: 1.0625rem; line-height: 1.6; color: var(--text-dark);
 }
+/* "tail-probability" was breaking at its hyphen across two lines, which reads
+   badly for a term being defined; keep it whole */
+.explain-split .notes strong { white-space: nowrap; }
 .explain-split img { width: 100%; height: auto; display: block; }
 @media (max-width: 768px) {
   .explain-split { grid-template-columns: 1fr; gap: 1.1rem; }
-  .explain-split .notes { gap: 0.9rem; padding: 0; }
+  .explain-split .notes { gap: 0.9rem; }
   .explain-split .notes p { font-size: 1rem; }
 }
