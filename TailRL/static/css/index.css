@@ -1,3 +1,29 @@
+@charset "UTF-8";
+/* ===========================================================================
+   Computer Modern (CMU Serif). The page's display math is already set in
+   KaTeX's Computer Modern faces, and the tail-probability illustration is
+   typeset in LaTeX, so the running text now uses the same family. Own
+   @font-face rules rather than the package's stylesheet, which declares
+   `font-style: roman` -- not a valid CSS value. Bold italic is omitted and
+   left to synthesis; it appears nowhere on the page.
+   ========================================================================= */
+@font-face {
+  font-family: 'CMU Serif'; font-style: normal; font-weight: 400; font-display: swap;
+  src: url('https://cdn.jsdelivr.net/npm/computer-modern@0.1.2/fonts/cmu-serif-500-roman.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'CMU Serif'; font-style: italic; font-weight: 400; font-display: swap;
+  src: url('https://cdn.jsdelivr.net/npm/computer-modern@0.1.2/fonts/cmu-serif-500-italic.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'CMU Serif'; font-style: normal; font-weight: 700; font-display: swap;
+  src: url('https://cdn.jsdelivr.net/npm/computer-modern@0.1.2/fonts/cmu-serif-700-roman.woff2') format('woff2');
+}
+:root {
+  /* KaTeX_Main is the same design, so it covers any glyph CMU Serif misses */
+  --cm: 'CMU Serif', 'KaTeX_Main', 'Latin Modern Roman', Georgia, serif;
+}
+
 :root {
   --primary: #363636;
   --primary-light: #4a4a4a;
@@ -13,13 +39,13 @@
   --rloo: #1D9E75;
 }
 
-body { color: var(--text-dark); font-family: 'Noto Sans', sans-serif; }
+body { color: var(--text-dark); font-family: var(--cm); }
 
 .hero { background: #f3f4f6; border-bottom: 1px solid #e5e7eb; overflow: visible !important; }
 .hero .hero-body { padding-top: 2rem; padding-bottom: 0.8rem; overflow: visible !important; }
 .hero * { overflow: visible !important; }
 .hero .container, .hero .columns, .hero .column { overflow: visible !important; max-height: none !important; }
-.hero .title.is-1 { color: var(--tailrl); font-weight: 400; font-family: Georgia, 'Times New Roman', serif; }
+.hero .title.is-1 { color: var(--tailrl); font-weight: 400; font-family: var(--cm); }
 .hero .publication-authors a { color: #374151 !important; }
 .hero .publication-authors a:hover { color: var(--tailrl) !important; text-decoration: underline; }
 .hero .publication-authors span { color: #4b5563; }
@@ -43,20 +69,20 @@ h4.subsection-title,
 .title.section-title {
   color: var(--primary) !important;
   font-weight: 600;
-  font-family: 'Google Sans', sans-serif;
+  font-family: var(--cm);
   margin-bottom: 1.5rem;
 }
 
 h4.subsection-title {
   font-size: 1.25rem;
-  font-family: 'Google Sans', sans-serif;
+  font-family: var(--cm);
   margin-top: 2rem;
   margin-bottom: 1rem;
 }
 
 /* Body text */
 .content p, .content li {
-  font-family: 'Noto Sans', sans-serif;
+  font-family: var(--cm);
   font-size: 1rem;
   line-height: 1.7;
 }
@@ -73,7 +99,7 @@ h4.subsection-title {
   margin: 1.5rem 0;
 }
 .insight-box p {
-  font-family: 'Castoro', Georgia, serif;
+  font-family: var(--cm);
   font-size: 1.1rem;
 }
 
@@ -121,7 +147,7 @@ h4.subsection-title {
 .result-card h4 { color: var(--text-dark); font-weight: 600; margin-bottom: 1rem; }
 .result-card .task-tag {
   display: inline-block;
-  font-family: 'Google Sans', sans-serif;
+  font-family: var(--cm);
   font-size: 0.78rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -137,7 +163,7 @@ h4.subsection-title {
   border-radius: 4px;
   margin: 1.5rem 0 0 0;
 }
-.takeaway-box p { margin: 0; font-family: 'Noto Sans', sans-serif; }
+.takeaway-box p { margin: 0; font-family: var(--cm); }
 .takeaway-box .takeaway-title { font-weight: 600; color: var(--tailrl); display: block; margin-bottom: 0.25rem; }
 .takeaway-box .takeaway-body { color: var(--text-dark); font-size: 0.98rem; }
 
@@ -204,12 +230,12 @@ footer a:hover { color: #bfdbfe; }
   border-radius: 8px;
   padding: 1.5rem;
   margin: 1.5rem 0;
-  font-family: 'Noto Sans', sans-serif;
+  font-family: var(--cm);
 }
 .explorer .explorer-head { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; align-items: center; margin-bottom: 0.75rem; }
-.explorer .explorer-head .label-text { font-family: 'Google Sans', sans-serif; font-size: 0.85rem; color: var(--text-muted); margin-right: 0.25rem; }
+.explorer .explorer-head .label-text { font-family: var(--cm); font-size: 0.85rem; color: var(--text-muted); margin-right: 0.25rem; }
 .explorer button {
-  font-family: 'Google Sans', sans-serif;
+  font-family: var(--cm);
   font-size: 0.85rem;
   padding: 0.3rem 0.7rem;
   border: 1px solid #d1d5db;
@@ -222,13 +248,13 @@ footer a:hover { color: #bfdbfe; }
 .explorer button:focus-visible { outline: 2px solid var(--tailrl); outline-offset: 2px; }
 .explorer button.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 .explorer svg { width: 100%; height: auto; display: block; touch-action: none; user-select: none; -webkit-user-select: none; }
-.explorer .svg-label { font-family: 'Google Sans', sans-serif; font-size: 12px; fill: #6b7280; }
-.explorer .svg-title { font-family: 'Google Sans', sans-serif; font-size: 13px; font-weight: 600; fill: #1f2937; }
-.explorer .svg-tick { font-family: 'KaTeX_Main', 'Noto Sans', serif; font-size: 11px; fill: #9ca3af; }
+.explorer .svg-label { font-family: var(--cm); font-size: 12px; fill: #6b7280; }
+.explorer .svg-title { font-family: var(--cm); font-size: 13px; font-weight: 600; fill: #1f2937; }
+.explorer .svg-tick { font-family: var(--cm); font-size: 11px; fill: #9ca3af; }
 .explorer .rollout { cursor: grab; }
 .explorer .rollout:active { cursor: grabbing; }
 .explorer .readout {
-  font-family: 'KaTeX_Main', Georgia, serif;
+  font-family: var(--cm);
   font-size: 0.82rem;
   color: #374151;
   background: #f9fafb;
@@ -249,7 +275,7 @@ footer a:hover { color: #bfdbfe; }
 @media (max-width: 768px) { .smt-grid { grid-template-columns: 1fr; } }
 .explorer .smt-check {
   display: inline-flex; align-items: center; gap: 0.4em;
-  font-family: 'Google Sans', sans-serif; font-size: 0.85rem;
+  font-family: var(--cm); font-size: 0.85rem;
   color: var(--text-dark); cursor: pointer;
 }
 .explorer .smt-check input { accent-color: var(--tailrl); cursor: pointer; }
@@ -345,11 +371,11 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--tailrl); outlin
   display: flex; align-items: center; gap: 1.25rem;
 }
 .pagenav .brand {
-  font-family: 'Google Sans', sans-serif; font-weight: 600;
+  font-family: var(--cm); font-weight: 600;
   color: var(--tailrl); font-size: 0.9rem; margin-right: auto;
 }
 .pagenav a {
-  font-family: 'Google Sans', sans-serif; font-size: 0.85rem;
+  font-family: var(--cm); font-size: 0.85rem;
   color: var(--text-muted); text-decoration: none; padding: 0.2rem 0;
   border-bottom: 2px solid transparent;
 }
@@ -361,7 +387,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--tailrl); outlin
 @media (max-width: 768px) {
   .pagenav .links { display: none; }
   .pagenav .jump {
-    display: block; font-family: 'Google Sans', sans-serif; font-size: 0.85rem;
+    display: block; font-family: var(--cm); font-size: 0.85rem;
     padding: 0.3rem 0.5rem; border: 1px solid var(--border-light); border-radius: 6px;
     background: #fff; color: var(--text-dark);
   }
@@ -376,7 +402,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--tailrl); outlin
 .btn-row.is-centered { justify-content: center; }
 .btn {
   display: inline-flex; align-items: center; gap: 0.45em;
-  font-family: 'Google Sans', sans-serif; font-size: 0.9rem;
+  font-family: var(--cm); font-size: 0.9rem;
   padding: 0.45rem 0.95rem; border-radius: 999px;
   border: 1px solid #d1d5db; background: #fff; color: #374151;
   text-decoration: none; cursor: pointer;
@@ -397,11 +423,11 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--tailrl); outlin
 .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin: 1.75rem 0; }
 @media (max-width: 860px) { .steps { grid-template-columns: 1fr; gap: 1.1rem; } }
 .step .step-n {
-  font-family: 'Google Sans', sans-serif; font-size: 0.75rem; font-weight: 600;
+  font-family: var(--cm); font-size: 0.75rem; font-weight: 600;
   letter-spacing: 0.08em; text-transform: uppercase; color: var(--tailrl);
 }
 .step h4 {
-  font-family: 'Google Sans', sans-serif; font-weight: 600; font-size: 1.02rem;
+  font-family: var(--cm); font-weight: 600; font-size: 1.02rem;
   color: var(--text-dark); margin: 0.3rem 0 0.4rem 0;
 }
 .step p { font-size: 0.95rem; line-height: 1.6; color: #4b5563; margin: 0; }
@@ -410,7 +436,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--tailrl); outlin
 .keyline {
   border-left: 3px solid var(--tailrl); padding: 0.15rem 0 0.15rem 1.1rem;
   text-align: left;
-  margin: 1.5rem 0; font-family: 'Castoro', Georgia, serif;
+  margin: 1.5rem 0; font-family: var(--cm);
   font-size: 1.12rem; line-height: 1.55; color: var(--text-dark);
 }
 
@@ -422,7 +448,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--tailrl); outlin
 .wcard.grpo { border-top-color: var(--grpo); }
 .wcard.tail { border-top-color: var(--tailrl); }
 .wcard .wname {
-  font-family: 'Google Sans', sans-serif; font-weight: 600; font-size: 0.95rem;
+  font-family: var(--cm); font-weight: 600; font-size: 0.95rem;
   margin-bottom: 0.35rem;
 }
 .wcard.rl .wname { color: var(--rloo); }
@@ -437,7 +463,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--tailrl); outlin
 /* ---- badges -------------------------------------------------------------- */
 .badges { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1.1rem 0 1.5rem 0; }
 .badge {
-  font-family: 'Google Sans', sans-serif; font-size: 0.8rem;
+  font-family: var(--cm); font-size: 0.8rem;
   color: var(--text-dark); background: var(--bg-gray);
   border: 1px solid var(--border-light); border-radius: 999px; padding: 0.28rem 0.7rem;
 }
@@ -445,7 +471,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--tailrl); outlin
 
 /* ---- results ------------------------------------------------------------- */
 .eyebrow {
-  display: block; font-family: 'Google Sans', sans-serif; font-size: 0.8rem;
+  display: block; font-family: var(--cm); font-size: 0.8rem;
   font-weight: 600; color: var(--tailrl); margin-bottom: 0.3rem;
 }
 .result-card h4 { margin-top: 0; }
@@ -465,7 +491,7 @@ details.deep {
 }
 details.deep > summary {
   cursor: pointer; padding: 0.7rem 1rem; list-style: none;
-  font-family: 'Google Sans', sans-serif; font-size: 0.9rem; color: var(--text-dark);
+  font-family: var(--cm); font-size: 0.9rem; color: var(--text-dark);
 }
 details.deep > summary::-webkit-details-marker { display: none; }
 details.deep > summary::before { content: "▸ "; color: var(--tailrl); font-weight: 700; }
@@ -478,7 +504,7 @@ details.deep .deep-body p { font-size: 0.94rem; }
 /* ---- closing band -------------------------------------------------------- */
 .closing { background: var(--bg-gray); border-top: 1px solid var(--border-light); text-align: center; }
 .closing .closing-line {
-  font-family: 'Castoro', Georgia, serif; font-size: 1.35rem; color: var(--text-dark);
+  font-family: var(--cm); font-size: 1.35rem; color: var(--text-dark);
   margin-bottom: 1.2rem;
 }
 .closing .btn-row { justify-content: center; }
@@ -497,7 +523,7 @@ details.deep .deep-body p { font-size: 0.94rem; }
 /* ---- presentation mode (opt-in only) ------------------------------------- */
 .sj-toggle {
   position: fixed; right: 16px; bottom: 16px; z-index: 60;
-  font-family: 'Google Sans', sans-serif; font-size: 0.75rem;
+  font-family: var(--cm); font-size: 0.75rem;
   padding: 0.35rem 0.75rem; border-radius: 999px; cursor: pointer;
   border: 1px solid var(--border-light); background: rgba(255, 255, 255, 0.92);
   color: var(--text-muted); backdrop-filter: blur(4px);
@@ -540,7 +566,7 @@ body.sj-on .hero { min-height: 0; display: block; }
 .hero .hero-body { padding-top: 2.75rem; padding-bottom: 2rem; }
 .hero .publication-title {
   color: var(--tailrl); font-weight: 400;
-  font-family: Georgia, 'Times New Roman', serif; margin-bottom: 0.9rem;
+  font-family: var(--cm); margin-bottom: 0.9rem;
 }
 .hero .publication-authors a { color: #374151 !important; }
 .hero .publication-authors a:hover { color: var(--tailrl) !important; text-decoration: underline; }
@@ -563,7 +589,7 @@ body.sj-on .hero { min-height: 0; display: block; }
    one line there. */
 .publication-authors { margin-top: 0.15rem; }
 .author-line {
-  font-family: 'Google Sans', sans-serif; font-size: 1rem; line-height: 1.75;
+  font-family: var(--cm); font-size: 1rem; line-height: 1.75;
   color: #4b5563;
 }
 .author-line a { color: #374151; }
@@ -607,16 +633,16 @@ body.sj-on .hero { min-height: 0; display: block; }
 }
 .explorer tspan.sv-text,
 .explorer .sv-text {
-  font-family: 'KaTeX_Main', Georgia, serif;
+  font-family: var(--cm);
   font-style: normal;
 }
 /* numbers the widgets print live: upright roman, as in LaTeX */
 .explorer .readout .knum {
-  font-family: 'KaTeX_Main', Georgia, serif;
+  font-family: var(--cm);
   font-variant-numeric: tabular-nums;
 }
 .explorer .readout .katex { font-size: 1em; }
-.explorer .readout .katex .mord.text { font-family: 'KaTeX_Main', Georgia, serif; }
+.explorer .readout .katex .mord.text { font-family: var(--cm); }
 
 /* both widget control bars centre their contents */
 #smt-widget .explorer-head { justify-content: center; }
@@ -649,3 +675,12 @@ body.sj-on .hero { min-height: 0; display: block; }
   .publication-affiliations { font-size: 0.82rem; }
   .publication-contact { font-size: 0.78rem; }
 }
+
+/* Computer Modern runs lighter and smaller on the eye than Noto Sans at the
+   same nominal size, so the running text gets a touch more size and leading. */
+body { font-family: var(--cm); }
+.content p, .content li { font-size: 1.0625rem; line-height: 1.72; }
+.result-card > p { font-size: 1.0625rem; }
+.hero .title.is-2 { font-weight: 700; }
+h2.title.is-3, .title.is-3.section-title { font-weight: 700; }
+code, pre, .bibtex-box code { font-family: 'JetBrains Mono', 'Fira Code', Monaco, monospace; }

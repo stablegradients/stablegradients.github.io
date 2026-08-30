@@ -30,17 +30,17 @@
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="./static/css/bulma.min.css">
-  <link rel="stylesheet" href="./static/css/index.css?v=12">
+  <link rel="stylesheet" href="./static/css/index.css?v=13">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
 
-  <script defer src="./static/js/same-mean-tail.js?v=12"></script>
-  <script defer src="./static/js/tailrl-explorer.js?v=12"></script>
-  <script defer src="./static/js/index.js?v=12"></script>
-  <script defer src="./static/js/scroll-jack.js?v=12"></script>
+  <script defer src="./static/js/same-mean-tail.js?v=13"></script>
+  <script defer src="./static/js/tailrl-explorer.js?v=13"></script>
+  <script defer src="./static/js/index.js?v=13"></script>
+  <script defer src="./static/js/scroll-jack.js?v=13"></script>
 </head>
 <body>
 
@@ -78,7 +78,7 @@
     <div class="container is-max-widescreen">
       <div class="columns is-centered">
         <div class="column has-text-centered">
-        <h1 class="title is-2" style="color: var(--tailrl); font-family: Georgia, 'Times New Roman', serif; font-weight: 400; margin-bottom: 0.9rem;">
+        <h1 class="title is-2" style="color: var(--tailrl); margin-bottom: 0.9rem;">
           Tail-Likelihood Reinforcement Learning
         </h1>
 
@@ -141,23 +141,21 @@
 <section class="section section-narrow section-white" id="tail">
   <div class="container is-max-desktop">
     <h2 class="title is-3 section-title">What is Tail-Likelihood?</h2>
-    <div class="content has-text-justified">
-      <p>
-        Fix an input $x$ and a reward level $\tau$. The <strong>tail probability</strong> is the chance that one
-        rollout from the policy clears that level:
-      </p>
-    </div>
-
-    <div class="formula-box" style="margin: 1.25rem 0 1rem 0;">
-      <p style="font-size: 1.15rem; margin: 0;">
-        $p_\theta(x,\tau) \;=\; \Pr_{z\sim\pi_\theta(\cdot\mid x)}\!\left[\,r(x,z) > \tau\,\right]$
-      </p>
-    </div>
+    <figure class="figure-container" style="margin-top: 0.5rem;">
+      <img src="./static/images/tailprob_illustration.gif"
+           data-static="./static/images/tailprob_illustration.png"
+           width="1664" height="702"
+           alt="A reward distribution over the unit interval. A dashed line at a threshold tau splits it, and the shaded mass to the right of tau is the tail probability, the chance that a rollout's reward exceeds tau.">
+      <figcaption class="figure-caption">
+        A policy and a reward function together induce a distribution over rewards. The mass above a threshold
+        $\tau$ is the tail probability $p_\theta(x,\tau)$.
+      </figcaption>
+    </figure>
 
     <div class="content has-text-justified">
       <p>
-        Read as a function of $\tau$, this is not one number but a curve: the entire upper tail of the reward
-        distribution the policy induces. Every point on it is a likelihood, the probability of the event
+        Read as a function of $\tau$, this is not one number but a curve: the entire upper tail of that
+        distribution. Every point on it is a likelihood, the probability of the event
         <em>this rollout is at least this good</em>. A policy with a thicker tail is more likely to produce an
         exceptional sample, and it is more likely at every level where that matters.
       </p>
