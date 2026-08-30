@@ -19,14 +19,32 @@
 
   // the rollout budgets the paper trains at; the slider steps over these only
   var STOPS = [16, 64, 256, 1024], START = 1;
-  var N = STOPS[START], rewards = [], hover = -1, dragging = -1, preset = 'rare';
+  var N = STOPS[START], rewards = [], hover = -1, dragging = -1, preset = 'random';
+
+  function gauss() {                                 // Box-Muller
+    var u = 1 - Math.random(), v = Math.random();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+  }
 
   var presets = {
+    random: function (n) {
+      /* A Gaussian with a randomly placed mean and width. Truncated by
+         redrawing rather than clamped: clamping piles a spike of mass on
+         whichever end the tail crosses. */
+      var mu = 0.25 + 0.5 * Math.random();
+      var sd = 0.06 + 0.16 * Math.random();
+      var a = [], i, t, x;
+      for (i = 0; i < n; i++) {
+        for (t = 0; t < 24; t++) { x = mu + sd * gauss(); if (x >= 0 && x <= 1) break; }
+        if (!(x >= 0 && x <= 1)) x = Math.min(1, Math.max(0, x));
+        a.push(Math.round(x * 100) / 100);
+      }
+      return a;
+    },
     rare:   function (n) { var a = []; for (var i = 0; i < n; i++) a.push(0.12 + 0.28 * ((i * 7919) % n) / n); a[n - 1] = 0.92; return a; },
-    spread: function (n) { var a = []; for (var i = 0; i < n; i++) a.push((i + 0.5) / n); return a; },
-    random: function (n) { var a = []; for (var i = 0; i < n; i++) a.push(Math.round(Math.random() * 100) / 100); return a; }
+    spread: function (n) { var a = []; for (var i = 0; i < n; i++) a.push((i + 0.5) / n); return a; }
   };
-  var presetLabels = { rare: 'One rare high reward', spread: 'Evenly spread', random: 'Randomize' };
+  var presetLabels = { random: 'Randomize', rare: 'One rare high reward', spread: 'Evenly spread' };
 
   function order(r) { return r.map(function (v, i) { return i; }).sort(function (a, b) { return r[a] - r[b] || a - b; }); }
 
@@ -330,7 +348,7 @@
 
   var resetBtn = document.getElementById('ex-reset');
   if (resetBtn) resetBtn.addEventListener('click', function () {
-    N = STOPS[START]; preset = 'rare'; hover = -1; dragging = -1; pend = null;
+    N = STOPS[START]; preset = 'random'; hover = -1; dragging = -1; pend = null;
     nSlider.value = String(START);
     nValue.textContent = String(N);
     rewards = presets[preset](N);

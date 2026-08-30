@@ -805,3 +805,12 @@ h2.title.is-4, .title.is-4.section-title { font-size: 24px; }
 /* the Best-of-k box carries two equations and no heading, so it sits tight */
 .math-box.is-compact { padding: 1.1rem 1.4rem; }
 .math-box.is-compact .math-line { white-space: nowrap; }
+
+/* The rollout slider and the presets each get their own centred row. Without
+   flex-basis 100% they share a line and wrap unevenly as the labels grow. */
+.explorer-head .ctl-line {
+  flex: 0 0 100%;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+  gap: 0.5rem 1.25rem;
+}
+.explorer-head .ctl-line .reset { margin-left: 0; }
