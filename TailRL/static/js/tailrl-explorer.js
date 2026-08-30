@@ -23,11 +23,10 @@
 
   var presets = {
     rare:   function (n) { var a = []; for (var i = 0; i < n; i++) a.push(0.12 + 0.28 * ((i * 7919) % n) / n); a[n - 1] = 0.92; return a; },
-    binary: function (n) { var a = []; var K = Math.max(1, Math.round(n / 4)); for (var i = 0; i < n; i++) a.push(i < K ? 1 : 0); return a; },
     spread: function (n) { var a = []; for (var i = 0; i < n; i++) a.push((i + 0.5) / n); return a; },
     random: function (n) { var a = []; for (var i = 0; i < n; i++) a.push(Math.round(Math.random() * 100) / 100); return a; }
   };
-  var presetLabels = { rare: 'One rare high reward', binary: 'Binary rewards (MaxRL)', spread: 'Evenly spread', random: 'Randomize' };
+  var presetLabels = { rare: 'One rare high reward', spread: 'Evenly spread', random: 'Randomize' };
 
   function order(r) { return r.map(function (v, i) { return i; }).sort(function (a, b) { return r[a] - r[b] || a - b; }); }
 
@@ -66,26 +65,9 @@
     });
     return t;
   }
-  /* KaTeX is loaded before this script (both deferred, declared earlier), so
-     the static symbols are typeset once and reused every frame; only the
-     numbers change, and they are set in KaTeX_Main. */
-  function tex(src) {
-    try { return katex.renderToString(src, { throwOnError: false, output: 'html' }); }
-    catch (e) { return src; }
-  }
-  var TEX = (typeof katex !== 'undefined') ? {
-    r:      tex('r'),
-    aRein:  tex('A_{\\mathrm{REINFORCE}}'),
-    aTail:  tex('A_{\\mathrm{TailRL}}'),
-    rShare: tex('r/\\!\\sum r'),
-    wShare: tex('\\omega/\\!\\sum\\omega'),
-    times:  tex('\\times')
-  } : { r: 'r', aRein: 'A_REINFORCE', aTail: 'A_TailRL', rShare: 'r / \u03a3r', wShare: '\u03c9 / \u03a3\u03c9', times: '\u00d7' };
-  function num(v) { return '<span class="knum">' + v + '</span>'; }
-  // At N = 1024 the interesting advantages are around 1/1024, so widen the
-  // precision rather than printing a row of zeros.
+  // At N = 1024 the interesting magnitudes sit near 1/1024, so widen the
+  // precision there rather than printing a row of zeros.
   function dec(v) { var a = Math.abs(v); return (a > 0 && a < 0.01) ? 4 : 3; }
-  function fmt(v) { return (v >= 0 ? '+' : '') + v.toFixed(dec(v)); }
 
   // How the group is drawn at each size. Beyond 64 rollouts individual
   // glyphs stop being resolvable, so the panels switch to a sorted profile.
@@ -99,10 +81,47 @@
 
   var svgR = document.getElementById('ex-svg-rewards');
   var svgA = document.getElementById('ex-svg-adv');
-  var readout = document.getElementById('ex-readout');
 
   // ---- Panel A: the draggable reward strip ----
-  var PA = { x0: 60, x1: 730, yRoll: 74 };
+  var PA = { x0: 60, x1: 730, yRoll: 100, kdeTop: 34, kdeBase: 92 };
+
+  /* Gaussian KDE of the group's rewards, drawn above the axis so the reader
+     can see the distribution the advantages come from. Binned and convolved
+     rather than evaluated pair by pair: at N = 1024 the direct form is a
+     million exponentials a frame, this is a few hundred. */
+  var KB = 128;                                    // density bins over [0,1]
+  function bandwidth(r) {
+    var n = r.length, i, m = 0, v = 0, sd, srt, q1, q3, a, h;
+    for (i = 0; i < n; i++) m += r[i];
+    m /= n;
+    for (i = 0; i < n; i++) v += (r[i] - m) * (r[i] - m);
+    sd = Math.sqrt(v / Math.max(1, n));
+    srt = r.slice().sort(function (p, q) { return p - q; });
+    q1 = srt[Math.floor(0.25 * (n - 1))]; q3 = srt[Math.floor(0.75 * (n - 1))];
+    a = Math.min(sd || 1, (q3 - q1) / 1.34 || 1);
+    h = 0.9 * a * Math.pow(n, -0.2);
+    // Silverman over-smooths a clustered reward set, so cap the width
+    return Math.max(0.015, Math.min(0.08, h || 0.03));
+  }
+  function density(r) {
+    var counts = new Array(KB), i, j, b, h = bandwidth(r), bw = 1 / (KB - 1);
+    for (i = 0; i < KB; i++) counts[i] = 0;
+    for (i = 0; i < r.length; i++) {
+      b = Math.round(Math.min(1, Math.max(0, r[i])) * (KB - 1));
+      counts[b] += 1;
+    }
+    var w = new Array(KB), u;                      // kernel indexed by bin offset
+    for (i = 0; i < KB; i++) { u = (i * bw) / h; w[i] = Math.exp(-0.5 * u * u); }
+    var out = new Array(KB), sum, mx = 0;
+    for (i = 0; i < KB; i++) {
+      sum = 0;
+      for (j = 0; j < KB; j++) if (counts[j]) sum += counts[j] * w[Math.abs(i - j)];
+      out[i] = sum;
+      if (sum > mx) mx = sum;
+    }
+    if (mx > 0) for (i = 0; i < KB; i++) out[i] /= mx;   // unit peak, for drawing
+    return out;
+  }
   function xOf(t) { return PA.x0 + t * (PA.x1 - PA.x0); }
   function tOf(x) { return Math.min(1, Math.max(0, (x - PA.x0) / (PA.x1 - PA.x0))); }
   function localX(svg, e) {
@@ -121,7 +140,22 @@
   function drawRewards() {
     while (svgR.firstChild) svgR.removeChild(svgR.firstChild);
     var res = tailrl(rewards), idx = res.idx, n = rewards.length, sz = sizing();
-    mtext(svgR, PA.x0, 20, 'The rollout group: ' + n + ' rewards on [0, 1]', 'svg-title', 'start');
+    mtext(svgR, (PA.x0 + PA.x1) / 2, 20, 'The rollout group: ' + n + ' rewards on [0, 1]', 'svg-title');
+
+    /* density band above the axis */
+    var dens = density(rewards), di, dx, dy, area = '', line = '';
+    for (di = 0; di < KB; di++) {
+      dx = xOf(di / (KB - 1));
+      dy = PA.kdeBase - dens[di] * (PA.kdeBase - PA.kdeTop);
+      area += (di === 0 ? 'M' + dx + ' ' + PA.kdeBase + 'L' : 'L') + dx + ' ' + dy;
+      line += (di === 0 ? 'M' : 'L') + dx + ' ' + dy;
+    }
+    area += 'L' + xOf(1) + ' ' + PA.kdeBase + 'Z';
+    el('path', { d: area, fill: C.tailrl, opacity: 0.14 }, svgR);
+    el('path', { d: line, fill: 'none', stroke: C.tailrl, 'stroke-width': 1.6, opacity: 0.75 }, svgR);
+    var dmid = (PA.kdeTop + PA.kdeBase) / 2;
+    var dl = mtext(svgR, 20, dmid, 'density', 'svg-tick');
+    dl.setAttribute('transform', 'rotate(-90, 20, ' + dmid + ')');
 
     // reward axis
     el('line', { x1: PA.x0, x2: PA.x1, y1: PA.yRoll, y2: PA.yRoll, stroke: C.ink, 'stroke-width': 1.2 }, svgR);
@@ -271,34 +305,7 @@
   // registered once: re-registering inside drawAdv() leaked a listener per render
   svgA.addEventListener('pointerleave', function () { if (dragging < 0 && hover !== -1) { hover = -1; scheduleRender(); } });
 
-  function drawReadout() {
-    var res = tailrl(rewards), n = rewards.length, rf = reinforce(rewards);
-    var i = hover >= 0 ? hover : res.idx[n - 1];
-    // Both updates are sum_i weight_i * score_i minus a group-wide baseline,
-    // and the baseline promotes nobody, so the honest side-by-side is the
-    // share of the group's total pre-baseline weight: r_i for REINFORCE,
-    // omega_i for TailRL. That share is exactly what the two objectives
-    // disagree about.
-    function share(w, j) {
-      var tot = w.reduce(function (s, v) { return s + v; }, 0);
-      return tot > 0 ? (100 * w[j] / tot) : 100 / n;
-    }
-    var sR = share(rewards, i), sT = share(res.w, i);
-    var ratio = sR > 1e-9 ? (sT / sR) : 0;
-    readout.innerHTML =
-      'rollout ' + num(i + 1) + ': ' + TEX.r + ' = ' + num(rewards[i].toFixed(2)) +
-      ' &nbsp;|&nbsp; <span class="m-grpo">' + TEX.aRein + ' = ' + num(fmt(rf[i])) + '</span>' +
-      ' &nbsp; <span class="m-tailrl">' + TEX.aTail + ' = ' + num(fmt(res.A[i])) + '</span><br>' +
-      'share of the group\u2019s total weight: ' +
-      '<span class="m-grpo">' + num(sR.toFixed(1) + '%') + '</span> under REINFORCE (' + TEX.rShare + '), ' +
-      '<span class="m-tailrl">' + num(sT.toFixed(1) + '%') + '</span> under TailRL (' + TEX.wShare + ')' +
-      (ratio > 0 ? ' &nbsp;\u2192&nbsp; ' + num(ratio.toFixed(2)) + TEX.times + ' the influence' : '') +
-      (preset === 'binary'
-        ? '<br>binary rewards: A<sub>TailRL</sub> = (r \u2212 \u03bc\u0302) / (N \u03bc\u0302), the MaxRL advantage up to the 1/N averaging, so every success carries equal weight under both'
-        : '');
-  }
-
-  function render() { drawRewards(); drawAdv(); drawReadout(); }
+  function render() { drawRewards(); drawAdv(); }
 
   // ---- Controls ----
   var nSlider = document.getElementById('ex-n-slider'), nValue = document.getElementById('ex-n-value');
