@@ -30,17 +30,17 @@
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="./static/css/bulma.min.css">
-  <link rel="stylesheet" href="./static/css/index.css?v=17">
+  <link rel="stylesheet" href="./static/css/index.css?v=19">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
 
-  <script defer src="./static/js/same-mean-tail.js?v=17"></script>
-  <script defer src="./static/js/tailrl-explorer.js?v=17"></script>
-  <script defer src="./static/js/index.js?v=17"></script>
-  <script defer src="./static/js/scroll-jack.js?v=17"></script>
+  <script defer src="./static/js/same-mean-tail.js?v=19"></script>
+  <script defer src="./static/js/tailrl-explorer.js?v=19"></script>
+  <script defer src="./static/js/index.js?v=19"></script>
+  <script defer src="./static/js/scroll-jack.js?v=19"></script>
 </head>
 <body>
 
@@ -61,6 +61,7 @@
       <option value="">Jump to…</option>
       <option value="#tail">Tail likelihood</option>
       <option value="#why">Why tail-likelihood</option>
+      <option value="#tailrl">Objective and gradient</option>
       <option value="#decompose">Decomposition</option>
       <option value="#objective">Objective</option>
       <option value="#bestofk">Best-of-k</option>
@@ -176,8 +177,67 @@
   </div>
 </section>
 
-<!-- ==================== 4. CONTINUOUS REWARDS DECOMPOSE ==================== -->
-<section class="section section-narrow section-white" id="decompose">
+<!-- ==================== 4. TAILRL: OBJECTIVE AND GRADIENT ==================== -->
+<section class="section section-narrow section-white" id="tailrl">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 section-title">Tail-Likelihood Reinforcement Learning</h2>
+
+    <div class="math-comparison">
+      <div class="math-box">
+        <h4>Expected-reward RL</h4>
+        <p class="math-line">
+          $J_{\mathrm{RL}}(\theta;x) := \mathbb{E}_{z\sim\pi_\theta(\cdot\mid x)}\!\left[\,r(x,z)\,\right]$
+        </p>
+        <p class="math-note">The mean reward of a single rollout.</p>
+      </div>
+      <div class="math-box">
+        <h4>TailRL</h4>
+        <p class="math-line">
+          $J_{\mathrm{TailRL}}(\theta;x) := \displaystyle\int_0^1 \log p_\theta(x,\tau)\,d\tau$
+        </p>
+        <p class="math-note">The mean log tail-probability across reward levels, for rewards in $[0,1]$.</p>
+      </div>
+    </div>
+
+    <div class="content has-text-justified">
+      <p>
+        Both gradients take the same shape: an average of policy scores
+        $S(x,z) := \nabla_\theta \log \pi_\theta(z \mid x)$, each scaled by a weight the objective attaches to its
+        rollout. Only that weight differs.
+      </p>
+    </div>
+
+    <div class="math-comparison">
+      <div class="math-box">
+        <h4>Expected-reward RL</h4>
+        <p class="math-line">
+          $\nabla_\theta J_{\mathrm{RL}}(\theta;x) = \mathbb{E}_{z\sim\pi_\theta(\cdot\mid x)}\!\left[\,r(x,z)\,S(x,z)\right]$
+        </p>
+        <p class="math-note">Weight: the reward itself.</p>
+      </div>
+      <div class="math-box">
+        <h4>TailRL</h4>
+        <p class="math-line">
+          $\nabla_\theta J_{\mathrm{TailRL}}(\theta;x) = \mathbb{E}_{z\sim\pi_\theta(\cdot\mid x)}\!\left[\left(\displaystyle\int_0^{r(x,z)}\frac{d\tau}{p_\theta(x,\tau)}\right)S(x,z)\right]$
+        </p>
+        <p class="math-note">Weight: inverse tail-probability, integrated up to the rollout's own reward.
+          Not computable during training: the estimator below replaces $1/p_\theta$ with a count over the
+          rollout group.</p>
+      </div>
+    </div>
+
+    <div class="content has-text-justified">
+      <p>
+        TailRL upweights the gradient of rollouts that are rare and excellent. Where the tail-probability
+        $p_\theta(x,\tau)$ is low, $1/p_\theta(x,\tau)$ is large, so a rollout clearing levels the policy almost
+        never reaches counts for far more than its reward alone would say.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== 5. CONTINUOUS REWARDS DECOMPOSE ==================== -->
+<section class="section section-narrow section-gray" id="decompose">
   <div class="container is-max-desktop">
     <h2 class="title is-3 section-title">A continuous reward already contains that curve</h2>
     <div class="content has-text-justified">
@@ -225,8 +285,8 @@
   </div>
 </section>
 
-<!-- ==================== 5. THE TAILRL OBJECTIVE ==================== -->
-<section class="section section-narrow section-gray" id="objective">
+<!-- ==================== 6. THE TAILRL OBJECTIVE ==================== -->
+<section class="section section-narrow section-white" id="objective">
   <div class="container is-max-desktop">
     <h2 class="title is-3 section-title">The TailRL objective</h2>
     <div class="content has-text-justified">
@@ -286,8 +346,8 @@
   </div>
 </section>
 
-<!-- ==================== 6. BEST-OF-K ==================== -->
-<section class="section section-narrow section-white" id="bestofk">
+<!-- ==================== 7. BEST-OF-K ==================== -->
+<section class="section section-narrow section-gray" id="bestofk">
   <div class="container is-max-desktop">
     <h2 class="title is-3 section-title">TailRL is a mixture of Best-of-$k$ objectives</h2>
     <div class="content has-text-justified">
@@ -316,8 +376,8 @@
   </div>
 </section>
 
-<!-- ==================== 7. PI_A vs PI_B INTERACTIVE ==================== -->
-<section class="section section-narrow section-gray" id="compare">
+<!-- ==================== 8. PI_A vs PI_B INTERACTIVE ==================== -->
+<section class="section section-narrow section-white" id="compare">
   <div class="container is-max-desktop">
     <h2 class="title is-3 section-title">Same mean, different tail</h2>
     <div class="content has-text-justified">
@@ -355,8 +415,8 @@
   </div>
 </section>
 
-<!-- ==================== 8. ALGORITHM ==================== -->
-<section class="section section-narrow section-white" id="algorithm">
+<!-- ==================== 9. ALGORITHM ==================== -->
+<section class="section section-narrow section-gray" id="algorithm">
   <div class="container is-max-desktop">
     <h2 class="title is-3 section-title">A new objective, not a new training stack</h2>
     <div class="content has-text-justified">
@@ -398,8 +458,8 @@
   </div>
 </section>
 
-<!-- ==================== 9. ADVANTAGE INTERACTIVE ==================== -->
-<section class="section section-narrow section-gray" id="advantages">
+<!-- ==================== 10. ADVANTAGE INTERACTIVE ==================== -->
+<section class="section section-narrow section-white" id="advantages">
   <div class="container is-max-desktop">
     <h2 class="title is-3 section-title">REINFORCE and TailRL on the same group</h2>
     <div class="content has-text-justified">
@@ -462,8 +522,8 @@
   </div>
 </section>
 
-<!-- ==================== 10. RESULTS ==================== -->
-<section class="section section-narrow section-white" id="results">
+<!-- ==================== 11. RESULTS ==================== -->
+<section class="section section-narrow section-gray" id="results">
   <div class="container is-max-desktop">
     <h2 class="title is-3 section-title">TailRL moves the sampling-compute frontier</h2>
     <div class="content has-text-justified">

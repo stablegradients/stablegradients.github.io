@@ -717,3 +717,12 @@ code, pre, .bibtex-box code { font-family: 'JetBrains Mono', 'Fira Code', Monaco
 
 /* the reshape teaser is blank until it scrolls into view, so hold its box */
 img[data-play-in-view] { aspect-ratio: 962 / 663; width: 100%; height: auto; background: transparent; }
+
+/* ---- objective / gradient comparison boxes -------------------------------
+   The gradient expressions are wide for a half-width column, so each formula
+   scrolls inside its own box rather than pushing the page sideways. */
+.math-box .math-line {
+  margin: 0; text-align: center;
+  overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch;
+}
+.math-box h4 { text-align: center; font-size: 1rem; }
