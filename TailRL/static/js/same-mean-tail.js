@@ -184,12 +184,16 @@
       pb = normalize(tb);
       // a random draw can be untiltable onto A's mean; redraw rather than
       // opening with two policies whose means visibly differ
-      if (pb && Math.abs(mean(pb) - mean(pa)) < 1e-6) return { a: a, b: tb };
+      /* tilt() multiplies every weight by exp(lambda x), which can leave them
+         all tiny. The bars are drawn from the raw weight, so without a rescale
+         B's histogram can come out blank. normalize() divides by the sum, so
+         scaling is invisible to the mean, the tail curve and Best-of-k. */
+      if (pb && Math.abs(mean(pb) - mean(pa)) < 1e-6) return { a: a, b: scaleToUnit(tb) };
     }
     // deterministic fallback so the widget always opens in a valid state
     pair = PRESETS.peaked.make();
     a = scaleToUnit(pair[0]); b = scaleToUnit(pair[1]);
-    return { a: a, b: tilt(b, mean(normalize(a)), null).w };
+    return { a: a, b: scaleToUnit(tilt(b, mean(normalize(a)), null).w) };
   }
 
   /* Test hook: creates no global of its own, only calls one the page defines. */
@@ -281,13 +285,18 @@
 
     clear(svg);
 
-    t = el('text', { x: 10, y: 18, 'class': 'svg-title', 'text-anchor': 'start' }, svg);
+    /* Panel title, centred over the plot. */
+    t = el('text', { x: (HG.x0 + HG.x1) / 2, y: 18, 'class': 'svg-title', 'text-anchor': 'middle' }, svg);
     t.setAttribute('fill', color);
     ts = el('tspan', { 'class': 'sv-text' }, t); ts.textContent = 'Policy ';
     ts = el('tspan', { 'class': 'sv-math' }, t); ts.textContent = '\u03c0';
     ts = el('tspan', { 'class': 'sv-math', 'font-size': '10', dy: '3' }, t); ts.textContent = which;
     ts = el('tspan', { 'class': 'sv-text', fill: MUTED, dy: '-3' }, t); ts.textContent = '   mean = ' + d3(mu);
-    mtext(svg, 10, 36, 'relative mass', 'svg-tick', 'start');
+
+    /* "relative mass" is the y axis, so it runs up the left edge. */
+    var ymid = (HG.yTop + HG.yBase) / 2;
+    ts = mtext(svg, 13, ymid, 'relative mass', 'svg-tick');
+    ts.setAttribute('transform', 'rotate(-90, 13, ' + ymid + ')');
 
     /* Faint full-height tracks so empty bins stay visible and paintable. */
     for (i = 0; i < L; i++) {
@@ -330,7 +339,7 @@
 
   function drawTail(svg) {
     clear(svg);
-    mtext(svg, 10, 18, 'Tail probability  |p|(|τ|) = Pr(|r| > |τ|)', 'svg-title', 'start');
+    mtext(svg, (PL.x0 + PL.x1) / 2, 18, 'Tail probability  |p|(|τ|) = Pr(|r| > |τ|)', 'svg-title');
     [0, 0.5, 1].forEach(function (v) {
       el('line', { x1: PL.x0, x2: PL.x1, y1: ply(v), y2: ply(v), stroke: GRID, 'stroke-width': 1 }, svg);
       text(svg, PL.x0 - 7, ply(v) + 4, v.toFixed(1), 'svg-tick', 'end');
@@ -357,7 +366,7 @@
   function drawBok(svg) {
     var k = kOf(), e2, marks = [];
     clear(svg);
-    mtext(svg, 10, 18, 'Best-of-|k|', 'svg-title', 'start');
+    mtext(svg, (BK.x0 + BK.x1) / 2, 18, 'Best-of-|k|', 'svg-title');
     [0, 0.5, 1].forEach(function (v) {
       el('line', { x1: BK.x0, x2: BK.x1, y1: bky(v), y2: bky(v), stroke: GRID, 'stroke-width': 1 }, svg);
       text(svg, BK.x0 - 7, bky(v) + 4, v.toFixed(1), 'svg-tick', 'end');
