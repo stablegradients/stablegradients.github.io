@@ -30,17 +30,17 @@
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="./static/css/bulma.min.css">
-  <link rel="stylesheet" href="./static/css/index.css?v=13">
+  <link rel="stylesheet" href="./static/css/index.css?v=14">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
 
-  <script defer src="./static/js/same-mean-tail.js?v=13"></script>
-  <script defer src="./static/js/tailrl-explorer.js?v=13"></script>
-  <script defer src="./static/js/index.js?v=13"></script>
-  <script defer src="./static/js/scroll-jack.js?v=13"></script>
+  <script defer src="./static/js/same-mean-tail.js?v=14"></script>
+  <script defer src="./static/js/tailrl-explorer.js?v=14"></script>
+  <script defer src="./static/js/index.js?v=14"></script>
+  <script defer src="./static/js/scroll-jack.js?v=14"></script>
 </head>
 <body>
 
@@ -141,15 +141,14 @@
 <section class="section section-narrow section-white" id="tail">
   <div class="container is-max-desktop">
     <h2 class="title is-3 section-title">What is Tail-Likelihood?</h2>
-    <figure class="figure-container" style="margin-top: 0.5rem;">
-      <img src="./static/images/tailprob_illustration.gif"
-           data-static="./static/images/tailprob_illustration.png"
-           width="1664" height="702"
-           alt="A reward distribution over the unit interval. A dashed line at a threshold tau splits it, and the shaded mass to the right of tau is the tail probability, the chance that a rollout's reward exceeds tau.">
-      <figcaption class="figure-caption">
-        A policy and a reward function together induce a distribution over rewards. The mass above a threshold
-        $\tau$ is the tail probability $p_\theta(x,\tau)$.
-      </figcaption>
+    <figure class="explain-split">
+      <div class="notes">
+        <p>For an input $x$, the policy and the reward function induce a distribution over rewards.</p>
+        <p>The probability that the reward $r$ lies above a threshold $\tau$ is the
+           <strong>tail-probability</strong> $p_\theta(x,\tau)$.</p>
+      </div>
+      <img src="./static/images/tailprob_density.png" width="1089" height="702"
+           alt="A reward density over the unit interval. A dashed line at a threshold tau splits it, and the shaded mass to the right of tau is labelled as the probability that a rollout's reward exceeds tau.">
     </figure>
 
     <div class="content has-text-justified">

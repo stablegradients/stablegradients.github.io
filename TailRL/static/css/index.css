@@ -684,3 +684,28 @@ body { font-family: var(--cm); }
 .hero .title.is-2 { font-weight: 700; }
 h2.title.is-3, .title.is-3.section-title { font-weight: 700; }
 code, pre, .bibtex-box code { font-family: 'JetBrains Mono', 'Fira Code', Monaco, monospace; }
+
+/* ---- explainer: notes beside a plot --------------------------------------
+   Reproduces the layout of the original LaTeX figure, whose left column held
+   the prose and whose right held the density. The text is real HTML now, so
+   it reflows, is selectable and is read by screen readers. */
+.explain-split {
+  display: grid;
+  grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.9fr);
+  gap: 2rem;
+  align-items: center;
+  margin: 1.5rem 0 0.5rem 0;
+}
+.explain-split .notes {
+  display: flex; flex-direction: column; justify-content: space-around;
+  gap: 2.75rem; align-self: stretch; padding: 1.5rem 0;
+}
+.explain-split .notes p {
+  margin: 0; font-size: 1.0625rem; line-height: 1.6; color: var(--text-dark);
+}
+.explain-split img { width: 100%; height: auto; display: block; }
+@media (max-width: 768px) {
+  .explain-split { grid-template-columns: 1fr; gap: 1.1rem; }
+  .explain-split .notes { gap: 0.9rem; padding: 0; }
+  .explain-split .notes p { font-size: 1rem; }
+}
