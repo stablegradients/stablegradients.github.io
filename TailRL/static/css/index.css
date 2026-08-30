@@ -369,35 +369,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--tailrl); outlin
 /* anchors clear the sticky bar */
 [id] { scroll-margin-top: 68px; }
 
-/* ---- hero ---------------------------------------------------------------- */
 
-.hook {
-  font-family: 'Castoro', Georgia, serif;
-  font-size: 1.75rem; line-height: 1.3; color: var(--text-dark);
-  margin: 1.4rem auto 0.7rem auto; max-width: 24em;
-}
-.hook .em { color: var(--tailrl); }
-.subhead { font-size: 1rem; line-height: 1.65; color: #4b5563; max-width: 44em; margin: 0 auto; }
-@media (max-width: 480px) { .hook { font-size: 1.3rem; } }
-
-
-/* ---- evidence strip ------------------------------------------------------ */
-.evidence {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.25rem;
-  margin-top: 2.25rem; padding-top: 1.5rem; border-top: 1px solid var(--border-light);
-}
-@media (max-width: 768px) { .evidence { grid-template-columns: 1fr; gap: 0.9rem; } }
-.evidence a {
-  display: block; text-decoration: none; color: inherit;
-  border-left: 3px solid var(--tailrl); padding: 0.1rem 0 0.1rem 0.85rem;
-}
-.evidence a:hover .ev-num { text-decoration: underline; }
-.evidence a:focus-visible { outline: 2px solid var(--tailrl); outline-offset: 3px; }
-.ev-num {
-  display: block; font-family: 'Google Sans', sans-serif; font-weight: 600;
-  font-size: 1.05rem; color: var(--tailrl); line-height: 1.3;
-}
-.ev-sub { display: block; font-size: 0.88rem; color: var(--text-muted); margin-top: 0.15rem; }
 
 /* ---- buttons ------------------------------------------------------------- */
 .btn-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.2rem; }
@@ -550,7 +522,6 @@ body.sj-on .pagenav { display: none; }
    presentation mode is on, and restore it on the way out. */
 body.sj-on section.section,
 body.sj-on section.hero,
-body.sj-on #pitch,
 body.sj-on .hero .hero-body,
 body.sj-on footer.footer { padding-top: 0; padding-bottom: 0; }
 /* the title slide is a card like any other once presentation mode is on */
@@ -579,17 +550,9 @@ body.sj-on .hero { min-height: 0; display: block; }
 .content.has-text-justified { text-justify: inter-word; }
 @media (max-width: 768px) { .content.has-text-justified { text-align: left !important; } }
 
-/* ---- the pitch band ------------------------------------------------------
-   The hero is the title slide and holds nothing but the title block, so the
-   hook, the subhead and the headline numbers live in their own band under it. */
-#pitch { padding-top: 2.5rem; padding-bottom: 2.75rem; }
-#pitch .hook { margin-top: 0; }
-#pitch .evidence { text-align: left; max-width: 900px; margin-left: auto; margin-right: auto; }
-@media (max-width: 768px) { #pitch .evidence { margin-top: 1.6rem; padding-top: 1.1rem; } }
 
-/* The title slide is a third of the screen, so the pitch under it is visible
-   without scrolling. min-height, not height: the block still grows if the
-   author list wraps onto more lines on a narrow viewport. */
+/* The title slide is a third of the screen. min-height, not height: the block
+   still grows if the author list wraps onto more lines on a narrow viewport. */
 .hero { min-height: 33.333vh; display: flex; flex-direction: column; justify-content: center; }
 .hero .hero-body { display: flex; align-items: center; width: 100%; padding-top: 1.75rem; padding-bottom: 1.75rem; }
 .hero .hero-body > .container { width: 100%; }

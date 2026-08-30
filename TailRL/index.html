@@ -30,17 +30,17 @@
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="./static/css/bulma.min.css">
-  <link rel="stylesheet" href="./static/css/index.css?v=10">
+  <link rel="stylesheet" href="./static/css/index.css?v=12">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
 
-  <script defer src="./static/js/same-mean-tail.js?v=10"></script>
-  <script defer src="./static/js/tailrl-explorer.js?v=10"></script>
-  <script defer src="./static/js/index.js?v=10"></script>
-  <script defer src="./static/js/scroll-jack.js?v=10"></script>
+  <script defer src="./static/js/same-mean-tail.js?v=12"></script>
+  <script defer src="./static/js/tailrl-explorer.js?v=12"></script>
+  <script defer src="./static/js/index.js?v=12"></script>
+  <script defer src="./static/js/scroll-jack.js?v=12"></script>
 </head>
 <body>
 
@@ -137,36 +137,10 @@
   </div>
 </section>
 
-<!-- ==================== THE PITCH ==================== -->
-<section class="section section-narrow section-white" id="pitch">
-  <div class="container is-max-desktop">
-    <p class="hook has-text-centered">RL optimizes the mean. <span class="em">TailRL shapes the tail.</span></p>
-    <p class="subhead has-text-centered">
-      Three lines in your policy-gradient estimator. TailRL Pareto-dominates expected-reward RL in
-      performance versus sampling compute, and scales favorably with training compute.
-    </p>
-
-    <div class="evidence">
-      <a href="#gui">
-        <span class="ev-num">128× / 256× less inference sampling</span>
-        <span class="ev-sub">Matches RLOO's Pass@1024 at 3B / 7B.</span>
-      </a>
-      <a href="#code-opt">
-        <span class="ev-num">7.7× Best-of-1024 code speedup</span>
-        <span class="ev-sub">GRPO and RLOO remain below 1×.</span>
-      </a>
-      <a href="#imagenet">
-        <span class="ev-num">1/64 the training rollouts</span>
-        <span class="ev-sub">TailRL at $N=16$ exceeds expected-reward baselines at $N=1024$ on ImageNet.</span>
-      </a>
-    </div>
-  </div>
-</section>
-
 <!-- ==================== 2. WHAT IS THE TAIL LIKELIHOOD ==================== -->
 <section class="section section-narrow section-white" id="tail">
   <div class="container is-max-desktop">
-    <h2 class="title is-3 section-title">What is the tail likelihood?</h2>
+    <h2 class="title is-3 section-title">What is Tail-Likelihood?</h2>
     <div class="content has-text-justified">
       <p>
         Fix an input $x$ and a reward level $\tau$. The <strong>tail probability</strong> is the chance that one
