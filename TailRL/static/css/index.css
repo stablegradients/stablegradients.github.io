@@ -28,7 +28,7 @@
   --primary: #363636;
   --primary-light: #4a4a4a;
   --text-dark: #1f2937;
-  --text-muted: #6b7280;
+  --text-muted: #1f2937;
   --bg-white: #ffffff;
   --bg-gray: #f9fafb;
   --border-light: #e5e7eb;
@@ -46,19 +46,19 @@ body { color: var(--text-dark); font-family: var(--cm); }
 .hero * { overflow: visible !important; }
 .hero .container, .hero .columns, .hero .column { overflow: visible !important; max-height: none !important; }
 .hero .title.is-1 { color: var(--tailrl); font-weight: 400; font-family: var(--cm); }
-.hero .publication-authors a { color: #374151 !important; }
+.hero .publication-authors a { color: #1f2937 !important; }
 .hero .publication-authors a:hover { color: var(--tailrl) !important; text-decoration: underline; }
-.hero .publication-authors span { color: #4b5563; }
+.hero .publication-authors span { color: #1f2937; }
 
 .publication-links .button {
   margin: 0.25rem;
   background: transparent;
   border: 1px solid #d1d5db;
-  color: #374151;
+  color: #1f2937;
 }
 .publication-links .button:hover {
   background: #f3f4f6;
-  border-color: #9ca3af;
+  border-color: #1f2937;
   color: #1f2937;
 }
 
@@ -207,7 +207,7 @@ pre code { display: block; padding: 1rem; background: #1f2937; color: #e5e7eb; b
   padding: 0;
 }
 
-footer.footer { background: #1f2937; color: #9ca3af; padding: 2rem; overflow: hidden; }
+footer.footer { background: #1f2937; color: #1f2937; padding: 2rem; overflow: hidden; }
 footer.footer .columns { margin: 0; }
 footer.footer .container { overflow: hidden; }
 footer a { color: #93c5fd; }
@@ -241,22 +241,22 @@ footer a:hover { color: #bfdbfe; }
   border: 1px solid #d1d5db;
   border-radius: 999px;
   background: #fff;
-  color: #374151;
+  color: #1f2937;
   cursor: pointer;
 }
-.explorer button:hover { background: #f3f4f6; border-color: #9ca3af; }
+.explorer button:hover { background: #f3f4f6; border-color: #1f2937; }
 .explorer button:focus-visible { outline: 2px solid var(--tailrl); outline-offset: 2px; }
 .explorer button.active { background: var(--primary); color: #fff; border-color: var(--primary); }
 .explorer svg { width: 100%; height: auto; display: block; touch-action: none; user-select: none; -webkit-user-select: none; }
-.explorer .svg-label { font-family: var(--cm); font-size: 12px; fill: #6b7280; }
+.explorer .svg-label { font-family: var(--cm); font-size: 12px; fill: #1f2937; }
 .explorer .svg-title { font-family: var(--cm); font-size: 13px; font-weight: 600; fill: #1f2937; }
-.explorer .svg-tick { font-family: var(--cm); font-size: 11px; fill: #9ca3af; }
+.explorer .svg-tick { font-family: var(--cm); font-size: 11px; fill: #1f2937; }
 .explorer .rollout { cursor: grab; }
 .explorer .rollout:active { cursor: grabbing; }
 .explorer .readout {
   font-family: var(--cm);
   font-size: 0.82rem;
-  color: #374151;
+  color: #1f2937;
   background: #f9fafb;
   border: 1px solid var(--border-light);
   border-radius: 6px;
@@ -284,8 +284,8 @@ footer a:hover { color: #bfdbfe; }
 }
 .explorer input[type="range"]:focus-visible { outline: 2px solid var(--tailrl); outline-offset: 2px; }
 .explorer .smt-value { color: var(--text-dark); font-weight: 600; }
-.explorer .readout .smt-a { color: #2A7F9E; font-weight: 600; }
-.explorer .readout .smt-b { color: #C8811A; font-weight: 600; }
+.explorer .readout .smt-a { color: #236A85; font-weight: 600; }
+.explorer .readout .smt-b { color: #8A5A10; font-weight: 600; }
 
 /* ---- snap-scroll chrome: section rail + on/off toggle ---- */
 
@@ -404,10 +404,10 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--tailrl); outlin
   display: inline-flex; align-items: center; gap: 0.45em;
   font-family: var(--cm); font-size: 0.9rem;
   padding: 0.45rem 0.95rem; border-radius: 999px;
-  border: 1px solid #d1d5db; background: #fff; color: #374151;
+  border: 1px solid #d1d5db; background: #fff; color: #1f2937;
   text-decoration: none; cursor: pointer;
 }
-.btn:hover { background: #f3f4f6; border-color: #9ca3af; color: var(--text-dark); }
+.btn:hover { background: #f3f4f6; border-color: #1f2937; color: var(--text-dark); }
 .btn:focus-visible { outline: 2px solid var(--tailrl); outline-offset: 2px; }
 .btn-primary { background: var(--tailrl); border-color: var(--tailrl); color: #fff; }
 .btn-primary:hover { background: var(--tailrl-dark); border-color: var(--tailrl-dark); color: #fff; }
@@ -430,7 +430,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--tailrl); outlin
   font-family: var(--cm); font-weight: 600; font-size: 1.02rem;
   color: var(--text-dark); margin: 0.3rem 0 0.4rem 0;
 }
-.step p { font-size: 0.95rem; line-height: 1.6; color: #4b5563; margin: 0; }
+.step p { font-size: 0.95rem; line-height: 1.6; color: #1f2937; margin: 0; }
 
 /* ---- key line (replaces most bordered boxes) ----------------------------- */
 .keyline {
@@ -454,7 +454,7 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--tailrl); outlin
 .wcard.rl .wname { color: var(--rloo); }
 .wcard.grpo .wname { color: var(--grpo); }
 .wcard.tail .wname { color: var(--tailrl); }
-.wcard p { font-size: 0.93rem; line-height: 1.55; color: #4b5563; margin: 0 0 0.6rem 0; }
+.wcard p { font-size: 0.93rem; line-height: 1.55; color: #1f2937; margin: 0 0 0.6rem 0; }
 .wcard .wformula {
   font-size: 0.9rem; color: var(--text-dark);
   background: var(--bg-gray); border-radius: 4px; padding: 0.4rem 0.6rem;
@@ -528,7 +528,7 @@ details.deep .deep-body p { font-size: 0.94rem; }
   border: 1px solid var(--border-light); background: rgba(255, 255, 255, 0.92);
   color: var(--text-muted); backdrop-filter: blur(4px);
 }
-.sj-toggle:hover { border-color: #9ca3af; color: var(--text-dark); }
+.sj-toggle:hover { border-color: #1f2937; color: var(--text-dark); }
 .sj-toggle:focus-visible { outline: 2px solid var(--tailrl); outline-offset: 2px; }
 body.sj-on .sj-toggle { border-color: var(--tailrl); color: var(--tailrl); }
 body:not(.sj-on) .sj-card, body:not(.sj-on) .sj-card-inner { display: contents; }
@@ -568,7 +568,7 @@ body.sj-on .hero { min-height: 0; display: block; }
   color: var(--tailrl); font-weight: 400;
   font-family: var(--cm); margin-bottom: 0.9rem;
 }
-.hero .publication-authors a { color: #374151 !important; }
+.hero .publication-authors a { color: #1f2937 !important; }
 .hero .publication-authors a:hover { color: var(--tailrl) !important; text-decoration: underline; }
 @media (max-width: 768px) { .hero .hero-body { padding-top: 1.75rem; padding-bottom: 1.5rem; } }
 
@@ -590,9 +590,9 @@ body.sj-on .hero { min-height: 0; display: block; }
 .publication-authors { margin-top: 0.15rem; }
 .author-line {
   font-family: var(--cm); font-size: 1rem; line-height: 1.75;
-  color: #4b5563;
+  color: #1f2937;
 }
-.author-line a { color: #374151; }
+.author-line a { color: #1f2937; }
 .author-line a:hover { color: var(--tailrl); text-decoration: underline; }
 .author-line sup { font-size: 0.7em; color: var(--text-muted); }
 .publication-affiliations {
@@ -733,16 +733,32 @@ img[data-play-in-view] { aspect-ratio: 962 / 663; width: 100%; height: auto; bac
    baseline and red for TailRL, the same pairing as the advantage explorer.
    Kept faint: the tint should read as a label, not as a highlight. */
 .math-box.is-rl {
-  background: #f5f8fc;
-  border-color: #d2dfef;
+  background: #e4edf8;
+  border-color: #b3c9e4;
 }
 .math-box.is-rl h4 { color: var(--grpo); }
 .math-box.is-tail {
-  background: #fdf6f5;
-  border-color: #eed3ce;
+  background: #f9e6e2;
+  border-color: #e3b6ac;
 }
 .math-box.is-tail h4 { color: var(--tailrl); }
 
 /* a single full-width box, for a theorem rather than a two-way comparison */
 .math-comparison.one { grid-template-columns: 1fr; }
 .math-comparison.one .math-box { padding: 1.75rem 1.5rem; }
+
+/* Instructions under the widgets are directions to the reader, not asides:
+   full-strength ink, bold, centred. */
+.explorer .hint {
+  color: var(--text-dark);
+  font-weight: 700;
+  text-align: center;
+}
+
+/* "Drag inside either histogram..." and friends: these tell the reader what to
+   do, so they are centred, bold and full-strength, not a grey aside. */
+.content .do-this {
+  text-align: center;
+  font-weight: 700;
+  color: var(--text-dark);
+}

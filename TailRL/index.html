@@ -30,17 +30,17 @@
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="./static/css/bulma.min.css">
-  <link rel="stylesheet" href="./static/css/index.css?v=21">
+  <link rel="stylesheet" href="./static/css/index.css?v=26">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
 
-  <script defer src="./static/js/same-mean-tail.js?v=21"></script>
-  <script defer src="./static/js/tailrl-explorer.js?v=21"></script>
-  <script defer src="./static/js/index.js?v=21"></script>
-  <script defer src="./static/js/scroll-jack.js?v=21"></script>
+  <script defer src="./static/js/same-mean-tail.js?v=26"></script>
+  <script defer src="./static/js/tailrl-explorer.js?v=26"></script>
+  <script defer src="./static/js/index.js?v=26"></script>
+  <script defer src="./static/js/scroll-jack.js?v=26"></script>
 </head>
 <body>
 
@@ -62,7 +62,7 @@
       <option value="#tail">Tail likelihood</option>
       <option value="#why">Why tail-likelihood</option>
       <option value="#tailrl">Objective and gradient</option>
-      <option value="#harmonic">Best-of-k decomposition</option>
+      <option value="#harmonic">Aligned with inference time</option>
       <option value="#decompose">Decomposition</option>
       <option value="#objective">Objective</option>
       <option value="#bestofk">Best-of-k</option>
@@ -178,8 +178,47 @@
   </div>
 </section>
 
-<!-- ==================== 4. TAILRL: OBJECTIVE AND GRADIENT ==================== -->
-<section class="section section-narrow section-white" id="tailrl">
+<!-- ==================== 4. PI_A vs PI_B INTERACTIVE ==================== -->
+<section class="section section-narrow section-white" id="compare">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 section-title">Same mean, different tail</h2>
+    <div class="content has-text-justified">
+      <p>
+        Two policies can have the same expected reward and very different odds of producing an exceptional sample.
+        Shape $\pi_A$ and $\pi_B$ below. Their means stay locked to each other, so every difference you see in the
+        tail and in Best-of-$k$ is invisible to expected-reward RL.
+      </p>
+      <p class="do-this">
+        Drag inside either histogram to move mass between reward thresholds.
+      </p>
+    </div>
+
+    <div class="explorer" id="smt-widget">
+      <div class="explorer-head">
+        <span class="label-text">Presets</span>
+        <span id="smt-presets"></span>
+        <button type="button" class="reset" id="smt-reset" aria-label="Reset the same-mean widget to a fresh random pair">Reset</button>
+      </div>
+      <div class="smt-grid">
+        <svg id="smt-hist-a" viewBox="0 0 360 220" role="img" aria-label="Editable reward distribution for policy pi A"></svg>
+        <svg id="smt-hist-b" viewBox="0 0 360 220" role="img" aria-label="Editable reward distribution for policy pi B"></svg>
+      </div>
+      <div class="smt-grid">
+        <svg id="smt-tail" viewBox="0 0 360 220" role="img" aria-label="Tail-probability curves for both policies"></svg>
+        <svg id="smt-bok" viewBox="0 0 360 220" role="img" aria-label="Best-of-k against the rollout budget for both policies"></svg>
+      </div>
+      <div class="readout" id="smt-readout"></div>
+      <div class="hint" id="smt-hint"></div>
+    </div>
+
+    <p class="keyline">
+      The mean is identical. The policy with the stronger tail keeps improving as sampling compute grows.
+    </p>
+  </div>
+</section>
+
+<!-- ==================== 5. TAILRL: OBJECTIVE AND GRADIENT ==================== -->
+<section class="section section-narrow section-gray" id="tailrl">
   <div class="container is-max-desktop">
     <h2 class="title is-3 section-title">Tail-Likelihood Reinforcement Learning</h2>
 
@@ -196,7 +235,7 @@
         <p class="math-line">
           $J_{\mathrm{TailRL}}(\theta;x) := \displaystyle\int_0^1 \log p_\theta(x,\tau)\,d\tau$
         </p>
-        <p class="math-note">The mean log tail-probability across reward levels, for rewards in $[0,1]$.</p>
+        <p class="math-note">The mean log tail-probability across reward thresholds, for rewards in $[0,1]$.</p>
       </div>
     </div>
 
@@ -230,22 +269,20 @@
     <div class="content has-text-justified">
       <p>
         TailRL upweights the gradient of rollouts that are rare and excellent. Where the tail-probability
-        $p_\theta(x,\tau)$ is low, $1/p_\theta(x,\tau)$ is large, so a rollout clearing levels the policy almost
-        never reaches counts for far more than its reward alone would say.
+        $p_\theta(x,\tau)$ is low, $1/p_\theta(x,\tau)$ is large, so a rollout clearing reward thresholds the policy
+        almost never reaches counts for far more than its reward alone would say.
       </p>
     </div>
   </div>
 </section>
 
-<!-- ==================== 5. BEST-OF-K DECOMPOSITION ==================== -->
-<section class="section section-narrow section-gray" id="harmonic">
+<!-- ==================== 6. BEST-OF-K DECOMPOSITION ==================== -->
+<section class="section section-narrow section-white" id="harmonic">
   <div class="container is-max-desktop">
-    <h2 class="title is-3 section-title">Best-of-$k$ decomposition</h2>
+    <h2 class="title is-3 section-title">Aligned with inference time objectives</h2>
     <div class="content has-text-justified">
       <p>
-        Write $\text{Best-of-}k(\theta;x)$ for the expected maximum reward among $k$ independent rollouts. The
-        objective is defined over reward thresholds, but it has an exact reading across inference budgets, with no
-        truncation and no chosen $k$.
+        The gradient of TailRL naturally decomposes as harmonically weighted gradients of Best-of-$k$ objectives.
       </p>
     </div>
 
@@ -258,7 +295,6 @@
         <p class="math-line" style="margin-top: 1.1rem;">
           $\nabla_\theta J_{\mathrm{TailRL}}(\theta;x) = \displaystyle\sum_{k=1}^{\infty}\frac{1}{k}\,\nabla_\theta\,\text{Best-of-}k(\theta;x)$
         </p>
-        <p class="math-note">The gradient identity holds under the paper's regularity conditions.</p>
       </div>
     </div>
 
@@ -271,14 +307,14 @@
   </div>
 </section>
 
-<!-- ==================== 6. CONTINUOUS REWARDS DECOMPOSE ==================== -->
-<section class="section section-narrow section-white" id="decompose">
+<!-- ==================== 7. CONTINUOUS REWARDS DECOMPOSE ==================== -->
+<section class="section section-narrow section-gray" id="decompose">
   <div class="container is-max-desktop">
     <h2 class="title is-3 section-title">A continuous reward already contains that curve</h2>
     <div class="content has-text-justified">
       <p>
-        A scalar reward is a stack of success tests. A rollout with reward $r$ passes every level below $r$ and
-        fails every level above it, so the reward is the height of the stack it clears:
+        A scalar reward is a stack of success tests. A rollout with reward $r$ passes every threshold below $r$ and
+        fails every threshold above it, so the reward is the height of the stack it clears:
       </p>
     </div>
 
@@ -305,10 +341,10 @@
       <img src="./static/images/decomposition_teaser.gif"
              data-static="./static/images/teaser_decomposition.png"
              width="1650" height="550"
-             alt="A rollout's continuous reward is compared against a ladder of reward levels; each comparison is a pass/fail test, and averaging the passes across a group of rollouts traces the tail-probability curve.">
+             alt="A rollout's continuous reward is compared against a ladder of reward thresholds; each comparison is a pass/fail test, and averaging the passes across a group of rollouts traces the tail-probability curve.">
       <figcaption class="figure-caption">
-        <strong>One continuous reward, a success test at every level.</strong>
-        A rollout passes every level below its reward, and averaging the passes across a group traces
+        <strong>One continuous reward, a success test at every reward threshold.</strong>
+        A rollout passes every threshold below its reward, and averaging the passes across a group traces
         $p_\theta(x,\tau)$.
       </figcaption>
     </figure>
@@ -320,13 +356,13 @@
   </div>
 </section>
 
-<!-- ==================== 7. THE TAILRL OBJECTIVE ==================== -->
-<section class="section section-narrow section-gray" id="objective">
+<!-- ==================== 8. THE TAILRL OBJECTIVE ==================== -->
+<section class="section section-narrow section-white" id="objective">
   <div class="container is-max-desktop">
     <h2 class="title is-3 section-title">The TailRL objective</h2>
     <div class="content has-text-justified">
       <p>
-        Keep the curve instead of its area. TailRL maximizes the average log-likelihood across reward levels:
+        Keep the curve instead of its area. TailRL maximizes the average log-likelihood across reward thresholds:
       </p>
     </div>
 
@@ -336,17 +372,17 @@
       </p>
     </div>
     <p class="figure-caption" style="margin-bottom: 1.5rem;">
-      Every reward level contributes its own log-likelihood, and every level counts equally.
+      Every reward threshold contributes its own log-likelihood, and every threshold counts equally.
     </p>
 
     <div class="content has-text-justified">
       <p>
-        The logarithm is what changes the incentives. Because $\log p$ falls away without bound as $p\to 0$, a level
-        the policy almost never reaches cannot be traded for a small gain on a level it already clears. Under the
+        The logarithm is what changes the incentives. Because $\log p$ falls away without bound as $p\to 0$, a threshold
+        the policy almost never reaches cannot be traded for a small gain on a threshold it already clears. Under the
         mean, that trade is free.
       </p>
       <p>
-        On binary rewards every nontrivial level asks the same question, did the rollout succeed, so the integral
+        On binary rewards every nontrivial threshold asks the same question, did the rollout succeed, so the integral
         collapses to a single log-likelihood and TailRL reduces exactly to MaxRL.
         <a href="https://zanette-labs.github.io/MaxRL" target="_blank" rel="noopener">Related project: MaxRL for binary rewards →</a>
       </p>
@@ -356,9 +392,9 @@
       <summary>Why this is a likelihood, not just a reweighting</summary>
       <div class="deep-body">
         <p>
-          Take $L$ equally spaced levels $\tau_\ell=(\ell-1)/L$, draw independent rollouts
+          Take $L$ equally spaced thresholds $\tau_\ell=(\ell-1)/L$, draw independent rollouts
           $z_1,\ldots,z_L\sim\pi_\theta(\cdot\mid x)$, and let $E_L$ be the event that every one clears its assigned
-          level. Independence factorizes the likelihood:
+          threshold. Independence factorizes the likelihood:
         </p>
         <div class="formula-box">
           <p style="margin: 0;">
@@ -367,22 +403,22 @@
           </p>
         </div>
         <p>
-          The number of levels sets only the resolution of the audit. Requiring the objective to be invariant to that
+          The number of thresholds sets only the resolution of the audit. Requiring the objective to be invariant to that
           resolution, while agreeing with the ordinary log-likelihood at $L=1$, fixes the normalization at $1/L$. The
           result is a Riemann sum, and $L\to\infty$ gives the population objective
           $\int_0^1 \log p_\theta(x,\tau)\,d\tau$.
         </p>
         <p style="margin-bottom: 0;">
           The audit defines the population likelihood. It is not a sampling procedure: the finite-rollout estimator
-          used in training does not draw one rollout per level.
+          used in training does not draw one rollout per threshold.
         </p>
       </div>
     </details>
   </div>
 </section>
 
-<!-- ==================== 8. BEST-OF-K ==================== -->
-<section class="section section-narrow section-white" id="bestofk">
+<!-- ==================== 9. BEST-OF-K ==================== -->
+<section class="section section-narrow section-gray" id="bestofk">
   <div class="container is-max-desktop">
     <h2 class="title is-3 section-title">TailRL is a mixture of Best-of-$k$ objectives</h2>
     <div class="content has-text-justified">
@@ -411,45 +447,6 @@
   </div>
 </section>
 
-<!-- ==================== 9. PI_A vs PI_B INTERACTIVE ==================== -->
-<section class="section section-narrow section-gray" id="compare">
-  <div class="container is-max-desktop">
-    <h2 class="title is-3 section-title">Same mean, different tail</h2>
-    <div class="content has-text-justified">
-      <p>
-        Two policies can have the same expected reward and very different odds of producing an exceptional sample.
-        Shape $\pi_A$ and $\pi_B$ below. Their means stay locked to each other, so every difference you see in the
-        tail and in Best-of-$k$ is invisible to expected-reward RL.
-      </p>
-      <p style="color: var(--text-muted); font-size: 0.95rem;">
-        Drag inside either histogram to move mass between reward levels.
-      </p>
-    </div>
-
-    <div class="explorer" id="smt-widget">
-      <div class="explorer-head">
-        <span class="label-text">Presets</span>
-        <span id="smt-presets"></span>
-        <button type="button" class="reset" id="smt-reset" aria-label="Reset the same-mean widget to a fresh random pair">Reset</button>
-      </div>
-      <div class="smt-grid">
-        <svg id="smt-hist-a" viewBox="0 0 360 220" role="img" aria-label="Editable reward distribution for policy pi A"></svg>
-        <svg id="smt-hist-b" viewBox="0 0 360 220" role="img" aria-label="Editable reward distribution for policy pi B"></svg>
-      </div>
-      <div class="smt-grid">
-        <svg id="smt-tail" viewBox="0 0 360 220" role="img" aria-label="Tail-probability curves for both policies"></svg>
-        <svg id="smt-bok" viewBox="0 0 360 220" role="img" aria-label="Best-of-k against the rollout budget for both policies"></svg>
-      </div>
-      <div class="readout" id="smt-readout"></div>
-      <div class="hint" id="smt-hint"></div>
-    </div>
-
-    <p class="keyline">
-      The mean is identical. The policy with the stronger tail keeps improving as sampling compute grows.
-    </p>
-  </div>
-</section>
-
 <!-- ==================== 10. ALGORITHM ==================== -->
 <section class="section section-narrow section-white" id="algorithm">
   <div class="container is-max-desktop">
@@ -458,7 +455,7 @@
       <p>
         In an existing RL system this is a few lines inside the advantage computation: the same rollout groups as
         GRPO and RLOO, no critic, and no new hyperparameter. The weights are read straight off the empirical tail
-        probability, because the number of rollouts still surviving a reward level is exactly
+        probability, because the number of rollouts still surviving a reward threshold is exactly
         $N\,\hat p_\theta(x,\tau)$. Nothing extra is modelled, fitted or tuned.
       </p>
     </div>
@@ -504,7 +501,7 @@
         among the rollouts that reach it, so a gap only the best rollout clears is worth $N$ times a gap everybody
         clears.
       </p>
-      <p style="color: var(--text-muted); font-size: 0.95rem;">
+      <p class="do-this">
         Drag a rollout along the reward axis and watch both advantage profiles respond.
       </p>
     </div>
@@ -535,20 +532,20 @@
     </p>
 
     <details class="deep">
-      <summary>How the weight grows as a level gets rarer</summary>
+      <summary>How the weight grows as a reward threshold gets rarer</summary>
       <div class="deep-body">
         <p>
-          The per-level weight is the reciprocal of the survivor count, so in the population limit it approaches
+          The per-threshold weight is the reciprocal of the survivor count, so in the population limit it approaches
           $1/p_\theta(x,\tau)$: inverse-probability weighting, capped by the truncation order. Expected reward gives
-          every level the same weight of $1$, and GRPO's $1/\sigma(x)$ rescales an entire input's update rather than
-          the levels inside it.
+          every threshold the same weight of $1$, and GRPO's $1/\sigma(x)$ rescales an entire input's update rather than
+          the thresholds inside it.
         </p>
         <figure class="figure-container" style="margin-top: 1.25rem;">
           <img loading="lazy" decoding="async" src="./static/images/weight_vs_survival_wrap.png"
                width="850" height="746" style="max-width: 470px; width: 100%;"
                alt="Gradient weight plotted against pass rate. Expected reward is a flat line at one. Finite-order TailRL curves rise as the pass rate falls, approaching one over the pass rate while flattening off at a cap set by the truncation order.">
           <figcaption class="figure-caption" style="margin-bottom: 0;">
-            Finite-order TailRL approaches inverse-probability weighting while capping the rarest-level weight.
+            Finite-order TailRL approaches inverse-probability weighting while capping the rarest-threshold weight.
             The horizontal reference marks GRPO's single input-level multiplier for one illustrative fixed input.
           </figcaption>
         </figure>
@@ -673,7 +670,7 @@
     <div class="content has-text-justified" style="margin-top: 2rem;">
       <p>
         Expected-reward training fails in two ways: it overlooks rare good outcomes, or it collapses to a frequent
-        moderate one. TailRL addresses both by keeping rarely reached reward levels influential.
+        moderate one. TailRL addresses both by keeping rarely reached reward thresholds influential.
       </p>
     </div>
   </div>

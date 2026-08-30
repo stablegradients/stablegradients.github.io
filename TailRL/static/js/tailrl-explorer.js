@@ -15,7 +15,7 @@
   var root = document.getElementById('tailrl-explorer');
   if (!root) return;
   var NS = 'http://www.w3.org/2000/svg';
-  var C = { tailrl: '#C0392B', reinforce: '#46628F', ink: '#1f2937', muted: '#9ca3af', grid: '#e5e7eb' };
+  var C = { tailrl: '#C0392B', reinforce: '#46628F', ink: '#1f2937', muted: '#1f2937', grid: '#e5e7eb' };
 
   // the rollout budgets the paper trains at; the slider steps over these only
   var STOPS = [16, 64, 256, 1024], START = 1;

@@ -11,8 +11,8 @@
   'use strict';
 
   var NS = 'http://www.w3.org/2000/svg';
-  var CA = '#2A7F9E', CB = '#C8811A';
-  var INK = '#1f2937', MUTED = '#9ca3af', GRID = '#e5e7eb';
+  var CA = '#236A85', CB = '#8A5A10';
+  var INK = '#1f2937', MUTED = '#1f2937', GRID = '#e5e7eb';
 
   /* ------------------------------------------------------------------ model
      21 reward levels X[i] = i/20, i = 0..20, so 0 and 1 are exact and the
@@ -441,7 +441,7 @@
 
     if (dm > 1e-6) {
       hint.innerHTML = 'Means differ by ' + num(d3(dm)) +
-        ': spread some mass over more levels to let the lock hold.';
+        ': spread some mass over more reward values to let the lock hold.';
       return;
     }
     lead = bB >= bA ? 'B' : 'A';
