@@ -30,17 +30,17 @@
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="./static/css/bulma.min.css">
-  <link rel="stylesheet" href="./static/css/index.css?v=30">
+  <link rel="stylesheet" href="./static/css/index.css?v=33">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
 
-  <script defer src="./static/js/same-mean-tail.js?v=30"></script>
-  <script defer src="./static/js/tailrl-explorer.js?v=30"></script>
-  <script defer src="./static/js/index.js?v=30"></script>
-  <script defer src="./static/js/scroll-jack.js?v=30"></script>
+  <script defer src="./static/js/same-mean-tail.js?v=33"></script>
+  <script defer src="./static/js/tailrl-explorer.js?v=33"></script>
+  <script defer src="./static/js/index.js?v=33"></script>
+  <script defer src="./static/js/scroll-jack.js?v=33"></script>
 </head>
 <body>
 
@@ -51,7 +51,7 @@
     <span class="links">
       <a href="#tail">Tail</a>
       <a href="#objective">Objective</a>
-      <a href="#bestofk">Best-of-k</a>
+      <a href="#harmonic">Best-of-k</a>
       <a href="#algorithm">Algorithm</a>
       <a href="#results">Results</a>
       <a href="#bibtex">BibTeX</a>
@@ -65,8 +65,7 @@
       <option value="#harmonic">Aligned with inference time</option>
       <option value="#decompose">Decomposition</option>
       <option value="#objective">Objective</option>
-      <option value="#bestofk">Best-of-k</option>
-      <option value="#compare">Same mean, different tail</option>
+      <option value="#compare">Manipulate the distribution</option>
       <option value="#algorithm">Algorithm</option>
       <option value="#advantages">Advantages</option>
       <option value="#results">Results</option>
@@ -181,15 +180,15 @@
 <!-- ==================== 4. PI_A vs PI_B INTERACTIVE ==================== -->
 <section class="section section-narrow section-white" id="compare">
   <div class="container is-max-desktop">
-    <h2 class="title is-3 section-title">Same mean, different tail</h2>
+    <h2 class="title is-3 section-title">Let's manipulate the reward distribution</h2>
     <div class="content has-text-justified">
       <p>
         Two policies can have the same expected reward and very different odds of producing an exceptional sample.
-        Shape $\pi_A$ and $\pi_B$ below. Their means stay locked to each other, so every difference you see in the
-        tail and in Best-of-$k$ is invisible to expected-reward RL.
+        Every preset opens as a matched pair with equal means, so any difference you see in the tail and in
+        Best-of-$k$ is invisible to expected-reward RL. Drag the bars and the means are free to move apart.
       </p>
       <p class="do-this">
-        Drag inside either histogram to move mass between reward thresholds.
+        Drag inside either histogram to move mass between reward values.
       </p>
     </div>
 
@@ -212,7 +211,7 @@
     </div>
 
     <p class="keyline">
-      The mean is identical. The policy with the stronger tail keeps improving as sampling compute grows.
+      Even if the mean is identical, the policy with the stronger tail keeps improving as sampling compute grows.
     </p>
   </div>
 </section>
@@ -319,7 +318,7 @@
     </div>
 
     <div class="formula-box" style="margin: 1.25rem 0 1rem 0;">
-      <p style="font-size: 1.1rem; margin: 0;">
+      <p style="font-size: 1.32rem; margin: 0;">
         $r(x,z) \;=\; \displaystyle\int_0^1 \mathbf{1}\!\left\{r(x,z) > \tau\right\}d\tau$
       </p>
     </div>
@@ -332,7 +331,7 @@
     </div>
 
     <div class="formula-box" style="margin: 1.25rem 0 1rem 0;">
-      <p style="font-size: 1.1rem; margin: 0;">
+      <p style="font-size: 1.32rem; margin: 0;">
         $\mathbb{E}_{z\sim\pi_\theta}\!\left[r(x,z)\right] \;=\; \displaystyle\int_0^1 p_\theta(x,\tau)\,d\tau$
       </p>
     </div>
@@ -367,7 +366,7 @@
     </div>
 
     <div class="formula-box" style="margin: 1.25rem 0 0.75rem 0;">
-      <p style="font-size: 1.2rem; margin: 0;">
+      <p style="font-size: 1.44rem; margin: 0;">
         $J_{\mathrm{TailRL}}(\theta;x) \;=\; \displaystyle\int_0^1 \log p_\theta(x,\tau)\,d\tau$
       </p>
     </div>
@@ -417,38 +416,8 @@
   </div>
 </section>
 
-<!-- ==================== 9. BEST-OF-K ==================== -->
-<section class="section section-narrow section-gray" id="bestofk">
-  <div class="container is-max-desktop">
-    <h2 class="title is-3 section-title">TailRL is a mixture of Best-of-$k$ objectives</h2>
-    <div class="content has-text-justified">
-      <p>
-        Truncating the objective at order $T$ produces a family indexed by sampling compute. Its gradient is a
-        harmonic mixture of Best-of-$k$ gradients:
-      </p>
-    </div>
-
-    <div class="formula-box" style="margin: 1.25rem 0 0.75rem 0;">
-      <p style="font-size: 1.15rem; margin: 0;">
-        $\nabla_\theta J_{\mathrm{TailRL}}^{(T)}(\theta;x) \;=\; \displaystyle\sum_{k=1}^{T}\frac{1}{k}\,\nabla_\theta\,\text{Best-of-}k(\theta;x)$
-      </p>
-    </div>
-
-    <div class="content has-text-justified">
-      <p>
-        At $T=1$ this is exactly expected-reward RL: one sample, one gradient. Raising $T$ folds in larger inference
-        budgets, and the full tail likelihood is the limit. The $1/k$ weights fall out of the logarithm. They are not
-        a hyperparameter, and there is nothing to tune.
-      </p>
-      <p class="keyline">
-        Training against the tail likelihood is training for the way the model will actually be sampled.
-      </p>
-    </div>
-  </div>
-</section>
-
-<!-- ==================== 10. ALGORITHM ==================== -->
-<section class="section section-narrow section-white" id="algorithm">
+<!-- ==================== 9. ALGORITHM ==================== -->
+<section class="section section-narrow section-gray" id="algorithm">
   <div class="container is-max-desktop">
     <h2 class="title is-3 section-title">A new objective, not a new training stack</h2>
     <div class="content has-text-justified">
@@ -468,7 +437,7 @@
     </div>
 
     <div class="formula-box" style="margin: 1.25rem 0 0.75rem 0;">
-      <p style="font-size: 1.1rem; margin: 0;">
+      <p style="font-size: 1.32rem; margin: 0;">
         $\omega\!\left(r_{(i)}\right) = \displaystyle\sum_{k=1}^{i}\frac{r_{(k)}-r_{(k-1)}}{N-k+1},
         \qquad A_i = \omega(r_i) - \bar\omega$
       </p>
@@ -490,8 +459,8 @@
   </div>
 </section>
 
-<!-- ==================== 11. ADVANTAGE INTERACTIVE ==================== -->
-<section class="section section-narrow section-gray" id="advantages">
+<!-- ==================== 10. ADVANTAGE INTERACTIVE ==================== -->
+<section class="section section-narrow section-white" id="advantages">
   <div class="container is-max-desktop">
     <h2 class="title is-3 section-title">REINFORCE and TailRL on the same group</h2>
     <div class="content has-text-justified">
@@ -554,8 +523,8 @@
   </div>
 </section>
 
-<!-- ==================== 12. RESULTS ==================== -->
-<section class="section section-narrow section-white" id="results">
+<!-- ==================== 11. RESULTS ==================== -->
+<section class="section section-narrow section-gray" id="results">
   <div class="container is-max-desktop">
     <h2 class="title is-3 section-title">TailRL moves the sampling-compute frontier</h2>
     <div class="content has-text-justified">

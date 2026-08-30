@@ -205,8 +205,8 @@
   if (!root) return;
 
   /* ------------------------------------------------------------------- state */
-  // the mean lock is now unconditional and k is fixed at the largest budget
-  var wA = [], wB = [], preset = 'random', kExp = 10, lock = true;
+  // k is fixed at the largest budget; the means are not locked
+  var wA = [], wB = [], preset = 'random', kExp = 10;
   var painting = null;                 // { which: 'A'|'B', last: binIndex }
   var hot = { A: -1, B: -1 };
   var rafId = 0;
@@ -386,10 +386,10 @@
 
     /* Push the two endpoint labels to a fixed minimum separation when the
        curves finish close together. A fixed nudge is not enough: the label box
-       is about 12 user units tall, so the gap has to be set, not incremented. */
+       is about 15 user units tall, so the gap has to be set, not incremented. */
     if (marks.length === 2) {
       var y0 = bky(marks[0].v), y1 = bky(marks[1].v);
-      var gap = Math.abs(y0 - y1), MIN = 14, push;
+      var gap = Math.abs(y0 - y1), MIN = 17, push;
       if (gap < MIN) {
         push = (MIN - gap) / 2;
         marks[0].dy = (y0 <= y1) ? -push : push;
@@ -439,11 +439,6 @@
       TEX.bok + ' at ' + num('k = ' + k) + ': &nbsp; ' +
       spanA(pol('A') + ' ' + num(d3(bA))) + ' &nbsp; ' + spanB(pol('B') + ' ' + num(d3(bB)));
 
-    if (dm > 1e-6) {
-      hint.innerHTML = 'Means differ by ' + num(d3(dm)) +
-        ': spread some mass over more reward values to let the lock hold.';
-      return;
-    }
     lead = bB >= bA ? 'B' : 'A';
     dB = lead === 'B' ? bB - bA : bA - bB;
     dJ = lead === 'B' ? jB - jA : jA - jB;
@@ -456,7 +451,9 @@
        every budget up to k, so it can prefer the policy that leads at small k
        even when the other wins Best-of-k at the top budget. Say that plainly
        rather than asserting they always agree. */
-    msg = 'At ' + num('k = 1') + ' both policies are indistinguishable to expected-reward RL. At ' +
+    msg = (dm <= 1e-6
+             ? 'The means are equal, so expected-reward RL cannot separate these two. At '
+             : 'The means differ by ' + num(d3(dm)) + '. At ') +
       num('k = ' + k) + ', ' + pol(lead) + ' has the higher Best-of-' + num(k) + ' by ' + num(d3(dB));
     if (dJ >= 0) {
       msg += ' and the higher order-' + num(k) + ' tail likelihood by ' + num(d3(dJ)) +
@@ -501,18 +498,10 @@
   }
 
   function endPaint() {
-    var which, fixedIdx, other, po, res;
     if (!painting) return;
-    which = painting.which; fixedIdx = painting.last;
     painting = null;
-    if (lock) {
-      other = which === 'A' ? wB : wA;
-      po = normalize(other);
-      if (po) {
-        res = tilt(which === 'A' ? wA : wB, mean(po), fixedIdx);
-        if (which === 'A') wA = res.w; else wB = res.w;
-      }
-    }
+    /* No mean lock: a preset still opens as a fair same-mean pair, but once
+       the reader starts dragging the two means are free to separate. */
     render();
   }
 
