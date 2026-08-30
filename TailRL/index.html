@@ -30,17 +30,17 @@
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="./static/css/bulma.min.css">
-  <link rel="stylesheet" href="./static/css/index.css?v=47">
+  <link rel="stylesheet" href="./static/css/index.css?v=49">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
 
-  <script defer src="./static/js/same-mean-tail.js?v=47"></script>
-  <script defer src="./static/js/tailrl-explorer.js?v=47"></script>
-  <script defer src="./static/js/index.js?v=47"></script>
-  <script defer src="./static/js/scroll-jack.js?v=47"></script>
+  <script defer src="./static/js/same-mean-tail.js?v=49"></script>
+  <script defer src="./static/js/tailrl-explorer.js?v=49"></script>
+  <script defer src="./static/js/index.js?v=49"></script>
+  <script defer src="./static/js/scroll-jack.js?v=49"></script>
 </head>
 <body>
 
@@ -247,9 +247,8 @@
         <a href="https://zanette-labs.github.io/MaxRL" target="_blank" rel="noopener">Related project: MaxRL for binary rewards →</a>
       </p>
       <p>
-        Both gradients take the same shape: an average of policy scores
-        $S(x,z) := \nabla_\theta \log \pi_\theta(z \mid x)$, each scaled by a weight the objective attaches to its
-        rollout. Only that weight differs.
+        Both gradients are weighted sums of the score-function
+        $S(x,z) := \nabla_\theta \log \pi_\theta(z \mid x)$.
       </p>
     </div>
 
@@ -478,26 +477,6 @@
       Rare, exceptional rollouts stay visible to the update instead of disappearing into the mean.
     </p>
 
-    <details class="deep">
-      <summary>How the weight grows as a reward threshold gets rarer</summary>
-      <div class="deep-body">
-        <p>
-          The per-threshold weight is the reciprocal of the survivor count, so in the population limit it approaches
-          $1/p_\theta(x,\tau)$: inverse-probability weighting, capped by the truncation order. Expected reward gives
-          every threshold the same weight of $1$, and GRPO's $1/\sigma(x)$ rescales an entire input's update rather than
-          the thresholds inside it.
-        </p>
-        <figure class="figure-container" style="margin-top: 1.25rem;">
-          <img loading="lazy" decoding="async" src="./static/images/weight_vs_survival_wrap.png"
-               width="850" height="746" style="max-width: 470px; width: 100%;"
-               alt="Gradient weight plotted against pass rate. Expected reward is a flat line at one. Finite-order TailRL curves rise as the pass rate falls, approaching one over the pass rate while flattening off at a cap set by the truncation order.">
-          <figcaption class="figure-caption" style="margin-bottom: 0;">
-            Finite-order TailRL approaches inverse-probability weighting while capping the rarest-threshold weight.
-            The horizontal reference marks GRPO's single input-level multiplier for one illustrative fixed input.
-          </figcaption>
-        </figure>
-      </div>
-    </details>
   </div>
 </section>
 
