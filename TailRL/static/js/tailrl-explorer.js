@@ -26,21 +26,44 @@
     return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
   }
 
-  var presets = {
-    random: function (n) {
-      /* A Gaussian with a randomly placed mean and width. Truncated by
-         redrawing rather than clamped: clamping piles a spike of mass on
-         whichever end the tail crosses. */
-      var mu = 0.25 + 0.5 * Math.random();
-      var sd = 0.06 + 0.16 * Math.random();
-      var a = [], i, t, x;
-      for (i = 0; i < n; i++) {
-        for (t = 0; t < 24; t++) { x = mu + sd * gauss(); if (x >= 0 && x <= 1) break; }
-        if (!(x >= 0 && x <= 1)) x = Math.min(1, Math.max(0, x));
-        a.push(Math.round(x * 100) / 100);
+  /* The random preset is a Gaussian mixture with one to three modes at random
+     places and random weights. The spec is held rather than redrawn, so moving
+     the rollout slider draws more samples from the SAME reward distribution
+     instead of inventing a new one; only Randomize itself rerolls it. */
+  var randSpec = null;
+  function newRandSpec() {
+    var K = 1 + Math.floor(Math.random() * 3), comps = [], i, j, t, mu, ok, tot = 0, w;
+    for (i = 0; i < K; i++) {
+      /* Keep the modes apart. Drawn freely they often overlap into one bump,
+         so a three-component mixture would still read as unimodal. */
+      for (t = 0; t < 40; t++) {
+        mu = 0.12 + 0.76 * Math.random();
+        ok = true;
+        for (j = 0; j < comps.length; j++) if (Math.abs(mu - comps[j].mu) < 0.19) { ok = false; break; }
+        if (ok) break;
       }
-      return a;
-    },
+      w = 0.6 + 0.8 * Math.random();            // no component so light it vanishes
+      comps.push({ mu: mu, sd: 0.03 + 0.045 * Math.random(), w: w });
+      tot += w;
+    }
+    for (i = 0; i < K; i++) comps[i].w /= tot;
+    return comps;
+  }
+  function sampleSpec(spec, n) {
+    var a = [], i, k, t, u, c, x;
+    for (i = 0; i < n; i++) {
+      u = Math.random(); c = spec[spec.length - 1]; t = 0;
+      for (k = 0; k < spec.length; k++) { t += spec[k].w; if (u <= t) { c = spec[k]; break; } }
+      // truncate by redrawing; clamping would pile a spike on the boundary
+      for (t = 0; t < 24; t++) { x = c.mu + c.sd * gauss(); if (x >= 0 && x <= 1) break; }
+      if (!(x >= 0 && x <= 1)) x = Math.min(1, Math.max(0, x));
+      a.push(Math.round(x * 100) / 100);
+    }
+    return a;
+  }
+
+  var presets = {
+    random: function (n) { return sampleSpec(randSpec || (randSpec = newRandSpec()), n); },
     rare:   function (n) { var a = []; for (var i = 0; i < n; i++) a.push(0.12 + 0.28 * ((i * 7919) % n) / n); a[n - 1] = 0.92; return a; },
     spread: function (n) { var a = []; for (var i = 0; i < n; i++) a.push((i + 0.5) / n); return a; }
   };
@@ -181,7 +204,7 @@
       el('line', { x1: xOf(v), x2: xOf(v), y1: PA.yRoll - 4, y2: PA.yRoll + 4, stroke: C.ink, 'stroke-width': 1 }, svgR);
       text(svgR, xOf(v), PA.yRoll + 20, v.toFixed(1), 'svg-tick');
     });
-    mtext(svgR, PA.x1, PA.yRoll + 38, 'reward |r|  (drag the rollouts)', 'svg-label', 'end');
+    mtext(svgR, (PA.x0 + PA.x1) / 2, PA.yRoll + 38, 'reward |r|  (drag the rollouts)', 'svg-label');
 
     var focus = hover >= 0 ? hover : idx[n - 1];
 
@@ -339,6 +362,7 @@
     var b = document.createElement('button'); b.textContent = presetLabels[key]; b.type = 'button';
     if (key === preset) b.classList.add('active');
     b.addEventListener('click', function () {
+      if (key === 'random') randSpec = newRandSpec();     // a click rerolls it
       preset = key; rewards = presets[key](N); hover = -1;
       pBox.querySelectorAll('button').forEach(function (x) { x.classList.toggle('active', x === b); });
       render();
@@ -348,7 +372,7 @@
 
   var resetBtn = document.getElementById('ex-reset');
   if (resetBtn) resetBtn.addEventListener('click', function () {
-    N = STOPS[START]; preset = 'random'; hover = -1; dragging = -1; pend = null;
+    N = STOPS[START]; preset = 'random'; randSpec = newRandSpec(); hover = -1; dragging = -1; pend = null;
     nSlider.value = String(START);
     nValue.textContent = String(N);
     rewards = presets[preset](N);
