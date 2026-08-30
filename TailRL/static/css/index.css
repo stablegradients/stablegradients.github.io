@@ -726,3 +726,23 @@ img[data-play-in-view] { aspect-ratio: 962 / 663; width: 100%; height: auto; bac
   overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch;
 }
 .math-box h4 { text-align: center; font-size: 1rem; }
+
+/* ---- tinted comparison boxes ---------------------------------------------
+   MaxRL's own boxes are neutral grey; the tints here follow the colour
+   language the rest of this page already uses, blue for the expected-reward
+   baseline and red for TailRL, the same pairing as the advantage explorer.
+   Kept faint: the tint should read as a label, not as a highlight. */
+.math-box.is-rl {
+  background: #f5f8fc;
+  border-color: #d2dfef;
+}
+.math-box.is-rl h4 { color: var(--grpo); }
+.math-box.is-tail {
+  background: #fdf6f5;
+  border-color: #eed3ce;
+}
+.math-box.is-tail h4 { color: var(--tailrl); }
+
+/* a single full-width box, for a theorem rather than a two-way comparison */
+.math-comparison.one { grid-template-columns: 1fr; }
+.math-comparison.one .math-box { padding: 1.75rem 1.5rem; }
