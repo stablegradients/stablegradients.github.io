@@ -28,7 +28,9 @@
   };
 
   // elements that always begin a fresh card
-  var BREAK_BEFORE = '.result-card, .explorer, h2.section-title, .bibtex-box, .conclusion-box';
+  /* .bibtex-box is not listed: it is the only thing in its section, so
+     breaking before it would strand the heading on a card of its own. */
+  var BREAK_BEFORE = '.result-card, .explorer, h2.section-title, .conclusion-box';
   // containers safe to split into several cards, each keeping its own shell
   var SPLITTABLE = 'result-card';
   // blocks that must stay whole even when they exceed the budget -- taking a
@@ -36,7 +38,11 @@
   var ATOMIC = '.explorer, .figure-container, .math-comparison, .comparison-table-wrapper,' +
                '.bibtex-box, .insight-box, .takeaway-box, .formula-box, .algorithm-box, table, iframe';
   // a section heading always gets a card to itself, as a chapter divider
-  var SOLO = 'h2.section-title';
+  /* A section heading used to get a card to itself, which read as a title
+     slide followed by an unlabelled one. It now starts a card and travels with
+     as much of its section as the budget holds, so the heading and its content
+     arrive together. BREAK_BEFORE still forces the new card at the heading. */
+  var SOLO = null;
 
   var docEl = document.documentElement;
   var cards = [], sections = [], index = 0;
@@ -100,7 +106,6 @@
     function flush() { if (cur.length) { groups.push(cur); cur = []; sum = 0; } }
     kids.forEach(function (k) {
       var kh = h(k);
-      if (k.matches && k.matches(SOLO)) { flush(); groups.push([k]); return; }
       if (k.matches && k.matches(BREAK_BEFORE)) flush();
       else if (cur.length && k.parentNode !== cur[0].parentNode) flush();
       else if (cur.length && sum + kh > CFG.budget) flush();
@@ -157,7 +162,7 @@
     cards = [].slice.call(document.querySelectorAll('.sj-card'));
     cards.forEach(function (c) {
       var inn = c.firstChild;
-      if (inn.children.length === 1 && inn.children[0].matches && inn.children[0].matches(SOLO))
+      if (SOLO && inn.children.length === 1 && inn.children[0].matches && inn.children[0].matches(SOLO))
         c.classList.add('sj-chapter');
     });
     sections = [].slice.call(document.querySelectorAll('section, footer.footer')).map(function (el) {

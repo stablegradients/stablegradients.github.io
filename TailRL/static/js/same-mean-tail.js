@@ -156,18 +156,20 @@
                 at({ 0.00: 0.50, 0.50: 0.20, 1.00: 0.30 })];
       }
     },
-    ushape: {
-      label: 'Uniform vs. U-shaped',
+    expdecay: {
+      label: 'Exponentially decaying',
+      /* A is a clean exponential decay; B decays at the same rate but carries a
+         lump out in the tail. B has to differ in shape, not just in rate: the
+         mean lock tilts by exp(lambda x), so one exponential tilted onto
+         another's mean becomes that other exponential exactly, and the pair
+         would collapse into a single curve. */
       make: function () {
         var a = [], b = [], i;
-        for (i = 0; i < L; i++) a.push(1);
-        for (i = 0; i < L; i++) b.push(0.15 + 6 * (X[i] - 0.5) * (X[i] - 0.5));
+        for (i = 0; i < L; i++) a.push(Math.exp(-6 * X[i]));
+        for (i = 0; i < L; i++) b.push(Math.exp(-6 * X[i]));
+        addTo(b, bump(0.88, 0.055), 0.16);
         return [a, b];
       }
-    },
-    binary: {
-      label: 'Binary, same pass rate',
-      make: function () { var a = at({ 0: 0.7, 1: 0.3 }); return [a, a.slice()]; }
     }
   };
 

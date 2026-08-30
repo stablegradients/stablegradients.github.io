@@ -30,17 +30,17 @@
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="./static/css/bulma.min.css">
-  <link rel="stylesheet" href="./static/css/index.css?v=44">
+  <link rel="stylesheet" href="./static/css/index.css?v=47">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
 
-  <script defer src="./static/js/same-mean-tail.js?v=44"></script>
-  <script defer src="./static/js/tailrl-explorer.js?v=44"></script>
-  <script defer src="./static/js/index.js?v=44"></script>
-  <script defer src="./static/js/scroll-jack.js?v=44"></script>
+  <script defer src="./static/js/same-mean-tail.js?v=47"></script>
+  <script defer src="./static/js/tailrl-explorer.js?v=47"></script>
+  <script defer src="./static/js/index.js?v=47"></script>
+  <script defer src="./static/js/scroll-jack.js?v=47"></script>
 </head>
 <body>
 
@@ -157,10 +157,10 @@
 <!-- ==================== 3. WHY TAIL-LIKELIHOOD ==================== -->
 <section class="section section-narrow section-gray" id="why">
   <div class="container is-max-desktop">
-    <h2 class="title is-3 section-title">Why Tail-Likelihood</h2>
-    <div class="content has-text-justified">
-      <p>
-        Standard reinforcement learning only maximizes the mean reward, which loses coverage over rare excellent
+    <h2 class="title is-3 section-title">Why Tail-Likelihood?</h2>
+    <div class="content">
+      <p class="above-figure">
+        Standard reinforcement learning only maximizes the mean reward, losing coverage over rare excellent
         outputs.<br>
         TailRL maximizes the policy's mean reward while simultaneously maximizing its tail-probabilities.
       </p>
@@ -238,6 +238,14 @@
     </div>
 
     <div class="content has-text-justified">
+      <p>
+        TailRL is the expected log tail-probability over uniformly sampled thresholds.
+      </p>
+      <p>
+        On binary rewards every nontrivial threshold asks the same question, did the rollout succeed, so the integral
+        collapses to a single log-likelihood and TailRL reduces exactly to MaxRL.
+        <a href="https://zanette-labs.github.io/MaxRL" target="_blank" rel="noopener">Related project: MaxRL for binary rewards →</a>
+      </p>
       <p>
         Both gradients take the same shape: an average of policy scores
         $S(x,z) := \nabla_\theta \log \pi_\theta(z \mid x)$, each scaled by a weight the objective attaches to its
@@ -379,39 +387,7 @@
         the policy almost never reaches cannot be traded for a small gain on a threshold it already clears. Under the
         mean, that trade is free.
       </p>
-      <p>
-        On binary rewards every nontrivial threshold asks the same question, did the rollout succeed, so the integral
-        collapses to a single log-likelihood and TailRL reduces exactly to MaxRL.
-        <a href="https://zanette-labs.github.io/MaxRL" target="_blank" rel="noopener">Related project: MaxRL for binary rewards →</a>
-      </p>
     </div>
-
-    <details class="deep">
-      <summary>Why this is a likelihood, not just a reweighting</summary>
-      <div class="deep-body">
-        <p>
-          Take $L$ equally spaced thresholds $\tau_\ell=(\ell-1)/L$, draw independent rollouts
-          $z_1,\ldots,z_L\sim\pi_\theta(\cdot\mid x)$, and let $E_L$ be the event that every one clears its assigned
-          threshold. Independence factorizes the likelihood:
-        </p>
-        <div class="formula-box">
-          <p style="margin: 0;">
-            $E_L := \displaystyle\bigcap_{\ell=1}^{L}\left\{r(x,z_\ell)>\tau_\ell\right\}, \qquad
-            \Pr_\theta(E_L\mid x) = \prod_{\ell=1}^{L} p_\theta(x,\tau_\ell)$
-          </p>
-        </div>
-        <p>
-          The number of thresholds sets only the resolution of the audit. Requiring the objective to be invariant to that
-          resolution, while agreeing with the ordinary log-likelihood at $L=1$, fixes the normalization at $1/L$. The
-          result is a Riemann sum, and $L\to\infty$ gives the population objective
-          $\int_0^1 \log p_\theta(x,\tau)\,d\tau$.
-        </p>
-        <p style="margin-bottom: 0;">
-          The audit defines the population likelihood. It is not a sampling procedure: the finite-rollout estimator
-          used in training does not draw one rollout per threshold.
-        </p>
-      </div>
-    </details>
   </div>
 </section>
 
@@ -587,6 +563,21 @@
       <p class="takeaway-line">
         <strong>TailRL separates exactly where the high-reward tail becomes hard to observe.</strong>
       </p>
+      <details class="deep" style="margin-bottom: 0;">
+        <summary>Task details</summary>
+        <div class="deep-body">
+          <p style="margin-bottom: 0;">
+            Each input is a $17\times17$ maze written as text, and a rollout is a token sequence describing a path.
+            The reward $r(x,z)\in[0,1]$ measures proximity to the goal and path length against the shortest path: a
+            rollout earns reward $1$ only by reaching the goal along a shortest path, an event the paper calls
+            <em>shortest-path success</em>. Rollouts that fail still receive partial credit for ending closer to the
+            goal, and successful ones receive more for shorter paths. Varying how much supervised pretraining on
+            goal-reaching trajectories the policy gets yields initial shortest-path success rates from about $1\%$
+            down to $0.01\%$; every method then post-trains from the same checkpoint with $N=16$. Evaluation is on a
+            held-out set of $1024$ mazes.
+          </p>
+        </div>
+      </details>
     </div>
 
     <div class="result-card" id="code-opt">
@@ -616,6 +607,19 @@
       <p class="takeaway-line">
         <strong>Expected reward settles for the common moderate outcome. TailRL preserves the rare behavior needed to improve it.</strong>
       </p>
+      <details class="deep" style="margin-bottom: 0;">
+        <summary>Task details</summary>
+        <div class="deep-body">
+          <p style="margin-bottom: 0;">
+            Each input is a slow C++ program from the PIE corpus of competitive programming, and the model is asked to
+            write a faster version that stays correct. A rollout is a rewritten program, compiled and run against the
+            problem's test suite: it scores zero if it fails any test, and otherwise scores its speedup over the
+            original. Speedup is measured in gem5 time so that timing noise cannot manufacture an improvement.
+            Qwen3-1.7B-Instruct is post-trained with $N=16$ rollouts per program. A policy that simply reproduces its
+            input passes every test and earns mean reward $1$, which is the shortcut this task is built to expose.
+          </p>
+        </div>
+      </details>
     </div>
 
     <div class="result-card" id="gui">
@@ -636,6 +640,20 @@
       <p class="takeaway-line">
         <strong>Single-sample accuracy hides how much useful behavior remains recoverable from the policy.</strong>
       </p>
+      <details class="deep" style="margin-bottom: 0;">
+        <summary>Task details</summary>
+        <div class="deep-body">
+          <p style="margin-bottom: 0;">
+            Given a screenshot and a natural-language instruction to click something, the vision-language policy emits
+            the coordinates of the click. The reward $r(x,z)\in[0,2.5]$ combines proximity to the target, a bonus for
+            landing inside the target element, and a format bonus. Qwen2.5-VL-3B and Qwen2.5-VL-7B are fine-tuned on
+            the GTA1 grounding corpus with $N=8$ rollouts per input, and the training configuration is identical
+            across TailRL, GRPO and RLOO apart from the advantage estimator. Evaluation is on ScreenSpot-Pro, where
+            Pass@$k$ is the probability that at least one of $k$ rollouts clicks inside the target element and
+            Best-of-$k$ reward is the largest continuous reward among them.
+          </p>
+        </div>
+      </details>
     </div>
 
     <div class="content has-text-justified" style="margin-top: 2rem;">

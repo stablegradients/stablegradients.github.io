@@ -814,3 +814,18 @@ h2.title.is-4, .title.is-4.section-title { font-size: 24px; }
   gap: 0.5rem 1.25rem;
 }
 .explorer-head .ctl-line .reset { margin-left: 0; }
+
+/* Copy that introduces a centred, part-width figure reads as a caption above
+   it rather than as running text across the full measure. */
+.content .above-figure {
+  text-align: center;
+  max-width: 70.71%;
+  margin-left: auto;
+  margin-right: auto;
+}
+@media (max-width: 768px) { .content .above-figure { max-width: 100%; } }
+
+/* Bulma's default link blue is 4.35:1 on the grey section band, under AA.
+   This one clears it on both bands (5.9:1 grey, 6.2:1 white). */
+.content a, .result-card a, footer .content a { color: #275fb5; }
+.content a:hover, .result-card a:hover { color: var(--tailrl); }
