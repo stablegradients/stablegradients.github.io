@@ -714,3 +714,6 @@ code, pre, .bibtex-box code { font-family: 'JetBrains Mono', 'Fira Code', Monaco
   .explain-split .notes { gap: 0.9rem; }
   .explain-split .notes p { font-size: 1rem; }
 }
+
+/* the reshape teaser is blank until it scrolls into view, so hold its box */
+img[data-play-in-view] { aspect-ratio: 962 / 663; width: 100%; height: auto; background: transparent; }

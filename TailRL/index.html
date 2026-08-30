@@ -30,17 +30,17 @@
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="./static/css/bulma.min.css">
-  <link rel="stylesheet" href="./static/css/index.css?v=15">
+  <link rel="stylesheet" href="./static/css/index.css?v=16">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
 
-  <script defer src="./static/js/same-mean-tail.js?v=15"></script>
-  <script defer src="./static/js/tailrl-explorer.js?v=15"></script>
-  <script defer src="./static/js/index.js?v=15"></script>
-  <script defer src="./static/js/scroll-jack.js?v=15"></script>
+  <script defer src="./static/js/same-mean-tail.js?v=16"></script>
+  <script defer src="./static/js/tailrl-explorer.js?v=16"></script>
+  <script defer src="./static/js/index.js?v=16"></script>
+  <script defer src="./static/js/scroll-jack.js?v=16"></script>
 </head>
 <body>
 
@@ -60,6 +60,7 @@
     <select class="jump" id="pagenav-jump">
       <option value="">Jump to…</option>
       <option value="#tail">Tail likelihood</option>
+      <option value="#why">Why tail-likelihood</option>
       <option value="#decompose">Decomposition</option>
       <option value="#objective">Objective</option>
       <option value="#bestofk">Best-of-k</option>
@@ -153,8 +154,30 @@
   </div>
 </section>
 
-<!-- ==================== 3. CONTINUOUS REWARDS DECOMPOSE ==================== -->
-<section class="section section-narrow section-gray" id="decompose">
+<!-- ==================== 3. WHY TAIL-LIKELIHOOD ==================== -->
+<section class="section section-narrow section-gray" id="why">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 section-title">Why Tail-Likelihood</h2>
+    <div class="content has-text-justified">
+      <p>
+        Standard reinforcement learning only maximizes the mean reward, which loses coverage over rare excellent
+        outputs.<br>
+        TailRL maximizes the policy's mean reward while simultaneously maximizing its tail-probabilities.
+      </p>
+    </div>
+
+    <figure class="figure-container">
+      <img data-play-in-view="./static/images/reshape_teaser.gif"
+           data-static="./static/images/reshape_teaser_last.png"
+           src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+           width="962" height="663"
+           alt="Reward densities on the unit interval. The base policy is broad and low. GRPO collapses to a narrow peak at a moderate reward. TailRL sits further right and keeps a second lobe of mass in the high-reward tail, so its mean is higher and its tail is thicker.">
+    </figure>
+  </div>
+</section>
+
+<!-- ==================== 4. CONTINUOUS REWARDS DECOMPOSE ==================== -->
+<section class="section section-narrow section-white" id="decompose">
   <div class="container is-max-desktop">
     <h2 class="title is-3 section-title">A continuous reward already contains that curve</h2>
     <div class="content has-text-justified">
@@ -202,8 +225,8 @@
   </div>
 </section>
 
-<!-- ==================== 4. THE TAILRL OBJECTIVE ==================== -->
-<section class="section section-narrow section-white" id="objective">
+<!-- ==================== 5. THE TAILRL OBJECTIVE ==================== -->
+<section class="section section-narrow section-gray" id="objective">
   <div class="container is-max-desktop">
     <h2 class="title is-3 section-title">The TailRL objective</h2>
     <div class="content has-text-justified">
@@ -263,8 +286,8 @@
   </div>
 </section>
 
-<!-- ==================== 5. BEST-OF-K ==================== -->
-<section class="section section-narrow section-gray" id="bestofk">
+<!-- ==================== 6. BEST-OF-K ==================== -->
+<section class="section section-narrow section-white" id="bestofk">
   <div class="container is-max-desktop">
     <h2 class="title is-3 section-title">TailRL is a mixture of Best-of-$k$ objectives</h2>
     <div class="content has-text-justified">
@@ -293,8 +316,8 @@
   </div>
 </section>
 
-<!-- ==================== 6. PI_A vs PI_B INTERACTIVE ==================== -->
-<section class="section section-narrow section-white" id="compare">
+<!-- ==================== 7. PI_A vs PI_B INTERACTIVE ==================== -->
+<section class="section section-narrow section-gray" id="compare">
   <div class="container is-max-desktop">
     <h2 class="title is-3 section-title">Same mean, different tail</h2>
     <div class="content has-text-justified">
@@ -332,8 +355,8 @@
   </div>
 </section>
 
-<!-- ==================== 7. ALGORITHM ==================== -->
-<section class="section section-narrow section-gray" id="algorithm">
+<!-- ==================== 8. ALGORITHM ==================== -->
+<section class="section section-narrow section-white" id="algorithm">
   <div class="container is-max-desktop">
     <h2 class="title is-3 section-title">A new objective, not a new training stack</h2>
     <div class="content has-text-justified">
@@ -404,8 +427,8 @@
   </div>
 </section>
 
-<!-- ==================== 8. ADVANTAGE INTERACTIVE ==================== -->
-<section class="section section-narrow section-white" id="advantages">
+<!-- ==================== 9. ADVANTAGE INTERACTIVE ==================== -->
+<section class="section section-narrow section-gray" id="advantages">
   <div class="container is-max-desktop">
     <h2 class="title is-3 section-title">REINFORCE and TailRL on the same group</h2>
     <div class="content has-text-justified">
@@ -468,8 +491,8 @@
   </div>
 </section>
 
-<!-- ==================== 9. RESULTS ==================== -->
-<section class="section section-narrow section-gray" id="results">
+<!-- ==================== 10. RESULTS ==================== -->
+<section class="section section-narrow section-white" id="results">
   <div class="container is-max-desktop">
     <h2 class="title is-3 section-title">TailRL moves the sampling-compute frontier</h2>
     <div class="content has-text-justified">

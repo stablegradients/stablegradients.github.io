@@ -41,6 +41,53 @@
     });
   })();
 
+  /* ---- figures that start on first sight ---------------------------------
+     The reshape teaser carries no Netscape loop block, so once it starts it
+     runs through once and holds its final frame. What we control is when it
+     starts: swapping src at the moment the figure comes into view means the
+     reader sees it from frame one instead of arriving after it has finished.
+     A blank 1x1 holds the reserved box until then. */
+  (function () {
+    var figs = [].slice.call(document.querySelectorAll('img[data-play-in-view]'));
+    if (!figs.length) return;
+
+    var still = function (el) {
+      var s = el.getAttribute('data-static');
+      if (s) el.src = s;
+    };
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce || !('IntersectionObserver' in window)) {
+      figs.forEach(still);
+      return;
+    }
+
+    /* Warm the cache a screen early so playback is not waiting on the network.
+       fetch rather than `new Image()`: both leave the animation to start when
+       the <img> is swapped in (checked, the rendered frames are identical
+       either way), but fetch fills the HTTP cache without also decoding a
+       663-line bitmap that nothing is going to paint. */
+    var warm = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        var url = e.target.getAttribute('data-play-in-view');
+        if (window.fetch) fetch(url, { cache: 'force-cache' }).catch(function () {});
+        warm.unobserve(e.target);
+      });
+    }, { rootMargin: '900px 0px' });
+
+    // and start it only once a quarter of the figure is actually on screen
+    var start = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        e.target.src = e.target.getAttribute('data-play-in-view');
+        e.target.setAttribute('data-played', '1');
+        start.unobserve(e.target);
+      });
+    }, { threshold: 0.25 });
+
+    figs.forEach(function (el) { warm.observe(el); start.observe(el); });
+  })();
+
   /* ---- sticky nav: highlight the section currently in view --------------- */
   var links = [].slice.call(document.querySelectorAll('.pagenav .links a'));
   var targets = links.map(function (a) { return document.querySelector(a.getAttribute('href')); });
