@@ -808,14 +808,14 @@ h2.title.is-4, .title.is-4.section-title { font-size: 24px; }
 .grad-row .math-line { white-space: nowrap; }
 
 /* The Best-of-k box carries two equations and no heading, so it sits tight and
-   only as wide as it needs: the widest equation is 415px, so 1.5x that is
-   about 620px rather than the full 960px measure. */
+   only as wide as it needs: the widest equation is 332px at the
+   shared 0.8em size, so 1.5x that is 500px rather than the full 960px. */
 .math-box.is-compact {
   /* width, not max-width: the auto margins below turn off the grid item's
      stretch, so a max-width alone leaves it shrink-to-fit at the content's
      own 462px rather than the 620px target. */
   padding: 1.1rem 1.4rem;
-  width: 620px;
+  width: 500px;
   max-width: 100%;
   margin-left: auto;
   margin-right: auto;
@@ -846,7 +846,8 @@ h2.title.is-4, .title.is-4.section-title { font-size: 24px; }
 /* The comparison equations run 20% smaller than the body, which also lets the
    TailRL gradient keep its E[(integral) S] form on one line. The main equation
    in each box reserves the same height so the two sit level across a row. */
-#tailrl .math-line { font-size: 0.8em; }
+#tailrl .math-line,
+#harmonic .math-line { font-size: 0.8em; }
 #tailrl .math-comparison .math-box {
   display: flex; flex-direction: column;
 }
@@ -860,3 +861,13 @@ h2.title.is-4, .title.is-4.section-title { font-size: 24px; }
 #tailrl .obj-row  .math-line { --eq-h: 3.2em; }
 #tailrl .grad-row .math-line { --eq-h: 4.2em; }
 #tailrl .math-comparison .math-note { margin-top: auto; }
+
+/* The research question above each experiment sits halfway between the section
+   title (32px) and the experiment name (19.2px), so 25.6px. */
+.result-card .eyebrow {
+  font-size: 1.6rem;
+  line-height: 1.3;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+@media (max-width: 768px) { .result-card .eyebrow { font-size: 1.25rem; } }

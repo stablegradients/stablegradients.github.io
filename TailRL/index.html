@@ -30,17 +30,17 @@
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="./static/css/bulma.min.css">
-  <link rel="stylesheet" href="./static/css/index.css?v=57">
+  <link rel="stylesheet" href="./static/css/index.css?v=60">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
 
-  <script defer src="./static/js/same-mean-tail.js?v=57"></script>
-  <script defer src="./static/js/tailrl-explorer.js?v=57"></script>
-  <script defer src="./static/js/index.js?v=57"></script>
-  <script defer src="./static/js/scroll-jack.js?v=57"></script>
+  <script defer src="./static/js/same-mean-tail.js?v=60"></script>
+  <script defer src="./static/js/tailrl-explorer.js?v=60"></script>
+  <script defer src="./static/js/index.js?v=60"></script>
+  <script defer src="./static/js/scroll-jack.js?v=60"></script>
 </head>
 <body>
 
@@ -50,7 +50,7 @@
     <span class="brand">TailRL</span>
     <span class="links">
       <a href="#tail">Tail</a>
-      <a href="#objective">Objective</a>
+      <a href="#tailrl">Objective</a>
       <a href="#harmonic">Best-of-k</a>
       <a href="#algorithm">Algorithm</a>
       <a href="#results">Results</a>
@@ -64,7 +64,6 @@
       <option value="#tailrl">Objective and gradient</option>
       <option value="#harmonic">Aligned with inference time</option>
       <option value="#decompose">Decomposition</option>
-      <option value="#objective">Objective</option>
       <option value="#compare">Manipulate the distribution</option>
       <option value="#algorithm">Algorithm</option>
       <option value="#advantages">Advantages</option>
@@ -184,8 +183,8 @@
     <div class="content has-text-justified">
       <p>
         Two policies can have the same expected reward and very different odds of producing an exceptional sample.
-        Every preset opens as a matched pair with equal means, so any difference you see in the tail and in
-        Best-of-$k$ is invisible to expected-reward RL. Drag the bars and the means are free to move apart.
+        Every preset opens as a matched pair with equal mean reward but different tail probabilities. This difference
+        is reflected in their Best-of-$k$ as we increase sampling.
       </p>
       <p class="do-this">
         Drag inside either histogram to move mass between reward values.
@@ -206,7 +205,6 @@
         <svg id="smt-tail" viewBox="0 0 360 220" role="img" aria-label="Tail-probability curves for both policies"></svg>
         <svg id="smt-bok" viewBox="0 0 360 220" role="img" aria-label="Best-of-k against the rollout budget for both policies"></svg>
       </div>
-      <div class="readout" id="smt-readout"></div>
       <div class="hint" id="smt-hint"></div>
     </div>
 
@@ -360,39 +358,10 @@
   </div>
 </section>
 
-<!-- ==================== 8. THE TAILRL OBJECTIVE ==================== -->
-<section class="section section-narrow section-white" id="objective">
+<!-- ==================== 8. ALGORITHM ==================== -->
+<section class="section section-narrow section-white" id="algorithm">
   <div class="container is-max-desktop">
-    <h2 class="title is-3 section-title">The TailRL objective</h2>
-    <div class="content has-text-justified">
-      <p>
-        Keep the curve instead of its area. TailRL maximizes the average log-likelihood across reward thresholds:
-      </p>
-    </div>
-
-    <div class="formula-box" style="margin: 1.25rem 0 0.75rem 0;">
-      <p style="font-size: 1.44rem; margin: 0;">
-        $J_{\mathrm{TailRL}}(\theta;x) \;=\; \displaystyle\int_0^1 \log p_\theta(x,\tau)\,d\tau$
-      </p>
-    </div>
-    <p class="figure-caption" style="margin-bottom: 1.5rem;">
-      Every reward threshold contributes its own log-likelihood, and every threshold counts equally.
-    </p>
-
-    <div class="content has-text-justified">
-      <p>
-        The logarithm is what changes the incentives. Because $\log p$ falls away without bound as $p\to 0$, a threshold
-        the policy almost never reaches cannot be traded for a small gain on a threshold it already clears. Under the
-        mean, that trade is free.
-      </p>
-    </div>
-  </div>
-</section>
-
-<!-- ==================== 9. ALGORITHM ==================== -->
-<section class="section section-narrow section-gray" id="algorithm">
-  <div class="container is-max-desktop">
-    <h2 class="title is-3 section-title">A new objective, not a new training stack</h2>
+    <h2 class="title is-3 section-title">Easy plug-in for RL pipelines</h2>
     <div class="content has-text-justified">
       <p>
         In an existing RL system this is a few lines inside the advantage computation: the same rollout groups as
@@ -432,8 +401,8 @@
   </div>
 </section>
 
-<!-- ==================== 10. ADVANTAGE INTERACTIVE ==================== -->
-<section class="section section-narrow section-white" id="advantages">
+<!-- ==================== 9. ADVANTAGE INTERACTIVE ==================== -->
+<section class="section section-narrow section-gray" id="advantages">
   <div class="container is-max-desktop">
     <h2 class="title is-3 section-title">Comparing REINFORCE and TailRL advantages</h2>
     <div class="content has-text-justified">
@@ -479,8 +448,8 @@
   </div>
 </section>
 
-<!-- ==================== 11. RESULTS ==================== -->
-<section class="section section-narrow section-gray" id="results">
+<!-- ==================== 10. RESULTS ==================== -->
+<section class="section section-narrow section-white" id="results">
   <div class="container is-max-desktop">
     <h2 class="title is-3 section-title">TailRL moves the sampling-compute frontier</h2>
     <div class="content has-text-justified">

@@ -228,7 +228,7 @@
   }
   function text(parent, x, y, s, cls, anchor, fill) {
     var t = el('text', { x: x, y: y, 'class': cls || 'svg-label', 'text-anchor': anchor || 'middle' }, parent);
-    if (fill) t.setAttribute('fill', fill);
+    if (fill) t.style.fill = fill;
     t.textContent = s;
     return t;
   }
@@ -236,7 +236,7 @@
      italic, the rest in KaTeX_Main upright, matching the page's equations. */
   function mtext(parent, x, y, spec, cls, anchor, fill) {
     var t = el('text', { x: x, y: y, 'class': cls || 'svg-label', 'text-anchor': anchor || 'middle' }, parent);
-    if (fill) t.setAttribute('fill', fill);
+    if (fill) t.style.fill = fill;
     spec.split('|').forEach(function (seg, i) {
       if (seg === '') return;
       var ts = el('tspan', { 'class': (i % 2) ? 'sv-math' : 'sv-text' }, t);
@@ -250,13 +250,9 @@
   }
   /* Static symbols typeset once; only the numbers change per frame. */
   var TEX = (typeof katex !== 'undefined') ? {
-    jrl:  tex('J_{\\mathrm{RL}}'),
-    jpop: tex('J_{\\mathrm{TailRL}}'),
-    jk:   tex('J^{(k)}_{\\mathrm{TailRL}}'),
-    bok:  tex('\\text{Best-of-}k'),
     pa:   tex('\\pi_A'),
     pb:   tex('\\pi_B')
-  } : { jrl: 'J_RL', jpop: 'J_TailRL', jk: 'J^(k)', bok: 'Best-of-k', pa: 'A', pb: 'B' };
+  } : { pa: 'A', pb: 'B' };
   function num(v) { return '<span class="knum">' + v + '</span>'; }
 
   function clear(svg) { while (svg.firstChild) svg.removeChild(svg.firstChild); }
@@ -267,13 +263,6 @@
   }
   function d3(v) { return v.toFixed(3); }
   /* U+2212 for a real minus sign, matching the existing explorer readout. */
-  function sig(v) {
-    var s;
-    if (v === -Infinity) return '−∞';
-    s = v.toFixed(3);
-    if (/^-0(\.0*)?$/.test(s)) s = s.slice(1);
-    return s.charAt(0) === '-' ? '−' + s.slice(1) : s;
-  }
 
   /* --------------------------------------------------------------- histograms */
   var HG = { x0: 36, x1: 336, yTop: 46, yBase: 168 };
@@ -289,7 +278,7 @@
 
     /* Panel title, centred over the plot. */
     t = el('text', { x: (HG.x0 + HG.x1) / 2, y: 18, 'class': 'svg-title', 'text-anchor': 'middle' }, svg);
-    t.setAttribute('fill', color);
+    t.style.fill = color;
     ts = el('tspan', { 'class': 'sv-text' }, t); ts.textContent = 'Policy ';
     ts = el('tspan', { 'class': 'sv-math' }, t); ts.textContent = '\u03c0';
     ts = el('tspan', { 'class': 'sv-math', 'font-size': '10', dy: '3' }, t); ts.textContent = which;
@@ -419,37 +408,18 @@
     });
   }
 
-  /* ---------------------------------------------------------------- readouts */
-  function spanA(s) { return '<span class="smt-a">' + s + '</span>'; }
-  function spanB(s) { return '<span class="smt-b">' + s + '</span>'; }
-  /* the two policies are named \u03c0_A and \u03c0_B throughout the page */
+  /* ---------------------------------------------------------------- readouts */    /* the two policies are named \u03c0_A and \u03c0_B throughout the page */
   function pol(which) { return which === 'A' ? TEX.pa : TEX.pb; }
 
   function drawText() {
     var pa = normalize(wA), pb = normalize(wB);
-    var k = kOf(), out = document.getElementById('smt-readout'), hint = document.getElementById('smt-hint');
-    var mA, mB, dm, bA, bB, jA, jB, pA, pB, l1, lead, dB, dJ, msg;
+    var k = kOf(), hint = document.getElementById('smt-hint');
+    var mA, mB, dm, bA, bB, jA, jB, lead, dB, dJ, msg;
     if (!pa || !pb) return;
 
     mA = mean(pa); mB = mean(pb); dm = Math.abs(mA - mB);
     bA = bestOfK(pa, k); bB = bestOfK(pb, k);
     jA = jTrunc(pa, k); jB = jTrunc(pb, k);
-    pA = jPop(pa); pB = jPop(pb);
-
-    l1 = TEX.jrl + ' (mean): &nbsp; ' + spanA(pol('A') + ' ' + num(d3(mA))) + ' &nbsp; ' + spanB(pol('B') + ' ' + num(d3(mB))) + ' &nbsp; → ';
-    l1 += dm <= 1e-6
-      ? 'identical: expected-reward RL sees the same objective'
-      : 'differ by ' + d3(dm);
-
-    out.innerHTML = l1 + '<br>' +
-      TEX.jk + ' at ' + num('k = ' + k) + ': &nbsp; ' +
-      spanA(pol('A') + ' ' + num(sig(jA))) + ' &nbsp; ' + spanB(pol('B') + ' ' + num(sig(jB))) +
-      ' &nbsp;|&nbsp; population ' + TEX.jpop + ': &nbsp; ' +
-      spanA(pol('A') + ' ' + num(sig(pA)) + (pA === -Infinity ? ' (reward 1 unreachable)' : '')) + ' &nbsp; ' +
-      spanB(pol('B') + ' ' + num(sig(pB)) + (pB === -Infinity ? ' (reward 1 unreachable)' : '')) + '<br>' +
-      TEX.bok + ' at ' + num('k = ' + k) + ': &nbsp; ' +
-      spanA(pol('A') + ' ' + num(d3(bA))) + ' &nbsp; ' + spanB(pol('B') + ' ' + num(d3(bB)));
-
     lead = bB >= bA ? 'B' : 'A';
     dB = lead === 'B' ? bB - bA : bA - bB;
     dJ = lead === 'B' ? jB - jA : jA - jB;

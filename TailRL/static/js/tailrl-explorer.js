@@ -212,7 +212,7 @@
     function focusDecor(parent, r) {
       el('circle', { cx: xOf(r), cy: PA.yRoll, r: sz.r * 1.4, fill: C.tailrl, stroke: C.tailrl, 'stroke-width': 2 }, parent);
       var t = mtext(parent, xOf(r), PA.yRoll - sz.r * 1.4 - 8, '|r| = ' + r.toFixed(2), 'svg-tick');
-      t.setAttribute('fill', C.tailrl);
+      t.style.fill = C.tailrl;
     }
 
     if (sz.bars) {
@@ -303,7 +303,7 @@
       // the shape of the update; the printed bounds carry the differing scale
       var maxAbs = m.A.reduce(function (s, v) { return Math.max(s, Math.abs(v)); }, 0) || 1;
       var yMid = (yTop + yBot) / 2, scale = (yBot - yTop) / 2 / maxAbs * 0.92;
-      text(svgA, px + panelW / 2, 20, m.name + ' advantage', 'svg-title').setAttribute('fill', m.color);
+      text(svgA, px + panelW / 2, 20, m.name + ' advantage', 'svg-title').style.fill = m.color;
       mtext(svgA, px + panelW / 2, 36, m.sub, 'svg-tick');
       el('line', { x1: px, x2: px + panelW, y1: yMid, y2: yMid, stroke: C.muted, 'stroke-width': 1 }, svgA);
       text(svgA, px - 6, yTop + 4, '+' + maxAbs.toFixed(dec(maxAbs)), 'svg-tick', 'end');
