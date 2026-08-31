@@ -119,8 +119,19 @@
         cur.push(k);
         return;
       }
+      /* A research question opens a block, so it starts a slide rather than
+         trailing at the foot of the previous one. The exception is a question
+         sitting straight under the experiment name, where the two are one
+         heading and must not be split. */
       var kh = h(k);
-      if (k.matches && k.matches(BREAK_BEFORE)) flush();
+      if (k.matches && k.matches('.eyebrow')) {
+        var prev = null, j;
+        for (j = cur.length - 1; j >= 0; j--) {
+          if (!(cur[j].matches && cur[j].matches(CARRY))) { prev = cur[j]; break; }
+        }
+        if (!prev || prev.tagName !== 'H4') flush();
+      }
+      else if (k.matches && k.matches(BREAK_BEFORE)) flush();
       else if (cur.length && k.parentNode !== cur[0].parentNode) flush();
       else if (cur.length && sum + kh > CFG.budget) flush();
       cur.push(k); sum += kh;
