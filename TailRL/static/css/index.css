@@ -136,6 +136,8 @@ h4.subsection-title {
   margin-right: auto;
 }
 .figure-caption { font-size: 1.08rem; color: var(--text-muted); margin-top: 1rem; text-align: left; }
+/* opt-out for a caption that reads as a standalone label rather than prose */
+.figure-caption.is-centered { text-align: center; }
 
 .result-card {
   background: #fff;
