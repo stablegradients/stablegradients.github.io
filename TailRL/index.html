@@ -30,17 +30,17 @@
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="./static/css/bulma.min.css">
-  <link rel="stylesheet" href="./static/css/index.css?v=73">
+  <link rel="stylesheet" href="./static/css/index.css?v=74">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
 
-  <script defer src="./static/js/same-mean-tail.js?v=73"></script>
-  <script defer src="./static/js/tailrl-explorer.js?v=73"></script>
-  <script defer src="./static/js/index.js?v=73"></script>
-  <script defer src="./static/js/scroll-jack.js?v=73"></script>
+  <script defer src="./static/js/same-mean-tail.js?v=74"></script>
+  <script defer src="./static/js/tailrl-explorer.js?v=74"></script>
+  <script defer src="./static/js/index.js?v=74"></script>
+  <script defer src="./static/js/scroll-jack.js?v=74"></script>
 </head>
 <body>
 
@@ -391,7 +391,7 @@
     </p>
 
     <div style="margin: 0 0 0.5rem 0;">
-      <iframe id="tailrl-code-frame" src="./code.html?v=73" title="TailRL advantage computation as a diff against GRPO"
+      <iframe id="tailrl-code-frame" src="./code.html?v=74" title="TailRL advantage computation as a diff against GRPO"
               width="900" height="662"
               style="border: none; overflow: hidden; width: 100%; display: block;"
               scrolling="no"></iframe>
@@ -476,7 +476,7 @@
         comparable mean IoU.
       </p>
       <figure class="figure-container">
-        <img loading="lazy" decoding="async" src="./static/images/imagenet_sup_curves.png?v=73" width="1644" height="522"
+        <img loading="lazy" decoding="async" src="./static/images/imagenet_sup_curves.png?v=74" width="1644" height="522"
              alt="Three panels showing CorLoc at 0.5, CorLoc at 0.75 and mean IoU against training epochs. The population TailRL curve sits at or above the L1, GIoU and L1+GIoU supervised baselines throughout.">
         <figcaption class="figure-caption">
           CorLoc@$0.5$, CorLoc@$0.75$ and mean IoU for population TailRL against the supervised baselines L1, GIoU
@@ -490,7 +490,7 @@
         stays above the expected-reward baselines.
       </p>
       <figure class="figure-container">
-        <img loading="lazy" decoding="async" src="./static/images/imagenet_rl_curves.png?v=73" width="1644" height="581"
+        <img loading="lazy" decoding="async" src="./static/images/imagenet_rl_curves.png?v=74" width="1644" height="581"
              alt="Three panels showing CorLoc at 0.5, mean IoU and Best-of-1024 IoU against training epochs. TailRL curves at increasing rollout budgets rise toward a dashed exact-objective reference, and all sit above the GRPO, RLOO and PKPO curves.">
         <figcaption class="figure-caption">
           CorLoc@$0.5$, mean IoU and Best-of-$1024$ IoU on the held-out validation set. TailRL trains at
@@ -512,14 +512,22 @@
     </div>
 
     <div class="result-card" id="maze">
-      <h4>Text-maze navigation</h4>
+      <h4>Maze Navigation: Bootstrapping from Weak Initializations</h4>
+      <p>
+        A small transformer navigates mazes written as text. We pause supervised pretraining at several points to
+        obtain starting policies of varying strength, from ones that almost never solve a maze to ones that
+        occasionally do, then continue each with RL. The reward is graded: partial credit for getting closer to the
+        goal, plus a bonus for short solutions. This tests whether a method can learn from rare partial successes
+        when full solutions are almost never sampled.
+      </p>
+
       <span class="eyebrow">Can RL learn when exceptional outcomes are almost absent?</span>
       <p>
-        We vary the initial shortest-path success rate from about $1\%$ to $0.01\%$. TailRL remains reliable in the
-        rare-success regime, where RLOO stays at zero and GRPO becomes seed-dependent.
+        TailRL improves from every initialization, including the weakest. GRPO and RLOO fail to leave zero there,
+        and PKPO stays well below TailRL across the sweep.
       </p>
       <figure class="figure-container">
-        <img loading="lazy" decoding="async" src="./static/images/maze_init_sweep_wrap.png?v=73"
+        <img loading="lazy" decoding="async" src="./static/images/maze_init_sweep_wrap.png?v=74"
              width="834" height="691" style="max-width: 470px; width: 100%;"
              alt="Pass@1 after RL plotted against Pass@1 before RL for TailRL, GRPO, RLOO and PKPO. In the shaded poor-initialization region the TailRL curve stays high, RLOO and GRPO start at zero, and PKPO sits well below TailRL.">
         <figcaption class="figure-caption">
