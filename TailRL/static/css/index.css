@@ -486,6 +486,21 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--tailrl); outlin
 .inset-figure { max-width: 330px; margin-left: auto; margin-right: auto; }
 @media (max-width: 640px) { .inset-figure { max-width: 100%; } }
 
+/* A figure the prose runs around. Unlike the explainer sections, the copy here
+   is taller than the figure, so this is a real float: the text sets beside it
+   and then continues underneath. Declared after .inset-figure so the explicit
+   width and margins win over its auto-centring. */
+.wrap-right {
+  float: right;
+  width: 330px;
+  margin: 0.35rem 0 1rem 1.8rem;
+}
+/* the next question must start below the float, not beside it */
+.result-card .eyebrow { clear: both; }
+@media (max-width: 640px) {
+  .wrap-right { float: none; width: 100%; margin: 0 0 1rem 0; }
+}
+
 /* ---- disclosures --------------------------------------------------------- */
 details.deep {
   border: 1px solid var(--border-light); border-radius: 6px;
