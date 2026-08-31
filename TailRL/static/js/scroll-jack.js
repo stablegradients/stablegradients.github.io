@@ -78,8 +78,15 @@
     return el;
   }
 
+  /* Reference material that rides along with its card instead of being packed:
+     hidden in presentation mode, but still moved into a card. A block dropped
+     here is not merely skipped, it is destroyed, because the split path removes
+     the original shell once its children have been handed to the clones. */
+  var CARRY = 'details.deep';
+
   function visibleKids(el) {
     return [].slice.call(el.children).filter(function (c) {
+      if (c.matches && c.matches(CARRY)) return true;
       var st = getComputedStyle(c);
       return st.display !== 'none' && st.position !== 'fixed' && h(c) > 4;
     });
@@ -105,6 +112,13 @@
     var groups = [], cur = [], sum = 0;
     function flush() { if (cur.length) { groups.push(cur); cur = []; sum = 0; } }
     kids.forEach(function (k) {
+      // a carried block never opens a card of its own and never costs budget,
+      // else a collapsed disclosure lands on a slide showing nothing
+      if (k.matches && k.matches(CARRY)) {
+        if (!cur.length || k.parentNode !== cur[0].parentNode) flush();
+        cur.push(k);
+        return;
+      }
       var kh = h(k);
       if (k.matches && k.matches(BREAK_BEFORE)) flush();
       else if (cur.length && k.parentNode !== cur[0].parentNode) flush();
@@ -139,11 +153,18 @@
       var host = hostOf(sec);
       var kids = flowBlocks(host);
       if (!kids.length) return;
+      /* Marked sections stay on one slide however tall they are; layout()
+         scales an oversized card down to fit. */
+      if (sec.hasAttribute('data-sj-whole')) {
+        wrapCard(kids, kids[0].parentNode, kids[0]);
+        return;
+      }
       var groups = pack(kids);
       groups.forEach(function (g) {
         // a single oversized splittable block becomes several cards, each
         // keeping its own shell so it still reads as one complete card
-        if (g.length === 1 && h(g[0]) > CFG.budget && g[0].classList.contains(SPLITTABLE)) {
+        if (g.length === 1 && h(g[0]) > CFG.budget && g[0].classList.contains(SPLITTABLE) &&
+            !g[0].hasAttribute('data-sj-whole')) {
           var shell = g[0], sub = pack(flowBlocks(shell));
           if (sub.length > 1) {
             sub.forEach(function (sg) {

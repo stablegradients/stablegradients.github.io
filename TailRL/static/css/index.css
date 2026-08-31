@@ -572,6 +572,12 @@ body.sj-on section.section,
 body.sj-on section.hero,
 body.sj-on .hero .hero-body,
 body.sj-on footer.footer { padding-top: 0; padding-bottom: 0; }
+/* Setup tables are reference material, not slide content. Left in, a collapsed
+   disclosure is tall enough to be packed but shows nothing, so it lands on a
+   card of its own that reads as an empty slide. `sj-on` is set before the
+   packer runs, and the packer skips display:none blocks, so this keeps them
+   out of the cards rather than merely hiding them inside one. */
+body.sj-on details.deep { display: none; }
 /* the title slide is a card like any other once presentation mode is on */
 body.sj-on .hero { min-height: 0; display: block; }
 @media print { .sj-toggle { display: none !important; } }
