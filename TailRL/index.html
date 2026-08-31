@@ -30,17 +30,17 @@
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="./static/css/bulma.min.css">
-  <link rel="stylesheet" href="./static/css/index.css?v=91">
+  <link rel="stylesheet" href="./static/css/index.css?v=95">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
 
-  <script defer src="./static/js/same-mean-tail.js?v=91"></script>
-  <script defer src="./static/js/tailrl-explorer.js?v=91"></script>
-  <script defer src="./static/js/index.js?v=91"></script>
-  <script defer src="./static/js/scroll-jack.js?v=91"></script>
+  <script defer src="./static/js/same-mean-tail.js?v=95"></script>
+  <script defer src="./static/js/tailrl-explorer.js?v=95"></script>
+  <script defer src="./static/js/index.js?v=95"></script>
+  <script defer src="./static/js/scroll-jack.js?v=95"></script>
 </head>
 <body>
 
@@ -382,7 +382,7 @@
     </details>
 
     <div style="margin: 0 0 0.5rem 0;">
-      <iframe id="tailrl-code-frame" src="./code.html?v=91" title="TailRL advantage computation as a diff against GRPO"
+      <iframe id="tailrl-code-frame" src="./code.html?v=95" title="TailRL advantage computation as a diff against GRPO"
               width="900" height="662"
               style="border: none; overflow: hidden; width: 100%; display: block;"
               scrolling="no"></iframe>
@@ -467,7 +467,7 @@
         comparable mean IoU.
       </p>
       <figure class="figure-container">
-        <img loading="lazy" decoding="async" src="./static/images/imagenet_sup_curves.png?v=91" width="1644" height="522"
+        <img loading="lazy" decoding="async" src="./static/images/imagenet_sup_curves.png?v=95" width="1644" height="522"
              alt="Three panels showing CorLoc at 0.5, CorLoc at 0.75 and mean IoU against training epochs. The population TailRL curve sits at or above the L1, GIoU and L1+GIoU supervised baselines throughout.">
         <figcaption class="figure-caption">
           CorLoc@$0.5$, CorLoc@$0.75$ and mean IoU for population TailRL against the supervised baselines L1, GIoU
@@ -481,7 +481,7 @@
         stays above the expected-reward baselines.
       </p>
       <figure class="figure-container">
-        <img loading="lazy" decoding="async" src="./static/images/imagenet_rl_curves.png?v=91" width="1644" height="581"
+        <img loading="lazy" decoding="async" src="./static/images/imagenet_rl_curves.png?v=95" width="1644" height="581"
              alt="Three panels showing CorLoc at 0.5, mean IoU and Best-of-1024 IoU against training epochs. TailRL curves at increasing rollout budgets rise toward a dashed exact-objective reference, and all sit above the GRPO, RLOO and PKPO curves.">
         <figcaption class="figure-caption">
           CorLoc@$0.5$, mean IoU and Best-of-$1024$ IoU on the held-out validation set. TailRL trains at
@@ -492,17 +492,24 @@
       <details class="deep" style="margin-bottom: 0;">
         <summary>Setup details</summary>
         <div class="deep-body">
-            <p><strong>Model.</strong> Pretrained ResNet-50 backbone with four categorical heads, $50$ uniformly
-              spaced bins each; a rollout samples one bin per head. The full output space is $50^4$ boxes, which is
-              what makes the population objective computable.</p>
-            <p><strong>Training.</strong> Adam, learning rate $5\times10^{-4}$ with warmup, batch size $128$,
-              $30$ epochs. TailRL at $N\in\{16,64,256,1024\}$; GRPO and RLOO use their stabilized,
-              advantage-clamped variants at the same budgets.</p>
-            <p><strong>Supervised anchors.</strong> MSE, L1, GIoU and L1+GIoU (DETR weights $\lambda_{\mathrm{L1}}=5$,
-              $\lambda_{\mathrm{GIoU}}=2$) regressed directly on the ground-truth coordinates.</p>
-            <p style="margin-bottom: 0;"><strong>Evaluation.</strong> CorLoc@$\delta$ under greedy decoding, mean IoU,
-              and Best-of-$1024$ IoU from $1{,}024$ samples per image, on the $50{,}000$ held-out validation images.
-              $3$ seeds.</p>
+          <table class="setup-table">
+            <tbody>
+              <tr><th>Backbone</th><td>ResNet-50, pretrained</td></tr>
+              <tr><th>Policy head</th><td>4 categorical heads $\times$ 50 bins</td></tr>
+              <tr><th>Reward</th><td>IoU, $[0,1]$</td></tr>
+              <tr><th>Optimizer</th><td>Adam</td></tr>
+              <tr><th>Learning rate</th><td>$5\times10^{-4}$, warmup</td></tr>
+              <tr><th>Batch size</th><td>128</td></tr>
+              <tr><th>Epochs</th><td>30</td></tr>
+              <tr><th>Training rollouts $N$</th><td>16, 64, 256, 1024</td></tr>
+              <tr><th>Population budget</th><td>$50^4$ boxes, so the exact objective is computable</td></tr>
+              <tr><th>Baselines</th><td>GRPO, RLOO (advantage-clamped)</td></tr>
+              <tr><th>Supervised anchors</th><td>MSE, L1, GIoU, L1+GIoU (DETR weights $5$, $2$)</td></tr>
+              <tr><th>Evaluation</th><td>CorLoc@$\delta$ greedy, mean IoU, Best-of-$1024$ IoU</td></tr>
+              <tr><th>Eval samples</th><td>1,024 per image, 50,000 held-out images</td></tr>
+              <tr><th>Seeds</th><td>3</td></tr>
+            </tbody>
+          </table>
         </div>
       </details>
     </div>
@@ -520,7 +527,7 @@
       <span class="eyebrow">Can RL learn when exceptional outcomes are almost absent?</span>
       <div class="pair-block">
       <figure class="figure-container pair-figure">
-        <img loading="lazy" decoding="async" src="./static/images/maze_init_sweep_wrap.png?v=91"
+        <img loading="lazy" decoding="async" src="./static/images/maze_init_sweep_wrap.png?v=95"
              width="834" height="691"
              alt="Pass@1 after RL plotted against Pass@1 before RL for TailRL, GRPO, RLOO and PKPO. In the shaded poor-initialization region the TailRL curve stays high, RLOO and GRPO start at zero, and PKPO sits well below TailRL.">
         <figcaption class="figure-caption">
@@ -538,15 +545,23 @@
       <details class="deep" style="margin-bottom: 0;">
         <summary>Setup details</summary>
         <div class="deep-body">
-            <p><strong>Model and data.</strong> A $3$M-parameter decoder-only transformer ($4$ layers, $4$ heads,
-              width $256$) trained from scratch, pretrained on $1.3$M mazes with up to $16$ annotated paths each,
-              path length $\le 60$.</p>
-            <p><strong>Initial policies.</strong> Seven pretraining checkpoints, held-out shortest-path rates from
-              $0.012\%$ to $0.83\%$.</p>
-            <p><strong>Training.</strong> verl, fully on-policy, one PPO epoch, no KL. $256$ prompts per step,
-              $N=16$ rollouts (swept over $\{4,16,64,256\}$), learning rate $10^{-4}$, $5{,}000$ steps, $3$ seeds.</p>
-            <p style="margin-bottom: 0;"><strong>Evaluation.</strong> Shortest-path rate from $64$ rollouts on each of
-              $1{,}024$ held-out mazes.</p>
+          <table class="setup-table">
+            <tbody>
+              <tr><th>Maze</th><td>$17\times17$, written as text</td></tr>
+              <tr><th>Policy</th><td>3M decoder, 4 layers, 4 heads, width 256</td></tr>
+              <tr><th>Pretraining corpus</th><td>1.3M mazes, up to 16 paths each</td></tr>
+              <tr><th>Path length</th><td>$\le 60$</td></tr>
+              <tr><th>Initial policies</th><td>7 checkpoints, $0.012\%$ to $0.83\%$ shortest-path</td></tr>
+              <tr><th>RL framework</th><td>verl, fully on-policy</td></tr>
+              <tr><th>PPO epochs</th><td>1, no KL</td></tr>
+              <tr><th>Prompts per step</th><td>256</td></tr>
+              <tr><th>Training rollouts $N$</th><td>16 (swept over 4, 16, 64, 256)</td></tr>
+              <tr><th>Learning rate</th><td>$10^{-4}$</td></tr>
+              <tr><th>Steps</th><td>5,000</td></tr>
+              <tr><th>Evaluation</th><td>64 rollouts on each of 1,024 held-out mazes</td></tr>
+              <tr><th>Seeds</th><td>3</td></tr>
+            </tbody>
+          </table>
         </div>
       </details>
     </div>
@@ -556,7 +571,7 @@
       <span class="eyebrow">Can the objective escape a safe but useless shortcut?</span>
       <div class="float-block">
       <figure class="figure-container wrap-right">
-        <img loading="lazy" decoding="async" src="./static/images/pie_rollout_dist_v2.png?v=91" width="791" height="633"
+        <img loading="lazy" decoding="async" src="./static/images/pie_rollout_dist_v2.png?v=95" width="791" height="633"
              alt="The initial reward distribution on PIE: a large mass of incorrect rollouts at zero, a tall spike at a speedup of one from copying the input, and a thin tail of correct and faster programs.">
         <figcaption class="figure-caption">
           Initial rewards for Qwen3-1.7B-Instruct: $74.4\%$ of rollouts are incorrect, $23.5\%$ are correct but no
@@ -583,7 +598,7 @@
         $0.98\times$ for GRPO and $0.96\times$ for RLOO, whose best rollouts never beat the input they reproduce.
       </p>
       <figure class="figure-container">
-        <img loading="lazy" decoding="async" src="./static/images/pie_results_v3.png?v=91" width="1652" height="521"
+        <img loading="lazy" decoding="async" src="./static/images/pie_results_v3.png?v=95" width="1652" height="521"
              alt="Three panels: mean training reward over one epoch, the density of per-problem Best-of-1024 reward on the test set, and correctness probability during training. TailRL's reward climbs well above the copying value while GRPO and RLOO settle at it.">
         <figcaption class="figure-caption">
           Mean reward over one epoch (left), per-problem Best-of-$1024$ reward on the test set (middle), where GRPO
@@ -596,18 +611,24 @@
       <details class="deep" style="margin-bottom: 0;">
         <summary>Setup details</summary>
         <div class="deep-body">
-            <p><strong>Model and data.</strong> Qwen3-1.7B-Instruct on the PIE corpus of competitive-programming
-              C++. The faster human rewrites PIE ships with are never used in training or evaluation. Problems are
-              filtered for programs that fail to compile or miss more than $\max(5,5\%)$ of tests, and for
-              unreliable or over-limit timing cases.</p>
-            <p><strong>Reward.</strong> Zero unless the rewrite compiles and passes every test, otherwise the speedup
-              over the input. Cost is gem5 simulated ticks, not wall clock, so the same program scores the same on
-              any machine. Rollouts exceeding $3\times$ the source ticks are cut off and scored zero.</p>
-            <p><strong>Training.</strong> Fully on-policy, one optimizer update per batch, no KL. $64$ programs per
-              batch, $N=16$ rollouts each, learning rate $10^{-6}$, temperature $1.0$, top-$p$ $1.0$, prompt cap
-              $2{,}560$ tokens, response cap $4{,}096$. $3$ runs per objective.</p>
-            <p style="margin-bottom: 0;"><strong>Evaluation.</strong> $878$ held-out problems; the initial
-              distribution above is $4{,}096$ rollouts per problem before any RL.</p>
+          <table class="setup-table">
+            <tbody>
+              <tr><th>Model</th><td>Qwen3-1.7B-Instruct</td></tr>
+              <tr><th>Corpus</th><td>PIE competitive-programming C++</td></tr>
+              <tr><th>Reward</th><td>speedup over the input, $0$ if any test fails</td></tr>
+              <tr><th>Timing</th><td>gem5 simulated ticks, not wall clock</td></tr>
+              <tr><th>Cutoff</th><td>rollouts past $3\times$ the source ticks score $0$</td></tr>
+              <tr><th>Training rollouts $N$</th><td>16</td></tr>
+              <tr><th>Programs per batch</th><td>64</td></tr>
+              <tr><th>Learning rate</th><td>$10^{-6}$</td></tr>
+              <tr><th>Optimizer updates</th><td>1 per batch, on-policy, no KL</td></tr>
+              <tr><th>Sampling temperature</th><td>1.0</td></tr>
+              <tr><th>Nucleus top-$p$</th><td>1.0</td></tr>
+              <tr><th>Max prompt / response</th><td>2,560 / 4,096 tokens</td></tr>
+              <tr><th>Evaluation</th><td>878 held-out problems</td></tr>
+              <tr><th>Runs per objective</th><td>3</td></tr>
+            </tbody>
+          </table>
         </div>
       </details>
     </div>
@@ -627,7 +648,7 @@
         $4$ at 7B, or $128\times$ and $256\times$ less inference sampling.
       </p>
       <figure class="figure-container">
-        <img loading="lazy" decoding="async" src="./static/images/gui_scales.png?v=91" width="1669" height="987"
+        <img loading="lazy" decoding="async" src="./static/images/gui_scales.png?v=95" width="1669" height="987"
              alt="Pass@k, Best-of-k reward and training accuracy for Qwen2.5-VL 3B and 7B on ScreenSpot-Pro. The TailRL Pass@k curves keep climbing with the rollout budget while RLOO flattens and GRPO trails, even though training accuracy is similar for all three.">
         <figcaption class="figure-caption">
           ScreenSpot-Pro after post-training Qwen2.5-VL-3B (top) and 7B (bottom). Columns are Pass@$k$, Best-of-$k$
@@ -640,19 +661,28 @@
       <details class="deep" style="margin-bottom: 0;">
         <summary>Setup details</summary>
         <div class="deep-body">
-            <p><strong>Models and data.</strong> Qwen2.5-VL-3B and 7B, vision tower trained, fine-tuned on GTA1
-              ($70{,}528$ screenshot-instruction pairs). Images at native resolution, $3{,}136$ to $12{,}845{,}056$
-              pixels, capped at $16{,}384$ image tokens.</p>
-            <p><strong>Reward.</strong> The SE-GUI dense point reward plus $0.5$ for a parseable coordinate, giving
-              $r(x,z)\in[0,2.5]$: an indicator for landing inside the target box, and $1-(d/d_{\max})^2$ for
-              proximity to its centre.</p>
-            <p><strong>Training.</strong> Fully on-policy, one update per batch, no KL. $8$ prompts per step,
-              $N=8$ rollouts each, temperature $1.0$, learning rate $10^{-6}$ decaying linearly to zero over
-              $26{,}448$ steps ($3$ epochs), bf16 with gradient checkpointing, gradient-norm guard $100$. $1$ seed.</p>
-            <p style="margin-bottom: 0;"><strong>Evaluation.</strong> All $1{,}581$ ScreenSpot-Pro items, $4{,}096$
-              samples each at temperature $0.6$ and top-$p$ $0.95$, with the unbiased Pass@$k$ estimator and
-              $1{,}000$-sample bootstrap intervals. Absolute values are not comparable with published ScreenSpot-Pro
-              numbers, which use a different tool-call format.</p>
+          <table class="setup-table">
+            <tbody>
+              <tr><th>Models</th><td>Qwen2.5-VL-3B and 7B, vision tower trained</td></tr>
+              <tr><th>Corpus</th><td>GTA1, 70,528 screenshot-instruction pairs</td></tr>
+              <tr><th>Reward</th><td>SE-GUI point reward $+\,0.5$ format, $[0,2.5]$</td></tr>
+              <tr><th>Pixel window</th><td>3,136 to 12,845,056</td></tr>
+              <tr><th>Token cap</th><td>16,384</td></tr>
+              <tr><th>Prompts per step</th><td>8</td></tr>
+              <tr><th>Rollouts per prompt $N$</th><td>8</td></tr>
+              <tr><th>Updates per step</th><td>1, on-policy, no KL</td></tr>
+              <tr><th>Rollout temperature</th><td>1.0</td></tr>
+              <tr><th>Learning rate</th><td>$10^{-6}$, linear to zero</td></tr>
+              <tr><th>Steps</th><td>26,448 (3 epochs)</td></tr>
+              <tr><th>Precision</th><td>bf16, gradient checkpointing</td></tr>
+              <tr><th>Grad-norm guard</th><td>100</td></tr>
+              <tr><th>Evaluation</th><td>ScreenSpot-Pro, all 1,581 items</td></tr>
+              <tr><th>Eval temp / top-$p$</th><td>0.6 / 0.95</td></tr>
+              <tr><th>Eval samples</th><td>4,096 per item</td></tr>
+              <tr><th>Confidence intervals</th><td>1,000-sample bootstrap</td></tr>
+              <tr><th>Seeds</th><td>1</td></tr>
+            </tbody>
+          </table>
         </div>
       </details>
     </div>

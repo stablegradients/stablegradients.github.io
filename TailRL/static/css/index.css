@@ -135,7 +135,7 @@ h4.subsection-title {
   margin-left: auto;
   margin-right: auto;
 }
-.figure-caption { font-size: 1.08rem; color: var(--text-muted); margin-top: 1rem; text-align: center; }
+.figure-caption { font-size: 1.08rem; color: var(--text-muted); margin-top: 1rem; text-align: left; }
 
 .result-card {
   background: #fff;
@@ -949,4 +949,23 @@ h2.title.is-4, .title.is-4.section-title { font-size: 24px; }
 @media (max-width: 768px) {
   .pair-block { flex-direction: column; align-items: stretch; gap: 1rem; }
   .pair-figure { flex: none; max-width: 100%; }
+}
+
+/* Hyperparameters read as a table, not as prose: two columns, the name in the
+   left rail. Scrolls inside itself on a narrow screen rather than widening
+   the page. */
+.deep-body table.setup-table {
+  width: 100%; border-collapse: collapse; margin: 0.25rem 0 0 0;
+  font-size: 1.02rem; background: transparent;
+}
+.setup-table th, .setup-table td {
+  text-align: left; vertical-align: top; padding: 0.4rem 0.9rem 0.4rem 0;
+  border-bottom: 1px solid var(--border-light);
+}
+.setup-table tr:last-child th, .setup-table tr:last-child td { border-bottom: none; }
+.setup-table th { font-weight: 600; color: var(--text-dark); white-space: nowrap; width: 1%; }
+.setup-table td { color: var(--text-dark); }
+@media (max-width: 640px) {
+  .setup-table th, .setup-table td { padding: 0.35rem 0.6rem 0.35rem 0; font-size: 0.96rem; }
+  .setup-table th { white-space: normal; }
 }

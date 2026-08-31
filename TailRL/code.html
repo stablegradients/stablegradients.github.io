@@ -11,7 +11,7 @@
         body { background: #f9fafb; padding: 0px 20px 24px 20px; margin: 0; }
 
         .code-window {
-            background: #2d2d2d;
+            background: #1e1e1e;
             border-radius: 12px;
             box-shadow: none;
             overflow: hidden;
@@ -82,6 +82,27 @@
             position: absolute; right: 5px; color: #66ff66; font-weight: bold;
         }
         .line-numbers-rows > span { position: relative; }
+
+        /* ---- VS Code Dark+ palette -------------------------------------
+           Prism's Tomorrow theme ships a different set of hues, so the tokens
+           are remapped to the colours the editor actually uses. Prism gives
+           every keyword one class, so a post-pass splits declarations (blue)
+           from control flow (purple), and tags the bare identifiers Prism
+           leaves as plain text, which is where most of the editor's blue
+           comes from. */
+        pre[class*="language-"], code[class*="language-"] { color: #d4d4d4; }
+        .token.comment, .token.prolog, .token.doctype, .token.cdata { color: #6a9955; font-style: normal; }
+        .token.string, .token.triple-quoted-string, .token.char { color: #ce9178; }
+        .token.number { color: #b5cea8; }
+        .token.boolean { color: #569cd6; }
+        .token.keyword { color: #c586c0; }
+        .token.keyword.kw-decl { color: #569cd6; }
+        .token.builtin, .token.class-name { color: #4ec9b0; }
+        .token.function, .token.decorator, .token.annotation { color: #dcdcaa; }
+        .token.operator, .token.punctuation { color: #d4d4d4; background: none; }
+        .tok-id { color: #9cdcfe; }
+        .tok-call { color: #dcdcaa; }
+        .tok-attr { color: #9cdcfe; }
         /* one block per source line; on desktop this is purely structural */
         .cl { display: block; }
 
@@ -211,6 +232,71 @@
                per line -- safe here because no highlight token spans a newline
                (asserted in the mobilecode suite) -- and hoist the diff class
                onto the wrapper so the band is the line itself. */
+            /* Prism assigns one class to every keyword; the editor does not.
+               Declarations are blue, control flow purple. */
+            var KW_DECL = ['def','class','lambda','import','from','as','global',
+                           'nonlocal','None','True','False','self'];
+            function splitKeywords() {
+                [].forEach.call(document.querySelectorAll('code .token.keyword'), function (t) {
+                    if (KW_DECL.indexOf(t.textContent.trim()) !== -1) t.classList.add('kw-decl');
+                });
+            }
+
+            /* Bare identifiers are left as plain text by Prism, so they would
+               render in the default grey. Wrap them: one that is followed by an
+               open paren is a call and takes the function colour, the rest take
+               the variable colour. Only text nodes outside a token are touched,
+               so nothing inside a string or comment is affected. */
+            var ID = /[A-Za-z_][A-Za-z0-9_]*/g;
+            function colorIdentifiers() {
+                var code = document.querySelector('code.language-python');
+                if (!code || code.getAttribute('data-ids')) return;
+                var walker = document.createTreeWalker(code, NodeFilter.SHOW_TEXT, null),
+                    nodes = [], n;
+                while ((n = walker.nextNode())) {
+                    if (!n.parentNode.closest('.token')) nodes.push(n);
+                }
+                nodes.forEach(function (node) {
+                    var text = node.nodeValue;
+                    if (!ID.test(text)) { ID.lastIndex = 0; return; }
+                    ID.lastIndex = 0;
+                    var frag = document.createDocumentFragment(), last = 0, m;
+                    while ((m = ID.exec(text))) {
+                        if (m.index > last) frag.appendChild(document.createTextNode(text.slice(last, m.index)));
+                        var sp = document.createElement('span');
+                        sp.className = 'tok-id';
+                        sp.textContent = m[0];
+                        frag.appendChild(sp);
+                        last = m.index + m[0].length;
+                    }
+                    if (last < text.length) frag.appendChild(document.createTextNode(text.slice(last)));
+                    node.parentNode.replaceChild(frag, node);
+                });
+                /* An identifier's open paren is a punctuation token in a
+                   different node, so the call test cannot be done on the text
+                   node alone; walk forward in document order instead. */
+                [].forEach.call(code.querySelectorAll('.tok-id'), function (el) {
+                    if (nextChar(el, code) === '(') el.className = 'tok-call';
+                });
+                code.setAttribute('data-ids', '1');
+            }
+
+            function nextChar(el, root) {
+                var n = el;
+                while (n && n !== root) {
+                    var sib = n.nextSibling;
+                    while (sib) {
+                        var t = sib.textContent;
+                        for (var i = 0; i < t.length; i++) {
+                            if (!/\s/.test(t.charAt(i))) return t.charAt(i);
+                        }
+                        sib = sib.nextSibling;
+                    }
+                    n = n.parentNode;
+                }
+                return '';
+            }
+
             function wrapLines() {
                 var code = document.querySelector('code.language-python');
                 if (!code || code.getAttribute('data-lines')) return;
@@ -277,7 +363,9 @@
 
             function runWhenReady() {
                 if (typeof Prism !== 'undefined' && document.querySelector('.line-numbers-rows')) {
-                    setTimeout(function () { wrapLines(); markDiffLines(); }, 500);
+                    setTimeout(function () {
+                        splitKeywords(); colorIdentifiers(); wrapLines(); markDiffLines();
+                    }, 500);
                 } else {
                     setTimeout(runWhenReady, 100);
                 }
