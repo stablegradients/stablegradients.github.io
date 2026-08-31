@@ -30,17 +30,17 @@
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="./static/css/bulma.min.css">
-  <link rel="stylesheet" href="./static/css/index.css?v=69">
+  <link rel="stylesheet" href="./static/css/index.css?v=70">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
 
-  <script defer src="./static/js/same-mean-tail.js?v=69"></script>
-  <script defer src="./static/js/tailrl-explorer.js?v=69"></script>
-  <script defer src="./static/js/index.js?v=69"></script>
-  <script defer src="./static/js/scroll-jack.js?v=69"></script>
+  <script defer src="./static/js/same-mean-tail.js?v=70"></script>
+  <script defer src="./static/js/tailrl-explorer.js?v=70"></script>
+  <script defer src="./static/js/index.js?v=70"></script>
+  <script defer src="./static/js/scroll-jack.js?v=70"></script>
 </head>
 <body>
 
@@ -391,7 +391,7 @@
     </p>
 
     <div style="margin: 0 0 0.5rem 0;">
-      <iframe id="tailrl-code-frame" src="./code.html?v=69" title="TailRL advantage computation as a diff against GRPO"
+      <iframe id="tailrl-code-frame" src="./code.html?v=70" title="TailRL advantage computation as a diff against GRPO"
               width="900" height="662"
               style="border: none; overflow: hidden; width: 100%; display: block;"
               scrolling="no"></iframe>
@@ -464,15 +464,15 @@
       <span class="eyebrow">Does the finite estimator approach the exact objective?</span>
       <h4>ImageNet localization</h4>
       <p>
-        The categorical policy is tractable enough to optimize population TailRL exactly. Finite-rollout TailRL
-        approaches that reference as $N$ grows, and TailRL at $N=16$ already exceeds GRPO and RLOO trained with $N=1024$.
+        ImageNet object localization asks for a bounding box around the object of interest, without classifying it.
       </p>
       <figure class="figure-container">
         <img loading="lazy" decoding="async" src="./static/images/imagenet_rl_curves.png" width="1645" height="581"
              alt="Three panels showing CorLoc at 0.5, mean IoU and Best-of-1024 IoU against training epochs. TailRL curves at increasing rollout budgets rise toward a dashed exact-objective reference, and all sit above the GRPO and RLOO curves.">
         <figcaption class="figure-caption">
-          Larger rollout groups move finite TailRL toward the exact population objective. Even $N=16$, using $1/64$ the
-          training rollouts, exceeds the expected-reward baselines at $N=1024$.
+          CorLoc@$0.5$, mean IoU and Best-of-$1024$ IoU on the held-out validation set. TailRL trains at
+          $N\in\{16,64,256,1024\}$, darker curves for larger $N$; the dashed curve optimizes the exactly computed
+          population objective. GRPO and RLOO use $N=1024$.
         </figcaption>
       </figure>
       <p class="result-note">
