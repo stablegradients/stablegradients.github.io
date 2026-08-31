@@ -208,8 +208,9 @@ pre code { display: block; padding: 1rem; background: #1f2937; color: #e5e7eb; b
   padding: 0;
 }
 
-footer.footer { background: #1f2937; color: #1f2937; padding: 2rem; overflow: hidden; }
+footer.footer { background: #1f2937; color: #ffffff; padding: 2rem; overflow: hidden; }
 footer.footer .columns { margin: 0; }
+footer.footer p { color: #ffffff; }
 footer.footer .container { overflow: hidden; }
 footer a { color: #93c5fd; }
 footer a:hover { color: #bfdbfe; }
