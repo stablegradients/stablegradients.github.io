@@ -30,17 +30,17 @@
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="./static/css/bulma.min.css">
-  <link rel="stylesheet" href="./static/css/index.css?v=84">
+  <link rel="stylesheet" href="./static/css/index.css?v=86">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
 
-  <script defer src="./static/js/same-mean-tail.js?v=84"></script>
-  <script defer src="./static/js/tailrl-explorer.js?v=84"></script>
-  <script defer src="./static/js/index.js?v=84"></script>
-  <script defer src="./static/js/scroll-jack.js?v=84"></script>
+  <script defer src="./static/js/same-mean-tail.js?v=86"></script>
+  <script defer src="./static/js/tailrl-explorer.js?v=86"></script>
+  <script defer src="./static/js/index.js?v=86"></script>
+  <script defer src="./static/js/scroll-jack.js?v=86"></script>
 </head>
 <body>
 
@@ -382,7 +382,7 @@
     </details>
 
     <div style="margin: 0 0 0.5rem 0;">
-      <iframe id="tailrl-code-frame" src="./code.html?v=84" title="TailRL advantage computation as a diff against GRPO"
+      <iframe id="tailrl-code-frame" src="./code.html?v=86" title="TailRL advantage computation as a diff against GRPO"
               width="900" height="662"
               style="border: none; overflow: hidden; width: 100%; display: block;"
               scrolling="no"></iframe>
@@ -467,7 +467,7 @@
         comparable mean IoU.
       </p>
       <figure class="figure-container">
-        <img loading="lazy" decoding="async" src="./static/images/imagenet_sup_curves.png?v=84" width="1644" height="522"
+        <img loading="lazy" decoding="async" src="./static/images/imagenet_sup_curves.png?v=86" width="1644" height="522"
              alt="Three panels showing CorLoc at 0.5, CorLoc at 0.75 and mean IoU against training epochs. The population TailRL curve sits at or above the L1, GIoU and L1+GIoU supervised baselines throughout.">
         <figcaption class="figure-caption">
           CorLoc@$0.5$, CorLoc@$0.75$ and mean IoU for population TailRL against the supervised baselines L1, GIoU
@@ -481,7 +481,7 @@
         stays above the expected-reward baselines.
       </p>
       <figure class="figure-container">
-        <img loading="lazy" decoding="async" src="./static/images/imagenet_rl_curves.png?v=84" width="1644" height="581"
+        <img loading="lazy" decoding="async" src="./static/images/imagenet_rl_curves.png?v=86" width="1644" height="581"
              alt="Three panels showing CorLoc at 0.5, mean IoU and Best-of-1024 IoU against training epochs. TailRL curves at increasing rollout budgets rise toward a dashed exact-objective reference, and all sit above the GRPO, RLOO and PKPO curves.">
         <figcaption class="figure-caption">
           CorLoc@$0.5$, mean IoU and Best-of-$1024$ IoU on the held-out validation set. TailRL trains at
@@ -490,14 +490,19 @@
         </figcaption>
       </figure>
       <details class="deep" style="margin-bottom: 0;">
-        <summary>Task details</summary>
+        <summary>Setup details</summary>
         <div class="deep-body">
-          <p style="margin-bottom: 0;">
-            A ResNet-50 backbone feeds four categorical heads that sample a bounding box centre, width and height. The
-            reward is the box's IoU with the ground truth. Because the policy is a tractable categorical distribution
-            over a finite box set, the exact policy-induced reward distribution, and so the population objective, can
-            be computed directly. Metrics are CorLoc@$\delta$, mean IoU and Best-of-$k$ IoU on held-out validation images.
-          </p>
+            <p><strong>Model.</strong> Pretrained ResNet-50 backbone with four categorical heads, $50$ uniformly
+              spaced bins each; a rollout samples one bin per head. The full output space is $50^4$ boxes, which is
+              what makes the population objective computable.</p>
+            <p><strong>Training.</strong> Adam, learning rate $5\times10^{-4}$ with warmup, batch size $128$,
+              $30$ epochs. TailRL at $N\in\{16,64,256,1024\}$; GRPO and RLOO use their stabilized,
+              advantage-clamped variants at the same budgets.</p>
+            <p><strong>Supervised anchors.</strong> MSE, L1, GIoU and L1+GIoU (DETR weights $\lambda_{\mathrm{L1}}=5$,
+              $\lambda_{\mathrm{GIoU}}=2$) regressed directly on the ground-truth coordinates.</p>
+            <p style="margin-bottom: 0;"><strong>Evaluation.</strong> CorLoc@$\delta$ under greedy decoding, mean IoU,
+              and Best-of-$1024$ IoU from $1{,}024$ samples per image, on the $50{,}000$ held-out validation images.
+              $3$ seeds.</p>
         </div>
       </details>
     </div>
@@ -518,7 +523,7 @@
         and PKPO stays well below TailRL across the sweep.
       </p>
       <figure class="figure-container">
-        <img loading="lazy" decoding="async" src="./static/images/maze_init_sweep_wrap.png?v=84"
+        <img loading="lazy" decoding="async" src="./static/images/maze_init_sweep_wrap.png?v=86"
              width="834" height="691" style="max-width: 470px; width: 100%;"
              alt="Pass@1 after RL plotted against Pass@1 before RL for TailRL, GRPO, RLOO and PKPO. In the shaded poor-initialization region the TailRL curve stays high, RLOO and GRPO start at zero, and PKPO sits well below TailRL.">
         <figcaption class="figure-caption">
@@ -531,94 +536,121 @@
         <strong>TailRL separates exactly where the high-reward tail becomes hard to observe.</strong>
       </p>
       <details class="deep" style="margin-bottom: 0;">
-        <summary>Task details</summary>
+        <summary>Setup details</summary>
         <div class="deep-body">
-          <p style="margin-bottom: 0;">
-            Each input is a $17\times17$ maze written as text, and a rollout is a token sequence describing a path.
-            The reward $r(x,z)\in[0,1]$ measures proximity to the goal and path length against the shortest path: a
-            rollout earns reward $1$ only by reaching the goal along a shortest path, an event the paper calls
-            <em>shortest-path success</em>. Rollouts that fail still receive partial credit for ending closer to the
-            goal, and successful ones receive more for shorter paths. Varying how much supervised pretraining on
-            goal-reaching trajectories the policy gets yields initial shortest-path success rates from about $1\%$
-            down to $0.01\%$; every method then post-trains from the same checkpoint with $N=16$. Evaluation is on a
-            held-out set of $1024$ mazes.
-          </p>
+            <p><strong>Model and data.</strong> A $3$M-parameter decoder-only transformer ($4$ layers, $4$ heads,
+              width $256$) trained from scratch, pretrained on $1.3$M mazes with up to $16$ annotated paths each,
+              path length $\le 60$.</p>
+            <p><strong>Initial policies.</strong> Seven pretraining checkpoints, held-out shortest-path rates from
+              $0.012\%$ to $0.83\%$.</p>
+            <p><strong>Training.</strong> verl, fully on-policy, one PPO epoch, no KL. $256$ prompts per step,
+              $N=16$ rollouts (swept over $\{4,16,64,256\}$), learning rate $10^{-4}$, $5{,}000$ steps, $3$ seeds.</p>
+            <p style="margin-bottom: 0;"><strong>Evaluation.</strong> Shortest-path rate from $64$ rollouts on each of
+              $1{,}024$ held-out mazes.</p>
         </div>
       </details>
     </div>
 
     <div class="result-card" id="code-opt">
-      <h4>Code runtime optimization</h4>
-      <span class="eyebrow">Can the objective escape a safe but useless shortcut?</span>
+      <h4>Code Runtime Optimization</h4>
       <p>
-        Copying the input is always correct and earns reward $1$. GRPO and RLOO collapse to this shortcut; TailRL keeps
-        producing risky rewrites and reaches $7.7\times$ Best-of-$1024$ speedup on held-out problems, versus below
-        $1\times$ for both baselines.
+        Each input is a slow C++ program from the PIE corpus of competitive programming, and the model is asked to
+        rewrite it to run faster while staying correct. A rollout is compiled and run against the problem's test
+        suite: it scores zero if it fails any test, and otherwise scores its speedup over the input. Speedup is
+        measured in gem5 time, so timing noise cannot manufacture an improvement.
       </p>
-      <figure class="figure-container">
-        <img loading="lazy" decoding="async" src="./static/images/pie_results_v3.png" width="1652" height="521"
-             alt="Three panels: mean training reward over one epoch, the density of per-problem Best-of-1024 reward on the test set, and correctness probability during training. TailRL's reward climbs well above the copying value while GRPO and RLOO settle at it.">
-        <figcaption class="figure-caption">
-          Mean reward during one epoch (left), per-problem Best-of-$1024$ reward on the test set (middle) where GRPO and
-          RLOO coincide at $1.0$, and the fraction of rollouts passing every test (right).
-        </figcaption>
-      </figure>
-      <figure class="figure-container inset-figure" style="margin-top: 0.5rem;">
-        <img loading="lazy" decoding="async" src="./static/images/pie_rollout_dist_v2.png" width="791" height="633"
+      <p>
+        The catch is where the reward mass starts. Copying the input passes every test and earns reward $1$, and it
+        is by far the easiest thing to reach.
+      </p>
+      <figure class="figure-container inset-figure">
+        <img loading="lazy" decoding="async" src="./static/images/pie_rollout_dist_v2.png?v=86" width="791" height="633"
              alt="The initial reward distribution on PIE: a large mass of incorrect rollouts at zero, a tall spike at a speedup of one from copying the input, and a thin tail of correct and faster programs.">
         <figcaption class="figure-caption">
-          The shortcut is visible from the start: $74.4\%$ of initial rollouts are incorrect, $23.5\%$ are correct
-          but no faster than the input, concentrating in the spike at $1\times$, and only $2.1\%$ are correct and faster.
+          Initial rewards for Qwen3-1.7B-Instruct: $74.4\%$ of rollouts are incorrect, $23.5\%$ are correct but no
+          faster than the input and pile up in the spike at $1\times$, and only $2.1\%$ are correct and faster.
+        </figcaption>
+      </figure>
+
+      <span class="eyebrow">Can the objective escape a safe but useless shortcut?</span>
+      <p>
+        GRPO and RLOO take the shortcut. Their correctness climbs above $98\%$ while mean reward settles just below
+        $1$, which is exactly what copying pays: their rollouts echo the program they were handed. TailRL keeps
+        producing risky rewrites instead, trading single-rollout correctness for programs that are genuinely faster,
+        and reaches mean reward $2.92$. On held-out problems its mean Best-of-$1024$ speedup is $7.7\times$, against
+        $0.98\times$ for GRPO and $0.96\times$ for RLOO, whose best rollouts never beat the input they reproduce.
+      </p>
+      <figure class="figure-container">
+        <img loading="lazy" decoding="async" src="./static/images/pie_results_v3.png?v=86" width="1652" height="521"
+             alt="Three panels: mean training reward over one epoch, the density of per-problem Best-of-1024 reward on the test set, and correctness probability during training. TailRL's reward climbs well above the copying value while GRPO and RLOO settle at it.">
+        <figcaption class="figure-caption">
+          Mean reward over one epoch (left), per-problem Best-of-$1024$ reward on the test set (middle), where GRPO
+          and RLOO coincide at $1.0$, and the fraction of rollouts passing every test (right).
         </figcaption>
       </figure>
       <p class="takeaway-line">
         <strong>Expected reward settles for the common moderate outcome. TailRL preserves the rare behavior needed to improve it.</strong>
       </p>
       <details class="deep" style="margin-bottom: 0;">
-        <summary>Task details</summary>
+        <summary>Setup details</summary>
         <div class="deep-body">
-          <p style="margin-bottom: 0;">
-            Each input is a slow C++ program from the PIE corpus of competitive programming, and the model is asked to
-            write a faster version that stays correct. A rollout is a rewritten program, compiled and run against the
-            problem's test suite: it scores zero if it fails any test, and otherwise scores its speedup over the
-            original. Speedup is measured in gem5 time so that timing noise cannot manufacture an improvement.
-            Qwen3-1.7B-Instruct is post-trained with $N=16$ rollouts per program. A policy that simply reproduces its
-            input passes every test and earns mean reward $1$, which is the shortcut this task is built to expose.
-          </p>
+            <p><strong>Model and data.</strong> Qwen3-1.7B-Instruct on the PIE corpus of competitive-programming
+              C++. The faster human rewrites PIE ships with are never used in training or evaluation. Problems are
+              filtered for programs that fail to compile or miss more than $\max(5,5\%)$ of tests, and for
+              unreliable or over-limit timing cases.</p>
+            <p><strong>Reward.</strong> Zero unless the rewrite compiles and passes every test, otherwise the speedup
+              over the input. Cost is gem5 simulated ticks, not wall clock, so the same program scores the same on
+              any machine. Rollouts exceeding $3\times$ the source ticks are cut off and scored zero.</p>
+            <p><strong>Training.</strong> Fully on-policy, one optimizer update per batch, no KL. $64$ programs per
+              batch, $N=16$ rollouts each, learning rate $10^{-6}$, temperature $1.0$, top-$p$ $1.0$, prompt cap
+              $2{,}560$ tokens, response cap $4{,}096$. $3$ runs per objective.</p>
+            <p style="margin-bottom: 0;"><strong>Evaluation.</strong> $878$ held-out problems; the initial
+              distribution above is $4{,}096$ rollouts per problem before any RL.</p>
         </div>
       </details>
     </div>
 
     <div class="result-card" id="gui">
-      <h4>GUI grounding with 3B and 7B vision-language models</h4>
+      <h4>GUI Grounding with Vision-Language Models</h4>
+      <p>
+        Given a screenshot and an instruction to click something, the model outputs the coordinates of the click.
+        The reward combines how close the click lands, a bonus for landing inside the target element, and a format
+        bonus. Qwen2.5-VL at 3B and 7B are fine-tuned on the GTA1 corpus and evaluated on ScreenSpot-Pro.
+      </p>
+
       <span class="eyebrow">Do similar one-sample policies scale differently with more inference?</span>
       <p>
-        TailRL and RLOO have similar Pass@$1$, but their curves separate as more samples are drawn. TailRL matches
-        RLOO's Pass@$1024$ with $8$ rollouts at 3B and $4$ at 7B: $128\times$ and $256\times$ less inference sampling.
+        Training accuracy says the three methods are alike, but they come apart as samples are drawn: TailRL's
+        Pass@$k$ keeps climbing while RLOO flattens. TailRL matches RLOO's Pass@$1024$ with $8$ rollouts at 3B and
+        $4$ at 7B, or $128\times$ and $256\times$ less inference sampling.
       </p>
       <figure class="figure-container">
-        <img loading="lazy" decoding="async" src="./static/images/gui_scales.png" width="1669" height="987"
+        <img loading="lazy" decoding="async" src="./static/images/gui_scales.png?v=86" width="1669" height="987"
              alt="Pass@k, Best-of-k reward and training accuracy for Qwen2.5-VL 3B and 7B on ScreenSpot-Pro. The TailRL Pass@k curves keep climbing with the rollout budget while RLOO flattens and GRPO trails, even though training accuracy is similar for all three.">
         <figcaption class="figure-caption">
-          ScreenSpot-Pro after post-training Qwen2.5-VL-3B (top) and 7B (bottom). All three methods reach similar
-          training accuracy, but only TailRL keeps improving with the inference budget.
+          ScreenSpot-Pro after post-training Qwen2.5-VL-3B (top) and 7B (bottom). Columns are Pass@$k$, Best-of-$k$
+          reward, and smoothed training accuracy.
         </figcaption>
       </figure>
       <p class="takeaway-line">
         <strong>Single-sample accuracy hides how much useful behavior remains recoverable from the policy.</strong>
       </p>
       <details class="deep" style="margin-bottom: 0;">
-        <summary>Task details</summary>
+        <summary>Setup details</summary>
         <div class="deep-body">
-          <p style="margin-bottom: 0;">
-            Given a screenshot and a natural-language instruction to click something, the vision-language policy emits
-            the coordinates of the click. The reward $r(x,z)\in[0,2.5]$ combines proximity to the target, a bonus for
-            landing inside the target element, and a format bonus. Qwen2.5-VL-3B and Qwen2.5-VL-7B are fine-tuned on
-            the GTA1 grounding corpus with $N=8$ rollouts per input, and the training configuration is identical
-            across TailRL, GRPO and RLOO apart from the advantage estimator. Evaluation is on ScreenSpot-Pro, where
-            Pass@$k$ is the probability that at least one of $k$ rollouts clicks inside the target element and
-            Best-of-$k$ reward is the largest continuous reward among them.
-          </p>
+            <p><strong>Models and data.</strong> Qwen2.5-VL-3B and 7B, vision tower trained, fine-tuned on GTA1
+              ($70{,}528$ screenshot-instruction pairs). Images at native resolution, $3{,}136$ to $12{,}845{,}056$
+              pixels, capped at $16{,}384$ image tokens.</p>
+            <p><strong>Reward.</strong> The SE-GUI dense point reward plus $0.5$ for a parseable coordinate, giving
+              $r(x,z)\in[0,2.5]$: an indicator for landing inside the target box, and $1-(d/d_{\max})^2$ for
+              proximity to its centre.</p>
+            <p><strong>Training.</strong> Fully on-policy, one update per batch, no KL. $8$ prompts per step,
+              $N=8$ rollouts each, temperature $1.0$, learning rate $10^{-6}$ decaying linearly to zero over
+              $26{,}448$ steps ($3$ epochs), bf16 with gradient checkpointing, gradient-norm guard $100$. $1$ seed.</p>
+            <p style="margin-bottom: 0;"><strong>Evaluation.</strong> All $1{,}581$ ScreenSpot-Pro items, $4{,}096$
+              samples each at temperature $0.6$ and top-$p$ $0.95$, with the unbiased Pass@$k$ estimator and
+              $1{,}000$-sample bootstrap intervals. Absolute values are not comparable with published ScreenSpot-Pro
+              numbers, which use a different tool-call format.</p>
         </div>
       </details>
     </div>
