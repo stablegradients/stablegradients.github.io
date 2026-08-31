@@ -30,17 +30,17 @@
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="./static/css/bulma.min.css">
-  <link rel="stylesheet" href="./static/css/index.css?v=71">
+  <link rel="stylesheet" href="./static/css/index.css?v=73">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
 
-  <script defer src="./static/js/same-mean-tail.js?v=71"></script>
-  <script defer src="./static/js/tailrl-explorer.js?v=71"></script>
-  <script defer src="./static/js/index.js?v=71"></script>
-  <script defer src="./static/js/scroll-jack.js?v=71"></script>
+  <script defer src="./static/js/same-mean-tail.js?v=73"></script>
+  <script defer src="./static/js/tailrl-explorer.js?v=73"></script>
+  <script defer src="./static/js/index.js?v=73"></script>
+  <script defer src="./static/js/scroll-jack.js?v=73"></script>
 </head>
 <body>
 
@@ -391,7 +391,7 @@
     </p>
 
     <div style="margin: 0 0 0.5rem 0;">
-      <iframe id="tailrl-code-frame" src="./code.html?v=71" title="TailRL advantage computation as a diff against GRPO"
+      <iframe id="tailrl-code-frame" src="./code.html?v=73" title="TailRL advantage computation as a diff against GRPO"
               width="900" height="662"
               style="border: none; overflow: hidden; width: 100%; display: block;"
               scrolling="no"></iframe>
@@ -461,22 +461,36 @@
     </div>
 
     <div class="result-card" id="imagenet">
-      <span class="eyebrow">Does the finite estimator approach the exact objective?</span>
-      <h4>ImageNet localization</h4>
+      <h4>ImageNet Object Localization</h4>
       <p>
-        ImageNet object localization asks for a bounding box around the object of interest, without classifying it.
-        A rollout is a sampled box, and its reward is that box's IoU with the ground truth, so the feedback is
-        continuous rather than pass/fail.
+        The task is to draw a bounding box around the object of interest, without classifying it. A rollout is a
+        sampled box and its reward is that box's IoU with the ground truth, so the feedback is continuous rather
+        than pass/fail. The policy is a categorical distribution over a large but finite set of boxes, so the exact
+        reward distribution, and with it the population objective, can be computed rather than estimated.
       </p>
+
+      <span class="eyebrow">How good is the population-level objective?</span>
       <p>
-        This is the one setting where the exact target is computable. The policy is a categorical distribution over
-        a large but finite set of boxes, so the reward distribution it induces &mdash; and with it the population
-        objective &mdash; can be evaluated directly rather than estimated. That makes it possible to ask whether the
-        finite-rollout estimator really does approach the objective it is meant to optimize as $N$ grows, instead of
-        assuming it.
+        On scalar IoU rewards alone, population TailRL matches or beats supervised objectives that see the
+        ground-truth coordinates directly. It leads L1+GIoU, the strongest of them, on both CorLoc thresholds at
+        comparable mean IoU.
       </p>
       <figure class="figure-container">
-        <img loading="lazy" decoding="async" src="./static/images/imagenet_rl_curves.png?v=71" width="1644" height="581"
+        <img loading="lazy" decoding="async" src="./static/images/imagenet_sup_curves.png?v=73" width="1644" height="522"
+             alt="Three panels showing CorLoc at 0.5, CorLoc at 0.75 and mean IoU against training epochs. The population TailRL curve sits at or above the L1, GIoU and L1+GIoU supervised baselines throughout.">
+        <figcaption class="figure-caption">
+          CorLoc@$0.5$, CorLoc@$0.75$ and mean IoU for population TailRL against the supervised baselines L1, GIoU
+          and L1+GIoU.
+        </figcaption>
+      </figure>
+
+      <span class="eyebrow">Does the finite estimator approach the exact objective?</span>
+      <p>
+        Larger training groups move the finite-rollout estimator toward that exact objective, and every TailRL budget
+        stays above the expected-reward baselines.
+      </p>
+      <figure class="figure-container">
+        <img loading="lazy" decoding="async" src="./static/images/imagenet_rl_curves.png?v=73" width="1644" height="581"
              alt="Three panels showing CorLoc at 0.5, mean IoU and Best-of-1024 IoU against training epochs. TailRL curves at increasing rollout budgets rise toward a dashed exact-objective reference, and all sit above the GRPO, RLOO and PKPO curves.">
         <figcaption class="figure-caption">
           CorLoc@$0.5$, mean IoU and Best-of-$1024$ IoU on the held-out validation set. TailRL trains at
@@ -484,9 +498,6 @@
           population objective. GRPO, RLOO and PKPO ($k_{\mathrm{opt}}=16$) use $N=1024$.
         </figcaption>
       </figure>
-      <p class="result-note">
-        Using only scalar IoU rewards, population TailRL also matches or exceeds task-specific coordinate supervision.
-      </p>
       <details class="deep" style="margin-bottom: 0;">
         <summary>Task details</summary>
         <div class="deep-body">
@@ -501,14 +512,14 @@
     </div>
 
     <div class="result-card" id="maze">
-      <span class="eyebrow">Can RL learn when exceptional outcomes are almost absent?</span>
       <h4>Text-maze navigation</h4>
+      <span class="eyebrow">Can RL learn when exceptional outcomes are almost absent?</span>
       <p>
         We vary the initial shortest-path success rate from about $1\%$ to $0.01\%$. TailRL remains reliable in the
         rare-success regime, where RLOO stays at zero and GRPO becomes seed-dependent.
       </p>
       <figure class="figure-container">
-        <img loading="lazy" decoding="async" src="./static/images/maze_init_sweep_wrap.png?v=71"
+        <img loading="lazy" decoding="async" src="./static/images/maze_init_sweep_wrap.png?v=73"
              width="834" height="691" style="max-width: 470px; width: 100%;"
              alt="Pass@1 after RL plotted against Pass@1 before RL for TailRL, GRPO, RLOO and PKPO. In the shaded poor-initialization region the TailRL curve stays high, RLOO and GRPO start at zero, and PKPO sits well below TailRL.">
         <figcaption class="figure-caption">
@@ -538,8 +549,8 @@
     </div>
 
     <div class="result-card" id="code-opt">
-      <span class="eyebrow">Can the objective escape a safe but useless shortcut?</span>
       <h4>Code runtime optimization</h4>
+      <span class="eyebrow">Can the objective escape a safe but useless shortcut?</span>
       <p>
         Copying the input is always correct and earns reward $1$. GRPO and RLOO collapse to this shortcut; TailRL keeps
         producing risky rewrites and reaches $7.7\times$ Best-of-$1024$ speedup on held-out problems, versus below
@@ -580,8 +591,8 @@
     </div>
 
     <div class="result-card" id="gui">
-      <span class="eyebrow">Do similar one-sample policies scale differently with more inference?</span>
       <h4>GUI grounding with 3B and 7B vision-language models</h4>
+      <span class="eyebrow">Do similar one-sample policies scale differently with more inference?</span>
       <p>
         TailRL and RLOO have similar Pass@$1$, but their curves separate as more samples are drawn. TailRL matches
         RLOO's Pass@$1024$ with $8$ rollouts at 3B and $4$ at 7B: $128\times$ and $256\times$ less inference sampling.

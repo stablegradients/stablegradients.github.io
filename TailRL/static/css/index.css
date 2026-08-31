@@ -144,7 +144,8 @@ h4.subsection-title {
   margin: 1.5rem 0;
   border: 1px solid var(--border-light);
 }
-.result-card h4 { color: var(--text-dark); font-weight: 600; margin-bottom: 1rem; }
+.result-card h4 { color: var(--tailrl); font-weight: 600; font-size: 1.6rem;
+                  line-height: 1.3; margin-bottom: 0.6rem; }
 .result-card .task-tag {
   display: inline-block;
   font-family: var(--cm);
@@ -332,7 +333,7 @@ footer a:hover { color: #bfdbfe; }
   .math-box h4 { font-size: 1.14rem; }
   .math-box p { font-size: 1.02rem; }
   .result-card { padding: 1rem; }
-  .result-card h4 { font-size: 1.2rem; }
+  .result-card h4 { font-size: 1.25rem; }
   .formula-box p { font-size: 1.02rem; }
   .result-card[style*="border-left"] { padding: 1rem; }
   .result-card[style*="border-left"] h4 { font-size: 1.2rem; }
@@ -871,9 +872,15 @@ h2.title.is-4, .title.is-4.section-title { font-size: 24px; }
 /* The research question above each experiment sits halfway between the section
    title (32px) and the experiment name (19.2px), so 25.6px. */
 .result-card .eyebrow {
-  font-size: 1.6rem;
-  line-height: 1.3;
+  font-size: 1.2rem;
+  line-height: 1.4;
   margin-bottom: 0.5rem;
-  font-weight: 600;
+  font-weight: 700;
+  color: var(--text-dark);
 }
-@media (max-width: 768px) { .result-card .eyebrow { font-size: 1.25rem; } }
+/* a card can pose more than one question; each opens a block inside it and
+   needs air above. The exception is a question sitting straight under the
+   experiment name, where the pair should read as one heading. */
+.result-card .eyebrow { margin-top: 2rem; }
+.result-card h4 + .eyebrow { margin-top: 0; }
+@media (max-width: 768px) { .result-card .eyebrow { font-size: 1.08rem; } }
