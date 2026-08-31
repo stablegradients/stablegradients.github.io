@@ -30,17 +30,17 @@
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="./static/css/bulma.min.css">
-  <link rel="stylesheet" href="./static/css/index.css?v=70">
+  <link rel="stylesheet" href="./static/css/index.css?v=71">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
 
-  <script defer src="./static/js/same-mean-tail.js?v=70"></script>
-  <script defer src="./static/js/tailrl-explorer.js?v=70"></script>
-  <script defer src="./static/js/index.js?v=70"></script>
-  <script defer src="./static/js/scroll-jack.js?v=70"></script>
+  <script defer src="./static/js/same-mean-tail.js?v=71"></script>
+  <script defer src="./static/js/tailrl-explorer.js?v=71"></script>
+  <script defer src="./static/js/index.js?v=71"></script>
+  <script defer src="./static/js/scroll-jack.js?v=71"></script>
 </head>
 <body>
 
@@ -391,7 +391,7 @@
     </p>
 
     <div style="margin: 0 0 0.5rem 0;">
-      <iframe id="tailrl-code-frame" src="./code.html?v=70" title="TailRL advantage computation as a diff against GRPO"
+      <iframe id="tailrl-code-frame" src="./code.html?v=71" title="TailRL advantage computation as a diff against GRPO"
               width="900" height="662"
               style="border: none; overflow: hidden; width: 100%; display: block;"
               scrolling="no"></iframe>
@@ -465,14 +465,23 @@
       <h4>ImageNet localization</h4>
       <p>
         ImageNet object localization asks for a bounding box around the object of interest, without classifying it.
+        A rollout is a sampled box, and its reward is that box's IoU with the ground truth, so the feedback is
+        continuous rather than pass/fail.
+      </p>
+      <p>
+        This is the one setting where the exact target is computable. The policy is a categorical distribution over
+        a large but finite set of boxes, so the reward distribution it induces &mdash; and with it the population
+        objective &mdash; can be evaluated directly rather than estimated. That makes it possible to ask whether the
+        finite-rollout estimator really does approach the objective it is meant to optimize as $N$ grows, instead of
+        assuming it.
       </p>
       <figure class="figure-container">
-        <img loading="lazy" decoding="async" src="./static/images/imagenet_rl_curves.png" width="1645" height="581"
-             alt="Three panels showing CorLoc at 0.5, mean IoU and Best-of-1024 IoU against training epochs. TailRL curves at increasing rollout budgets rise toward a dashed exact-objective reference, and all sit above the GRPO and RLOO curves.">
+        <img loading="lazy" decoding="async" src="./static/images/imagenet_rl_curves.png?v=71" width="1644" height="581"
+             alt="Three panels showing CorLoc at 0.5, mean IoU and Best-of-1024 IoU against training epochs. TailRL curves at increasing rollout budgets rise toward a dashed exact-objective reference, and all sit above the GRPO, RLOO and PKPO curves.">
         <figcaption class="figure-caption">
           CorLoc@$0.5$, mean IoU and Best-of-$1024$ IoU on the held-out validation set. TailRL trains at
           $N\in\{16,64,256,1024\}$, darker curves for larger $N$; the dashed curve optimizes the exactly computed
-          population objective. GRPO and RLOO use $N=1024$.
+          population objective. GRPO, RLOO and PKPO ($k_{\mathrm{opt}}=16$) use $N=1024$.
         </figcaption>
       </figure>
       <p class="result-note">
@@ -499,12 +508,13 @@
         rare-success regime, where RLOO stays at zero and GRPO becomes seed-dependent.
       </p>
       <figure class="figure-container">
-        <img loading="lazy" decoding="async" src="./static/images/maze_init_sweep_wrap.png"
-             width="766" height="688" style="max-width: 470px; width: 100%;"
-             alt="Pass@1 after RL plotted against Pass@1 before RL. In the shaded low-success region the TailRL curve stays high while RLOO sits at zero and GRPO varies widely across seeds.">
+        <img loading="lazy" decoding="async" src="./static/images/maze_init_sweep_wrap.png?v=71"
+             width="834" height="691" style="max-width: 470px; width: 100%;"
+             alt="Pass@1 after RL plotted against Pass@1 before RL for TailRL, GRPO, RLOO and PKPO. In the shaded poor-initialization region the TailRL curve stays high, RLOO and GRPO start at zero, and PKPO sits well below TailRL.">
         <figcaption class="figure-caption">
-          Pass@$1$ before and after post-training with $N=16$. In the shaded region RLOO ends at zero shortest-path
-          success and GRPO becomes seed-dependent; once successes are common the three methods converge.
+          Pass@$1$ before and after post-training with $N=16$. The shaded region marks poor policy initialization,
+          where GRPO and RLOO fail to improve reliably. TailRL holds up across the whole sweep; PKPO trails it
+          everywhere and falls off once successes are common.
         </figcaption>
       </figure>
       <p class="takeaway-line">
