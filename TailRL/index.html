@@ -30,17 +30,17 @@
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="./static/css/bulma.min.css">
-  <link rel="stylesheet" href="./static/css/index.css?v=74">
+  <link rel="stylesheet" href="./static/css/index.css?v=78">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
 
-  <script defer src="./static/js/same-mean-tail.js?v=74"></script>
-  <script defer src="./static/js/tailrl-explorer.js?v=74"></script>
-  <script defer src="./static/js/index.js?v=74"></script>
-  <script defer src="./static/js/scroll-jack.js?v=74"></script>
+  <script defer src="./static/js/same-mean-tail.js?v=78"></script>
+  <script defer src="./static/js/tailrl-explorer.js?v=78"></script>
+  <script defer src="./static/js/index.js?v=78"></script>
+  <script defer src="./static/js/scroll-jack.js?v=78"></script>
 </head>
 <body>
 
@@ -364,17 +364,15 @@
     <h2 class="title is-3 section-title">Easy plug-in for RLVR pipelines</h2>
     <div class="content has-text-justified">
       <p>
-        In an existing RL system this is a few lines inside the advantage computation: the same rollout groups as
-        GRPO and RLOO, no critic, and no new hyperparameter. The weights are read straight off the empirical tail
-        probability, because the number of rollouts still surviving a reward threshold is exactly
-        $N\,\hat p_\theta(x,\tau)$. Nothing extra is modelled, fitted or tuned.
+        In an existing RL system this is a few lines inside the advantage computation: no critic, and no new
+        hyperparameter.
       </p>
     </div>
 
     <div class="content has-text-justified">
       <p>
-        Sort the $N$ rewards, divide each reward gap among the rollouts that reach it, mean-center, and use the
-        result as advantages:
+        Sort the $N$ rewards from smallest to largest. Each step up in reward is shared among the rollouts that
+        reached it. Subtract the mean, and those are the advantages:
       </p>
     </div>
 
@@ -390,8 +388,28 @@
       that gap.
     </p>
 
+    <details class="deep" style="margin: 0 0 1.5rem 0;">
+      <summary>Pseudocode</summary>
+      <div class="deep-body">
+        <ol class="algo-steps">
+          <li class="algo-io"><span class="algo-kw">Require</span> rewards $r_1,\ldots,r_N$ from $N$ training rollouts for an input $x$</li>
+          <li>Sort the rewards increasingly: $r_{(1)}\le\cdots\le r_{(N)}$</li>
+          <li>Keep the sorting permutation, and set $r_{(0)}\gets 0$ and $\omega_{(0)}\gets 0$</li>
+          <li><span class="algo-kw">for</span> $i=1,\ldots,N$ <span class="algo-kw">do</span>
+            <ol><li>$\omega_{(i)}\gets\omega_{(i-1)}+\dfrac{r_{(i)}-r_{(i-1)}}{N-i+1}$</li></ol>
+          </li>
+          <li>$\bar\omega\gets\dfrac{1}{N}\sum_{j=1}^{N}\omega_{(j)}$</li>
+          <li><span class="algo-kw">for</span> $i=1,\ldots,N$ <span class="algo-kw">do</span>
+            <ol><li>$A_{(i)}\gets\omega_{(i)}-\bar\omega$</li></ol>
+          </li>
+          <li>Undo the sorting permutation: $A_{(1)},\ldots,A_{(N)}\rightarrow A_1,\ldots,A_N$</li>
+          <li class="algo-io"><span class="algo-kw">Ensure</span> advantages $A_1,\ldots,A_N$</li>
+        </ol>
+      </div>
+    </details>
+
     <div style="margin: 0 0 0.5rem 0;">
-      <iframe id="tailrl-code-frame" src="./code.html?v=74" title="TailRL advantage computation as a diff against GRPO"
+      <iframe id="tailrl-code-frame" src="./code.html?v=78" title="TailRL advantage computation as a diff against GRPO"
               width="900" height="662"
               style="border: none; overflow: hidden; width: 100%; display: block;"
               scrolling="no"></iframe>
@@ -476,7 +494,7 @@
         comparable mean IoU.
       </p>
       <figure class="figure-container">
-        <img loading="lazy" decoding="async" src="./static/images/imagenet_sup_curves.png?v=74" width="1644" height="522"
+        <img loading="lazy" decoding="async" src="./static/images/imagenet_sup_curves.png?v=78" width="1644" height="522"
              alt="Three panels showing CorLoc at 0.5, CorLoc at 0.75 and mean IoU against training epochs. The population TailRL curve sits at or above the L1, GIoU and L1+GIoU supervised baselines throughout.">
         <figcaption class="figure-caption">
           CorLoc@$0.5$, CorLoc@$0.75$ and mean IoU for population TailRL against the supervised baselines L1, GIoU
@@ -490,7 +508,7 @@
         stays above the expected-reward baselines.
       </p>
       <figure class="figure-container">
-        <img loading="lazy" decoding="async" src="./static/images/imagenet_rl_curves.png?v=74" width="1644" height="581"
+        <img loading="lazy" decoding="async" src="./static/images/imagenet_rl_curves.png?v=78" width="1644" height="581"
              alt="Three panels showing CorLoc at 0.5, mean IoU and Best-of-1024 IoU against training epochs. TailRL curves at increasing rollout budgets rise toward a dashed exact-objective reference, and all sit above the GRPO, RLOO and PKPO curves.">
         <figcaption class="figure-caption">
           CorLoc@$0.5$, mean IoU and Best-of-$1024$ IoU on the held-out validation set. TailRL trains at
@@ -527,7 +545,7 @@
         and PKPO stays well below TailRL across the sweep.
       </p>
       <figure class="figure-container">
-        <img loading="lazy" decoding="async" src="./static/images/maze_init_sweep_wrap.png?v=74"
+        <img loading="lazy" decoding="async" src="./static/images/maze_init_sweep_wrap.png?v=78"
              width="834" height="691" style="max-width: 470px; width: 100%;"
              alt="Pass@1 after RL plotted against Pass@1 before RL for TailRL, GRPO, RLOO and PKPO. In the shaded poor-initialization region the TailRL curve stays high, RLOO and GRPO start at zero, and PKPO sits well below TailRL.">
         <figcaption class="figure-caption">

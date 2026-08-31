@@ -884,3 +884,30 @@ h2.title.is-4, .title.is-4.section-title { font-size: 24px; }
 .result-card .eyebrow { margin-top: 2rem; }
 .result-card h4 + .eyebrow { margin-top: 0; }
 @media (max-width: 768px) { .result-card .eyebrow { font-size: 1.08rem; } }
+
+/* Pseudocode, set as a numbered list rather than a code block: the steps are
+   maths, so they need KaTeX rather than a monospace face. The nested list is a
+   loop body and continues the outer numbering visually through indentation. */
+.algo-steps { list-style: none; margin: 0; padding: 0; counter-reset: algo; }
+/* no counter-reset here: a loop body continues the outer numbering, as in the
+   paper's algorithm block, rather than restarting at 1 */
+.algo-steps ol { list-style: none; margin: 0; padding: 0; }
+.algo-steps li {
+  counter-increment: algo;
+  position: relative;
+  padding: 0.18rem 0 0.18rem 2.6rem;
+  font-size: 1.08rem;
+  line-height: 1.7;
+}
+.algo-steps > li::before,
+.algo-steps ol > li::before {
+  content: counter(algo);
+  position: absolute; left: 0; width: 1.9rem;
+  text-align: right;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.algo-steps ol { margin-left: 1.4rem; }
+.algo-steps li.algo-io { counter-increment: none; }
+.algo-steps li.algo-io::before { content: ""; }
+.algo-kw { font-variant: small-caps; font-weight: 700; letter-spacing: 0.02em; }
