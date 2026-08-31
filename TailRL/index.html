@@ -30,17 +30,17 @@
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="./static/css/bulma.min.css">
-  <link rel="stylesheet" href="./static/css/index.css?v=78">
+  <link rel="stylesheet" href="./static/css/index.css?v=81">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
 
-  <script defer src="./static/js/same-mean-tail.js?v=78"></script>
-  <script defer src="./static/js/tailrl-explorer.js?v=78"></script>
-  <script defer src="./static/js/index.js?v=78"></script>
-  <script defer src="./static/js/scroll-jack.js?v=78"></script>
+  <script defer src="./static/js/same-mean-tail.js?v=81"></script>
+  <script defer src="./static/js/tailrl-explorer.js?v=81"></script>
+  <script defer src="./static/js/index.js?v=81"></script>
+  <script defer src="./static/js/scroll-jack.js?v=81"></script>
 </head>
 <body>
 
@@ -312,30 +312,25 @@
 <!-- ==================== 7. CONTINUOUS REWARDS DECOMPOSE ==================== -->
 <section class="section section-narrow section-gray" id="decompose">
   <div class="container is-max-desktop">
-    <h2 class="title is-3 section-title">A continuous reward already contains that curve</h2>
+    <h2 class="title is-3 section-title">Computing tail probabilities from finite rollouts</h2>
     <div class="content has-text-justified">
       <p>
-        A scalar reward is a stack of success tests. A rollout with reward $r$ passes every threshold below $r$ and
-        fails every threshold above it, so the reward is the height of the stack it clears:
+        During training you never see the true tail probability. You see a group of $N$ rollouts and their rewards.
+        Estimating it is just counting: fix a reward threshold $\tau$ and ask how many of the $N$ rollouts beat it.
       </p>
     </div>
 
     <div class="formula-box" style="margin: 1.25rem 0 1rem 0;">
       <p style="font-size: 1.32rem; margin: 0;">
-        $r(x,z) \;=\; \displaystyle\int_0^1 \mathbf{1}\!\left\{r(x,z) > \tau\right\}d\tau$
+        $\hat p_\theta(x,\tau) \;=\; \dfrac{1}{N}\displaystyle\sum_{i=1}^{N}\mathbf{1}\!\left\{r_i > \tau\right\}$
       </p>
     </div>
 
     <div class="content has-text-justified">
       <p>
-        Average over rollouts and each test becomes its pass rate, which is exactly the tail probability. So the
-        objective that ordinary RL maximizes is the <em>area</em> under the tail curve:
-      </p>
-    </div>
-
-    <div class="formula-box" style="margin: 1.25rem 0 1rem 0;">
-      <p style="font-size: 1.32rem; margin: 0;">
-        $\mathbb{E}_{z\sim\pi_\theta}\!\left[r(x,z)\right] \;=\; \displaystyle\int_0^1 p_\theta(x,\tau)\,d\tau$
+        Now slide the threshold from $0$ up to $1$. The count starts at all $N$ rollouts and drops by one each time
+        the threshold passes another reward, until none are left. That staircase is the tail-probability curve, and
+        it costs nothing to build: it uses the same rollouts and the same rewards the group already has.
       </p>
     </div>
 
@@ -347,14 +342,10 @@
       <figcaption class="figure-caption">
         <strong>One continuous reward, a success test at every reward threshold.</strong>
         A rollout passes every threshold below its reward, and averaging the passes across a group traces
-        $p_\theta(x,\tau)$.
+        $\hat p_\theta(x,\tau)$.
       </figcaption>
     </figure>
 
-    <p class="keyline">
-      Two policies with very different tail curves can enclose the same area.
-      Expected-reward RL cannot tell them apart.
-    </p>
   </div>
 </section>
 
@@ -371,8 +362,7 @@
 
     <div class="content has-text-justified">
       <p>
-        Sort the $N$ rewards from smallest to largest. Each step up in reward is shared among the rollouts that
-        reached it. Subtract the mean, and those are the advantages:
+        The advantages can simply be written as:
       </p>
     </div>
 
@@ -382,13 +372,7 @@
         \qquad A_i = \omega(r_i) - \bar\omega$
       </p>
     </div>
-    <p class="figure-caption" style="margin-bottom: 1.5rem;">
-      Rewards sorted increasingly as $r_{(1)}\le\cdots\le r_{(N)}$, with $r_{(0)}:=0$ and
-      $\bar\omega=\frac{1}{N}\sum_j \omega(r_j)$. The divisor $N-k+1$ counts the rollouts still surviving at
-      that gap.
-    </p>
-
-    <details class="deep" style="margin: 0 0 1.5rem 0;">
+    <details class="deep" style="margin: 1rem 0 1.5rem 0;">
       <summary>Pseudocode</summary>
       <div class="deep-body">
         <ol class="algo-steps">
@@ -409,7 +393,7 @@
     </details>
 
     <div style="margin: 0 0 0.5rem 0;">
-      <iframe id="tailrl-code-frame" src="./code.html?v=78" title="TailRL advantage computation as a diff against GRPO"
+      <iframe id="tailrl-code-frame" src="./code.html?v=81" title="TailRL advantage computation as a diff against GRPO"
               width="900" height="662"
               style="border: none; overflow: hidden; width: 100%; display: block;"
               scrolling="no"></iframe>
@@ -494,7 +478,7 @@
         comparable mean IoU.
       </p>
       <figure class="figure-container">
-        <img loading="lazy" decoding="async" src="./static/images/imagenet_sup_curves.png?v=78" width="1644" height="522"
+        <img loading="lazy" decoding="async" src="./static/images/imagenet_sup_curves.png?v=81" width="1644" height="522"
              alt="Three panels showing CorLoc at 0.5, CorLoc at 0.75 and mean IoU against training epochs. The population TailRL curve sits at or above the L1, GIoU and L1+GIoU supervised baselines throughout.">
         <figcaption class="figure-caption">
           CorLoc@$0.5$, CorLoc@$0.75$ and mean IoU for population TailRL against the supervised baselines L1, GIoU
@@ -508,7 +492,7 @@
         stays above the expected-reward baselines.
       </p>
       <figure class="figure-container">
-        <img loading="lazy" decoding="async" src="./static/images/imagenet_rl_curves.png?v=78" width="1644" height="581"
+        <img loading="lazy" decoding="async" src="./static/images/imagenet_rl_curves.png?v=81" width="1644" height="581"
              alt="Three panels showing CorLoc at 0.5, mean IoU and Best-of-1024 IoU against training epochs. TailRL curves at increasing rollout budgets rise toward a dashed exact-objective reference, and all sit above the GRPO, RLOO and PKPO curves.">
         <figcaption class="figure-caption">
           CorLoc@$0.5$, mean IoU and Best-of-$1024$ IoU on the held-out validation set. TailRL trains at
@@ -545,7 +529,7 @@
         and PKPO stays well below TailRL across the sweep.
       </p>
       <figure class="figure-container">
-        <img loading="lazy" decoding="async" src="./static/images/maze_init_sweep_wrap.png?v=78"
+        <img loading="lazy" decoding="async" src="./static/images/maze_init_sweep_wrap.png?v=81"
              width="834" height="691" style="max-width: 470px; width: 100%;"
              alt="Pass@1 after RL plotted against Pass@1 before RL for TailRL, GRPO, RLOO and PKPO. In the shaded poor-initialization region the TailRL curve stays high, RLOO and GRPO start at zero, and PKPO sits well below TailRL.">
         <figcaption class="figure-caption">
