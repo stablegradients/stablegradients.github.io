@@ -157,16 +157,20 @@ h4.subsection-title {
 }
 
 .takeaway-box {
-  background: #fafafa;
-  border: 1px solid var(--border-light);
-  border-left: 4px solid var(--tailrl);
+  background: #fdf6d8;
+  border: 1px solid #e6d48a;
+  border-left: 4px solid #d9ab1f;
   padding: 1.25rem 1.75rem;
   border-radius: 4px;
   margin: 1.5rem 0 0 0;
 }
 .takeaway-box p { margin: 0; font-family: var(--cm); }
-.takeaway-box .takeaway-title { font-weight: 600; color: var(--tailrl); display: block; margin-bottom: 0.25rem; }
-.takeaway-box .takeaway-body { color: var(--text-dark); font-size: 1.176rem; }
+/* measured 5.9:1 on the yellow ground; #8a6a00 was only 4.67:1 */
+.takeaway-box .takeaway-title {
+  font-weight: 700; color: #705400; display: block; margin-bottom: 0.25rem;
+  font-variant: small-caps; letter-spacing: 0.03em;
+}
+.takeaway-box .takeaway-body { color: var(--text-dark); font-size: 1.176rem; font-weight: 700; }
 
 table.comparison-table {
   width: 100%;
