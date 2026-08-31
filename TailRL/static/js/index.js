@@ -99,25 +99,28 @@
     });
   }
 
-  /* ---- copy BibTeX ------------------------------------------------------- */
-  var copyBtn = document.getElementById('copy-bibtex');
-  var status = document.getElementById('copy-status');
-  if (copyBtn) {
-    copyBtn.addEventListener('click', function () {
-      var src = document.getElementById(copyBtn.getAttribute('data-target'));
+  /* ---- copy BibTeX -------------------------------------------------------
+     Every button carrying data-target copies that element's text, so the hero
+     and the closing band share one implementation. Each names its own status
+     element, since two buttons writing to one would clobber each other. */
+  [].slice.call(document.querySelectorAll('[data-target]')).forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var src = document.getElementById(btn.getAttribute('data-target'));
       if (!src) return;
-      var text = src.textContent;
+      var status = document.getElementById(btn.getAttribute('data-status') || '');
       function done(ok) {
-        if (status) {
-          status.textContent = ok ? 'Copied to clipboard' : 'Press Ctrl/Cmd+C to copy';
-          setTimeout(function () { status.textContent = ''; }, 3000);
-        }
+        if (!status) return;
+        status.textContent = ok ? 'Copied to clipboard' : 'Press Ctrl/Cmd+C to copy';
+        setTimeout(function () { status.textContent = ''; }, 3000);
       }
       if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(function () { done(true); }, function () { selectFallback(src); done(false); });
+        navigator.clipboard.writeText(src.textContent).then(
+          function () { done(true); },
+          function () { selectFallback(src); done(false); });
       } else { selectFallback(src); done(false); }
     });
-  }
+  });
+
   function selectFallback(node) {
     try {
       var r = document.createRange(); r.selectNodeContents(node);
