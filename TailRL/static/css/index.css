@@ -492,7 +492,9 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--tailrl); outlin
    width and margins win over its auto-centring. */
 .wrap-right {
   float: right;
-  width: 330px;
+  /* 49.22% of the card's measure is 441px, the width the two explainer
+     figures render at, so all three read as the same size */
+  width: 49.22%;
   margin: 0.35rem 0 1rem 1.8rem;
 }
 /* the next question must start below the float, not beside it */
@@ -927,3 +929,21 @@ h2.title.is-4, .title.is-4.section-title { font-size: 24px; }
 .algo-steps li.algo-io { counter-increment: none; }
 .algo-steps li.algo-io::before { content: ""; }
 .algo-kw { font-variant: small-caps; font-weight: 700; letter-spacing: 0.02em; }
+
+/* Figure and its prose side by side, centred on one horizontal axis. The prose
+   is shorter than the figure, so nothing would flow underneath a float and
+   centring the pair reads as one unit. The figure is first in source order and
+   ordered back to the right, which also puts it below the prose on a phone. */
+.pair-block { display: flex; align-items: center; gap: 2rem; }
+.pair-figure { order: 2; flex: 0 0 470px; max-width: 52%; margin: 0; padding: 0; }
+.pair-figure img { width: 100%; height: auto; }
+.pair-block > p {
+  flex: 1 1 0; min-width: 0;   /* flex items floor at min-content without this */
+  /* .result-card > p no longer reaches it; match what that rule resolves to */
+  font-size: 1.2rem; line-height: 1.7;
+  margin: 0;
+}
+@media (max-width: 768px) {
+  .pair-block { flex-direction: column; align-items: stretch; gap: 1rem; }
+  .pair-figure { flex: none; max-width: 100%; }
+}
