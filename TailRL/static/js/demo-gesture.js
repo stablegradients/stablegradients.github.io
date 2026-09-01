@@ -23,7 +23,7 @@
      surface's own viewBox units, which keeps the path independent of how wide
      the widget happens to render. */
   var DEMOS = [
-    { sel: '#ex-svg-rewards', vb: [760, 285],
+    { sel: '#ex-svg-rewards', vb: [760, 300],
       from: [250, 190], to: [520, 140], via: [385, 58] },
     { sel: '#smt-hist-a', vb: [360, 220],
       from: [150, 120], to: [250, 70], via: [200, 86] }

@@ -15,7 +15,8 @@
   var root = document.getElementById('tailrl-explorer');
   if (!root) return;
   var NS = 'http://www.w3.org/2000/svg';
-  var C = { tailrl: '#C0392B', reinforce: '#46628F', ink: '#1f2937', muted: '#1f2937', grid: '#e5e7eb' };
+  var C = { tailrl: '#C0392B', reinforce: '#46628F', ink: '#1f2937', muted: '#1f2937', grid: '#e5e7eb',
+            dist: '#8A5A10' };   // the dark yellow the two-policy widget uses
 
   // the rollout budgets the paper trains at; the slider steps over these only
   var STOPS = [16, 64, 256, 1024], START = 1;
@@ -136,7 +137,7 @@
   var svgA = document.getElementById('ex-svg-adv');
 
   // ---- Panel A: the draggable reward strip ----
-  var PA = { x0: 60, x1: 730, yRoll: 233, kdeTop: 30, kdeBase: 225 };
+  var PA = { x0: 60, x1: 730, yRoll: 233, kdeTop: 30, kdeBase: 214 };
 
   /* No KDE any more: the curve on screen is the distribution the reader drew,
      and the rollouts are derived from it rather than the other way round. */
@@ -168,10 +169,10 @@
       dy = PA.kdeBase - Math.max(0, dens[di]) * (PA.kdeBase - PA.kdeTop);
       el('rect', { x: dx + bw * 0.12, y: dy, width: bw * 0.76,
                    height: Math.max(0.6, PA.kdeBase - dy),
-                   fill: C.tailrl, opacity: 0.34 }, svgR);
+                   fill: C.dist, opacity: 0.5 }, svgR);
     }
     el('line', { x1: PA.x0, x2: PA.x1, y1: PA.kdeBase, y2: PA.kdeBase,
-                 stroke: C.tailrl, 'stroke-width': 1, opacity: 0.5 }, svgR);
+                 stroke: C.dist, 'stroke-width': 1, opacity: 0.6 }, svgR);
     var dmid = (PA.kdeTop + PA.kdeBase) / 2;
     var dl = mtext(svgR, 20, dmid, 'density', 'svg-tick');
     dl.setAttribute('transform', 'rotate(-90, 20, ' + dmid + ')');
@@ -180,52 +181,35 @@
     el('line', { x1: PA.x0, x2: PA.x1, y1: PA.yRoll, y2: PA.yRoll, stroke: C.ink, 'stroke-width': 1.2 }, svgR);
     [0, 0.2, 0.4, 0.6, 0.8, 1].forEach(function (v) {
       el('line', { x1: xOf(v), x2: xOf(v), y1: PA.yRoll - 4, y2: PA.yRoll + 4, stroke: C.ink, 'stroke-width': 1 }, svgR);
-      text(svgR, xOf(v), PA.yRoll + 20, v.toFixed(1), 'svg-tick');
+      text(svgR, xOf(v), PA.yRoll + 32, v.toFixed(1), 'svg-tick');
     });
-    mtext(svgR, (PA.x0 + PA.x1) / 2, PA.yRoll + 38, 'reward |r|', 'svg-label');
+    mtext(svgR, (PA.x0 + PA.x1) / 2, PA.yRoll + 50, 'reward |r|', 'svg-label');
 
     var focus = hover >= 0 ? hover : idx[n - 1];
 
-    // drawn last, so the focused rollout always sits on top
-    function focusDecor(parent, r) {
-      el('circle', { cx: xOf(r), cy: PA.yRoll, r: sz.r * 1.4, fill: C.tailrl, stroke: C.tailrl, 'stroke-width': 2 }, parent);
-      var t = mtext(parent, xOf(r), PA.yRoll - sz.r * 1.4 - 8, '|r| = ' + r.toFixed(2), 'svg-tick');
-      t.style.fill = C.tailrl;
-    }
-
-    if (sz.bars) {
-      rewards.forEach(function (r, i) {
-        if (i === focus) return;
-        var g = el('g', { 'class': 'rollout', 'data-i': i }, svgR);
-        el('circle', { cx: xOf(r), cy: PA.yRoll, r: sz.r, fill: '#fff', stroke: C.tailrl, 'stroke-width': 2, opacity: sz.op }, g);
-        g.setAttribute('pointer-events', 'none');
-      });
-      var gf = el('g', { 'class': 'rollout', 'data-i': focus, 'pointer-events': 'none' }, svgR);
-      focusDecor(gf, rewards[focus]);
-    } else {
-      // beyond 64 the circles are batched into one path and hit-tested by
-      // nearest reward instead of per-glyph
-      var cd = '', i2, cx;
-      for (i2 = 0; i2 < n; i2++) {
-        if (i2 === focus) continue;
-        cx = xOf(rewards[i2]);
-        cd += 'M' + (cx - sz.r) + ' ' + PA.yRoll +
-              'a' + sz.r + ' ' + sz.r + ' 0 1 0 ' + (2 * sz.r) + ' 0' +
-              'a' + sz.r + ' ' + sz.r + ' 0 1 0 ' + (-2 * sz.r) + ' 0';
-      }
-      if (cd) el('path', { d: cd, fill: '#fff', stroke: C.tailrl, 'stroke-width': 1.2, opacity: sz.op }, svgR);
-      focusDecor(svgR, rewards[focus]);
-    }
+    /* The scatter of one dot per rollout is gone: the histogram above already
+       shows where the rollouts are, and 1024 overlapping circles said less
+       than the bars do. A single marker stays, because it names the rollout
+       the advantage panels are highlighting. */
+    var fr = rewards[focus];
+    el('circle', { cx: xOf(fr), cy: PA.yRoll, r: sz.r * 1.4, fill: C.tailrl,
+                   stroke: C.tailrl, 'stroke-width': 2, 'pointer-events': 'none' }, svgR);
+    /* Beside the marker on the axis line rather than above it: with the bars
+       now running down to just above the axis, a label placed above collided
+       with the histogram's baseline. It flips to the left near the right end
+       so it cannot run off the panel. */
+    var right = fr < 0.82, off = sz.r * 1.4 + 7;
+    var ft = mtext(svgR, xOf(fr) + (right ? off : -off), PA.yRoll + 16,
+                   '|r| = ' + fr.toFixed(2), 'svg-tick', right ? 'start' : 'end');
+    ft.style.fill = C.tailrl;
+    ft.setAttribute('pointer-events', 'none');
   }
 
-  /* Painting the distribution. The pointer's height inside the band is the
-     density the reader is asking for at that reward; a soft brush carries it
-     to the neighbouring bins so a drag sweeps a curve rather than cutting
-     notches into it. */
+
   /* A bar takes the pointer's height directly, the way the two-policy widget
-     works. Bins between this point and the last are filled in too, so a quick
-     sweep draws a continuous shape instead of leaving gaps where no frame
-     happened to land. */
+     works. Bins between this point and the last are filled in on the way, so a
+     quick sweep draws a continuous shape instead of leaving gaps wherever no
+     frame happened to land. */
   var lastBin = -1;
   function setBin(i, v) { if (i >= 0 && i < KB) shape[i] = Math.min(1, Math.max(0, v)); }
   function paint(p) {
@@ -233,10 +217,10 @@
     var target = (PA.kdeBase - p.y) / (PA.kdeBase - PA.kdeTop);
     target = Math.min(1, Math.max(0, target));
     if (lastBin >= 0 && Math.abs(c - lastBin) > 1) {
-      var step = c > lastBin ? 1 : -1, i, f;
+      var from = shape[lastBin], step = c > lastBin ? 1 : -1, i, f;
       for (i = lastBin; i !== c; i += step) {
         f = (i - lastBin) / (c - lastBin);
-        setBin(i, shape[lastBin] + (target - shape[lastBin]) * f);
+        setBin(i, from + (target - from) * f);
       }
     }
     setBin(c, target);
@@ -249,7 +233,7 @@
   function flush() { rafId = 0; if (pendPt) { paint(pendPt); pendPt = null; } render(); }
   function scheduleRender() { if (!rafId) rafId = requestAnimationFrame(flush); }
 
-  // the band is the drawing surface; the axis below it is only a readout
+  // the bars are the drawing surface; the axis below them is only a readout
   function inBand(p) { return p.y >= PA.kdeTop - 12 && p.y <= PA.kdeBase + 8; }
 
   svgR.addEventListener('pointerdown', function (e) {
@@ -284,7 +268,6 @@
     if (hover !== -1) { hover = -1; scheduleRender(); }
   });
 
-  // ---- Panel B: REINFORCE advantages beside TailRL advantages ----
   function drawAdv() {
     while (svgA.firstChild) svgA.removeChild(svgA.firstChild);
     var res = tailrl(rewards), idx = res.idx, n = rewards.length, sz = sizing();
