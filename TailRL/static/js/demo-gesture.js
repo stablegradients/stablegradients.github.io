@@ -112,17 +112,47 @@
     setTimeout(function () { if (!cancelled) requestAnimationFrame(frame); }, 380);
   }
 
-  DEMOS.forEach(function (demo) {
+  /* Trigger on the reader arriving, not on the page existing.
+
+     An IntersectionObserver alone fires as soon as the element is visible,
+     which includes the moment of load: a refresh restores the previous scroll
+     position, so a widget the reader was already looking at would perform its
+     gesture before they had done anything. The same applies to following a
+     deep link.
+
+     So the gesture waits for a scroll that the reader actually made, and then
+     for that scroll to stop, with the widget settled near the middle of the
+     viewport. */
+  var startY = window.pageYOffset, scrolled = false;
+  var pending = DEMOS.filter(function (d) { return !!document.querySelector(d.sel); });
+  if (!pending.length) return;
+
+  function settledInView(demo) {
     var svg = document.querySelector(demo.sel);
-    if (!svg) return;
-    var seen = false;
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (en) {
-        if (seen || !en.isIntersecting) return;
-        seen = true; io.disconnect();
-        run(demo);
-      });
-    }, { threshold: 0.6 });
-    io.observe(svg);
-  });
+    if (!svg) return false;
+    var r = svg.getBoundingClientRect(), vh = window.innerHeight;
+    if (r.height === 0) return false;
+    var visible = Math.min(r.bottom, vh) - Math.max(r.top, 0);
+    if (visible / r.height < 0.6) return false;
+    var mid = (r.top + r.bottom) / 2;              // near the middle of the screen
+    return mid > vh * 0.15 && mid < vh * 0.85;
+  }
+
+  var idle = 0;
+  function check() {
+    pending = pending.filter(function (demo) {
+      if (!settledInView(demo)) return true;
+      run(demo);
+      return false;
+    });
+    if (!pending.length) window.removeEventListener('scroll', onScroll);
+  }
+  function onScroll() {
+    // the scroll restoration a reload performs is not the reader scrolling
+    if (!scrolled && Math.abs(window.pageYOffset - startY) < 4) return;
+    scrolled = true;
+    clearTimeout(idle);
+    idle = setTimeout(check, 220);
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
 })();
