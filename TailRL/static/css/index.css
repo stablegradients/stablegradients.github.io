@@ -503,11 +503,18 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--tailrl); outlin
   width: 49.22%;
   margin: 0.35rem 0 1rem 1.8rem;
 }
-/* The float is boxed so what follows it starts below rather than beside it.
-   The wrapper puts its prose out of reach of `.result-card > p`, so the size
-   that rule resolves to is restated here. */
-.float-block::after { content: ''; display: table; clear: both; }
-.float-block > p { font-size: 1.2rem; line-height: 1.7; }
+/* Prose and figure centred on one horizontal axis, as the maze pair is. The
+   wrapper puts the prose out of reach of `.result-card > p`, so the size that
+   rule resolves to is restated here. */
+.float-block { display: flex; align-items: center; gap: 2rem; }
+.float-block .wrap-right { float: none; order: 2; flex: 0 0 49.22%; margin: 0; }
+.float-block .float-prose { flex: 1 1 0; min-width: 0; }
+.float-block .float-prose p { font-size: 1.2rem; line-height: 1.7; }
+.float-block .float-prose p:last-child { margin-bottom: 0; }
+@media (max-width: 768px) {
+  .float-block { flex-direction: column; align-items: stretch; gap: 1rem; }
+  .float-block .wrap-right { flex: none; width: 100%; }
+}
 @media (max-width: 640px) {
   .wrap-right { float: none; width: 100%; margin: 0 0 1rem 0; }
 }
