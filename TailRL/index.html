@@ -30,18 +30,18 @@
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="./static/css/bulma.min.css">
-  <link rel="stylesheet" href="./static/css/index.css?v=124">
+  <link rel="stylesheet" href="./static/css/index.css?v=126">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
     onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}]});"></script>
 
-  <script defer src="./static/js/same-mean-tail.js?v=124"></script>
-  <script defer src="./static/js/tailrl-explorer.js?v=124"></script>
-  <script defer src="./static/js/demo-gesture.js?v=124"></script>
-  <script defer src="./static/js/index.js?v=124"></script>
-  <script defer src="./static/js/scroll-jack.js?v=124"></script>
+  <script defer src="./static/js/same-mean-tail.js?v=126"></script>
+  <script defer src="./static/js/tailrl-explorer.js?v=126"></script>
+  <script defer src="./static/js/demo-gesture.js?v=126"></script>
+  <script defer src="./static/js/index.js?v=126"></script>
+  <script defer src="./static/js/scroll-jack.js?v=126"></script>
 </head>
 <body>
 
@@ -385,7 +385,7 @@
     </details>
 
     <div style="margin: 0 0 0.5rem 0;">
-      <iframe id="tailrl-code-frame" src="./code.html?v=124" title="TailRL advantage computation as a diff against GRPO"
+      <iframe id="tailrl-code-frame" src="./code.html?v=126" title="TailRL advantage computation as a diff against GRPO"
               width="900" height="662"
               style="border: none; overflow: hidden; width: 100%; display: block;"
               scrolling="no"></iframe>
@@ -457,20 +457,18 @@
     <div class="result-card" id="imagenet">
       <h4>ImageNet Object Localization</h4>
       <p>
-        The task is to draw a bounding box around the object of interest, without classifying it. A rollout is a
-        sampled box and its reward is that box's IoU with the ground truth, so the feedback is continuous rather
-        than pass/fail. The policy is a categorical distribution over a large but finite set of boxes, so the exact
-        reward distribution, and with it the population objective, can be computed rather than estimated.
+        Put a box around the object, without naming it. A rollout is one sampled box, scored by its overlap (IoU)
+        with the true box. The set of boxes is finite, so here the exact objective can be computed rather than
+        estimated.
       </p>
 
       <span class="eyebrow">How good is the population-level objective?</span>
       <p>
-        On scalar IoU rewards alone, population TailRL matches or beats supervised objectives that see the
-        ground-truth coordinates directly. It leads L1+GIoU, the strongest of them, on both CorLoc thresholds at
-        comparable mean IoU.
+        Trained on overlap alone, population TailRL matches or beats supervised objectives that see the true
+        coordinates, leading the strongest of them, L1+GIoU, on both CorLoc thresholds.
       </p>
       <figure class="figure-container">
-        <img loading="lazy" decoding="async" src="./static/images/imagenet_sup_curves.png?v=124" width="1644" height="522"
+        <img loading="lazy" decoding="async" src="./static/images/imagenet_sup_curves.png?v=126" width="1644" height="522"
              alt="Three panels showing CorLoc at 0.5, CorLoc at 0.75 and mean IoU against training epochs. The population TailRL curve sits at or above the L1, GIoU and L1+GIoU supervised baselines throughout.">
         <figcaption class="figure-caption">
           CorLoc@$0.5$, CorLoc@$0.75$ and mean IoU for population TailRL against the supervised baselines L1, GIoU
@@ -485,11 +483,11 @@
 
       <span class="eyebrow">Does the finite estimator approach the exact objective?</span>
       <p>
-        Larger training groups move the finite-rollout estimator toward that exact objective, and every TailRL budget
-        stays above the expected-reward baselines.
+        Larger training groups move the estimator toward that exact objective, and every TailRL budget stays above
+        the expected-reward baselines.
       </p>
       <figure class="figure-container">
-        <img loading="lazy" decoding="async" src="./static/images/imagenet_rl_curves.png?v=124" width="1644" height="581"
+        <img loading="lazy" decoding="async" src="./static/images/imagenet_rl_curves.png?v=126" width="1644" height="581"
              alt="Three panels showing CorLoc at 0.5, mean IoU and Best-of-1024 IoU against training epochs. TailRL curves at increasing rollout budgets rise toward a dashed exact-objective reference, and all sit above the GRPO, RLOO and PKPO curves.">
         <figcaption class="figure-caption">
           CorLoc@$0.5$, mean IoU and Best-of-$1024$ IoU on the held-out validation set. TailRL trains at
@@ -501,45 +499,20 @@
         <p><span class="takeaway-title">Takeaway</span>
         <span class="takeaway-body">As the training rollout budget grows, the finite-rollout estimator converges to the population-level objective.</span></p>
       </div>
-      <details class="deep" style="margin-bottom: 0;">
-        <summary>Setup details</summary>
-        <div class="deep-body">
-          <table class="setup-table">
-            <tbody>
-              <tr><th>Backbone</th><td>ResNet-50, pretrained</td></tr>
-              <tr><th>Policy head</th><td>4 categorical heads $\times$ 50 bins</td></tr>
-              <tr><th>Reward</th><td>IoU, $[0,1]$</td></tr>
-              <tr><th>Optimizer</th><td>Adam</td></tr>
-              <tr><th>Learning rate</th><td>$5\times10^{-4}$, warmup</td></tr>
-              <tr><th>Batch size</th><td>128</td></tr>
-              <tr><th>Epochs</th><td>30</td></tr>
-              <tr><th>Training rollouts $N$</th><td>16, 64, 256, 1024</td></tr>
-              <tr><th>Population budget</th><td>$50^4$ boxes, so the exact objective is computable</td></tr>
-              <tr><th>Baselines</th><td>GRPO, RLOO (advantage-clamped)</td></tr>
-              <tr><th>Supervised anchors</th><td>MSE, L1, GIoU, L1+GIoU (DETR weights $5$, $2$)</td></tr>
-              <tr><th>Evaluation</th><td>CorLoc@$\delta$ greedy, mean IoU, Best-of-$1024$ IoU</td></tr>
-              <tr><th>Eval samples</th><td>1,024 per image, 50,000 held-out images</td></tr>
-              <tr><th>Seeds</th><td>3</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </details>
     </div>
 
     <div class="result-card" id="maze">
       <h4>Maze Navigation: Bootstrapping from Weak Initializations</h4>
       <p>
-        A small transformer navigates mazes written as text. We pause supervised pretraining at several points to
-        obtain starting policies of varying strength, from ones that almost never solve a maze to ones that
-        occasionally do, then continue each with RL. The reward is graded: partial credit for getting closer to the
-        goal, plus a bonus for short solutions. This tests whether a method can learn from rare partial successes
-        when full solutions are almost never sampled.
+        A small transformer solves mazes written as text. Stopping pretraining at different points gives starting
+        policies from almost hopeless to occasionally successful. Reward gives partial credit for getting closer to
+        the goal, and more for shorter paths.
       </p>
 
       <span class="eyebrow">Can RL learn when exceptional outcomes are almost absent?</span>
       <div class="pair-block">
       <figure class="figure-container pair-figure">
-        <img loading="lazy" decoding="async" src="./static/images/maze_init_sweep_wrap.png?v=124"
+        <img loading="lazy" decoding="async" src="./static/images/maze_init_sweep_wrap.png?v=126"
              width="834" height="691"
              alt="Pass@1 after RL plotted against Pass@1 before RL for TailRL, GRPO, RLOO and PKPO. In the shaded poor-initialization region the TailRL curve stays high, RLOO and GRPO start at zero, and PKPO sits well below TailRL.">
         <figcaption class="figure-caption">
@@ -555,28 +528,6 @@
         <p><span class="takeaway-title">Takeaway</span>
         <span class="takeaway-body">TailRL outperforms the other methods when the initial policy has poor coverage over rare excellent rollouts.</span></p>
       </div>
-      <details class="deep" style="margin-bottom: 0;">
-        <summary>Setup details</summary>
-        <div class="deep-body">
-          <table class="setup-table">
-            <tbody>
-              <tr><th>Maze</th><td>$17\times17$, written as text</td></tr>
-              <tr><th>Policy</th><td>3M decoder, 4 layers, 4 heads, width 256</td></tr>
-              <tr><th>Pretraining corpus</th><td>1.3M mazes, up to 16 paths each</td></tr>
-              <tr><th>Path length</th><td>$\le 60$</td></tr>
-              <tr><th>Initial policies</th><td>7 checkpoints, $0.012\%$ to $0.83\%$ shortest-path</td></tr>
-              <tr><th>RL framework</th><td>verl, fully on-policy</td></tr>
-              <tr><th>PPO epochs</th><td>1, no KL</td></tr>
-              <tr><th>Prompts per step</th><td>256</td></tr>
-              <tr><th>Training rollouts $N$</th><td>16 (swept over 4, 16, 64, 256)</td></tr>
-              <tr><th>Learning rate</th><td>$10^{-4}$</td></tr>
-              <tr><th>Steps</th><td>5,000</td></tr>
-              <tr><th>Evaluation</th><td>64 rollouts on each of 1,024 held-out mazes</td></tr>
-              <tr><th>Seeds</th><td>3</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </details>
     </div>
 
     <div class="result-card" id="code-opt">
@@ -584,7 +535,7 @@
       <span class="eyebrow">Can the objective escape a safe but useless shortcut?</span>
       <div class="float-block">
       <figure class="figure-container wrap-right">
-        <img loading="lazy" decoding="async" src="./static/images/pie_rollout_dist_v2.png?v=124" width="791" height="633"
+        <img loading="lazy" decoding="async" src="./static/images/pie_rollout_dist_v2.png?v=126" width="791" height="633"
              alt="The initial reward distribution on PIE: a large mass of incorrect rollouts at zero, a tall spike at a speedup of one from copying the input, and a thin tail of correct and faster programs.">
         <figcaption class="figure-caption">
           Initial rewards for Qwen3-1.7B-Instruct: $74.4\%$ of rollouts are incorrect, $23.5\%$ are correct but no
@@ -592,26 +543,17 @@
         </figcaption>
       </figure>
       <p>
-        Each input is a slow C++ program from the PIE corpus of competitive programming, and the model is asked to
-        rewrite it to run faster while staying correct. A rollout is compiled and run against the problem's test
-        suite: it scores zero if it fails any test, and otherwise scores its speedup over the input. Speedup is
-        measured in gem5 time, so timing noise cannot manufacture an improvement.
+        Each input is a slow C++ program, and the model rewrites it to run faster without breaking it. A rollout
+        scores zero if it fails any test, otherwise its speedup over the input, timed in gem5 so noise cannot fake
+        a gain.
       </p>
       <p>
-        The catch is where the reward mass starts. Copying the input passes every test and earns reward $1$, and it
-        is by far the easiest thing to reach.
+        Copying the input passes every test and earns reward $1$. It is by far the easiest thing to reach.
       </p>
       </div>
 
-      <p>
-        GRPO and RLOO take the shortcut. Their correctness climbs above $98\%$ while mean reward settles just below
-        $1$, which is exactly what copying pays: their rollouts echo the program they were handed. TailRL keeps
-        producing risky rewrites instead, trading single-rollout correctness for programs that are genuinely faster,
-        and reaches mean reward $2.92$. On held-out problems its mean Best-of-$1024$ speedup is $7.7\times$, against
-        $0.98\times$ for GRPO and $0.96\times$ for RLOO, whose best rollouts never beat the input they reproduce.
-      </p>
       <figure class="figure-container">
-        <img loading="lazy" decoding="async" src="./static/images/pie_results_v3.png?v=124" width="1652" height="521"
+        <img loading="lazy" decoding="async" src="./static/images/pie_results_v3.png?v=126" width="1652" height="521"
              alt="Three panels: mean training reward over one epoch, the density of per-problem Best-of-1024 reward on the test set, and correctness probability during training. TailRL's reward climbs well above the copying value while GRPO and RLOO settle at it.">
         <figcaption class="figure-caption">
           Mean reward over one epoch (left), per-problem Best-of-$1024$ reward on the test set (middle), where GRPO
@@ -622,47 +564,19 @@
         <p><span class="takeaway-title">Takeaway</span>
         <span class="takeaway-body">When an easy suboptimal solution exists, expected-reward methods settle for it. TailRL keeps searching and learns to produce rarer and better outcomes.</span></p>
       </div>
-      <details class="deep" style="margin-bottom: 0;">
-        <summary>Setup details</summary>
-        <div class="deep-body">
-          <table class="setup-table">
-            <tbody>
-              <tr><th>Model</th><td>Qwen3-1.7B-Instruct</td></tr>
-              <tr><th>Corpus</th><td>PIE competitive-programming C++</td></tr>
-              <tr><th>Reward</th><td>speedup over the input, $0$ if any test fails</td></tr>
-              <tr><th>Timing</th><td>gem5 simulated ticks, not wall clock</td></tr>
-              <tr><th>Cutoff</th><td>rollouts past $3\times$ the source ticks score $0$</td></tr>
-              <tr><th>Training rollouts $N$</th><td>16</td></tr>
-              <tr><th>Programs per batch</th><td>64</td></tr>
-              <tr><th>Learning rate</th><td>$10^{-6}$</td></tr>
-              <tr><th>Optimizer updates</th><td>1 per batch, on-policy, no KL</td></tr>
-              <tr><th>Sampling temperature</th><td>1.0</td></tr>
-              <tr><th>Nucleus top-$p$</th><td>1.0</td></tr>
-              <tr><th>Max prompt / response</th><td>2,560 / 4,096 tokens</td></tr>
-              <tr><th>Evaluation</th><td>878 held-out problems</td></tr>
-              <tr><th>Runs per objective</th><td>3</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </details>
     </div>
 
     <div class="result-card" id="gui" data-sj-whole>
       <h4>GUI Grounding with Vision-Language Models</h4>
       <span class="eyebrow">Do similar one-sample policies scale differently with more inference?</span>
       <p>
-        Given a screenshot and an instruction to click something, the model outputs the coordinates of the click.
-        The reward combines how close the click lands, a bonus for landing inside the target element, and a format
-        bonus. Qwen2.5-VL at 3B and 7B are fine-tuned on the GTA1 corpus and evaluated on ScreenSpot-Pro.
+        Given a screenshot and an instruction, the model outputs where to click. Reward combines how close the
+        click lands, a bonus for landing inside the target, and a format bonus. Qwen2.5-VL at 3B and 7B, evaluated
+        on ScreenSpot-Pro.
       </p>
 
-      <p>
-        Training accuracy says the three methods are alike, but they come apart as samples are drawn: TailRL's
-        Pass@$k$ keeps climbing while RLOO flattens. TailRL matches RLOO's Pass@$1024$ with $8$ rollouts at 3B and
-        $4$ at 7B, or $128\times$ and $256\times$ less inference sampling.
-      </p>
       <figure class="figure-container">
-        <img loading="lazy" decoding="async" src="./static/images/gui_scales.png?v=124" width="1669" height="987"
+        <img loading="lazy" decoding="async" src="./static/images/gui_scales.png?v=126" width="1669" height="987"
              alt="Pass@k, Best-of-k reward and training accuracy for Qwen2.5-VL 3B and 7B on ScreenSpot-Pro. The TailRL Pass@k curves keep climbing with the rollout budget while RLOO flattens and GRPO trails, even though training accuracy is similar for all three.">
         <figcaption class="figure-caption">
           ScreenSpot-Pro after post-training Qwen2.5-VL-3B (top) and 7B (bottom). Columns are Pass@$k$, Best-of-$k$
@@ -673,33 +587,6 @@
         <p><span class="takeaway-title">Takeaway</span>
         <span class="takeaway-body">TailRL scales better with inference compute than the expected-reward baselines.</span></p>
       </div>
-      <details class="deep" style="margin-bottom: 0;">
-        <summary>Setup details</summary>
-        <div class="deep-body">
-          <table class="setup-table">
-            <tbody>
-              <tr><th>Models</th><td>Qwen2.5-VL-3B and 7B, vision tower trained</td></tr>
-              <tr><th>Corpus</th><td>GTA1, 70,528 screenshot-instruction pairs</td></tr>
-              <tr><th>Reward</th><td>SE-GUI point reward $+\,0.5$ format, $[0,2.5]$</td></tr>
-              <tr><th>Pixel window</th><td>3,136 to 12,845,056</td></tr>
-              <tr><th>Token cap</th><td>16,384</td></tr>
-              <tr><th>Prompts per step</th><td>8</td></tr>
-              <tr><th>Rollouts per prompt $N$</th><td>8</td></tr>
-              <tr><th>Updates per step</th><td>1, on-policy, no KL</td></tr>
-              <tr><th>Rollout temperature</th><td>1.0</td></tr>
-              <tr><th>Learning rate</th><td>$10^{-6}$, linear to zero</td></tr>
-              <tr><th>Steps</th><td>26,448 (3 epochs)</td></tr>
-              <tr><th>Precision</th><td>bf16, gradient checkpointing</td></tr>
-              <tr><th>Grad-norm guard</th><td>100</td></tr>
-              <tr><th>Evaluation</th><td>ScreenSpot-Pro, all 1,581 items</td></tr>
-              <tr><th>Eval temp / top-$p$</th><td>0.6 / 0.95</td></tr>
-              <tr><th>Eval samples</th><td>4,096 per item</td></tr>
-              <tr><th>Confidence intervals</th><td>1,000-sample bootstrap</td></tr>
-              <tr><th>Seeds</th><td>1</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </details>
     </div>
 
     <div class="content has-text-justified" style="margin-top: 2rem;">
