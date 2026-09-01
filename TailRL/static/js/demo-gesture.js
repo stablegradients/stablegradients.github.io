@@ -73,14 +73,19 @@
       // release the widget wherever the gesture had got to
       try { send(svg, 'pointerup', last.x, last.y, 0); } catch (e) {}
       if (cur.parentNode) cur.parentNode.removeChild(cur);
-      ['pointerdown', 'wheel', 'keydown', 'touchstart'].forEach(function (t) {
-        window.removeEventListener(t, onUser, true);
-      });
+      window.removeEventListener('pointerdown', onPointer, true);
+      window.removeEventListener('keydown', onKey, true);
     }
-    function onUser() { if (!synthetic) cleanup(); }
-    ['pointerdown', 'wheel', 'keydown', 'touchstart'].forEach(function (t) {
-      window.addEventListener(t, onUser, true);
-    });
+
+    /* What counts as the reader taking over. Scrolling does not: they are
+       still reading, and cancelling on wheel meant the gesture died the moment
+       anyone nudged the page after it began. Nor does a press somewhere else
+       on the page, which on a touch device is simply how scrolling starts.
+       A press on this widget does, and so does Escape. */
+    function onPointer(e) { if (!synthetic && svg.contains(e.target)) cleanup(); }
+    function onKey(e) { if (e.key === 'Escape') cleanup(); }
+    window.addEventListener('pointerdown', onPointer, true);
+    window.addEventListener('keydown', onKey, true);
 
     var start = ptOf(svg, demo.vb, demo.from), last = start;
     cur.style.transform = 'translate(' + start.x + 'px,' + start.y + 'px)';
@@ -123,7 +128,6 @@
      So the gesture waits for a scroll that the reader actually made, and then
      for that scroll to stop, with the widget settled near the middle of the
      viewport. */
-  var startY = window.pageYOffset, scrolled = false;
   var pending = DEMOS.filter(function (d) { return !!document.querySelector(d.sel); });
   if (!pending.length) return;
 
@@ -138,21 +142,38 @@
     return mid > vh * 0.15 && mid < vh * 0.85;
   }
 
-  var idle = 0;
+  /* Arming, so the gesture answers the reader arriving rather than the page
+     loading. A reload restores the previous scroll position, which raises a
+     scroll event indistinguishable from a real one; comparing against the
+     offset at load does not settle it either, because whether that snapshot
+     is taken before or after restoration is a race.
+
+     Real input cannot come from restoration, so that is what arms it. A
+     scroll on its own arms it too, but only once the restoration window has
+     passed. */
+  var armed = false, loadedAt = +new Date(), idle = 0;
+  var INPUT = ['wheel', 'keydown', 'pointerdown', 'touchstart'];
+
   function check() {
     pending = pending.filter(function (demo) {
       if (!settledInView(demo)) return true;
       run(demo);
       return false;
     });
-    if (!pending.length) window.removeEventListener('scroll', onScroll);
+    if (!pending.length) {
+      window.removeEventListener('scroll', onScroll);
+      INPUT.forEach(function (t) { window.removeEventListener(t, arm, true); });
+    }
   }
+  function schedule() { clearTimeout(idle); idle = setTimeout(check, 220); }
+  function arm() { armed = true; schedule(); }
   function onScroll() {
-    // the scroll restoration a reload performs is not the reader scrolling
-    if (!scrolled && Math.abs(window.pageYOffset - startY) < 4) return;
-    scrolled = true;
-    clearTimeout(idle);
-    idle = setTimeout(check, 220);
+    if (!armed) {
+      if (+new Date() - loadedAt < 1200) return;   // still the restoration window
+      armed = true;
+    }
+    schedule();
   }
+  INPUT.forEach(function (t) { window.addEventListener(t, arm, true); });
   window.addEventListener('scroll', onScroll, { passive: true });
 })();
