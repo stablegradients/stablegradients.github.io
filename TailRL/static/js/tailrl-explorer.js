@@ -136,7 +136,7 @@
   var svgA = document.getElementById('ex-svg-adv');
 
   // ---- Panel A: the draggable reward strip ----
-  var PA = { x0: 60, x1: 730, yRoll: 100, kdeTop: 34, kdeBase: 92 };
+  var PA = { x0: 60, x1: 730, yRoll: 168, kdeTop: 30, kdeBase: 160 };
 
   /* No KDE any more: the curve on screen is the distribution the reader drew,
      and the rollouts are derived from it rather than the other way round. */
@@ -159,7 +159,7 @@
   function drawRewards() {
     while (svgR.firstChild) svgR.removeChild(svgR.firstChild);
     var res = tailrl(rewards), idx = res.idx, n = rewards.length, sz = sizing();
-    mtext(svgR, (PA.x0 + PA.x1) / 2, 20, 'Draw the reward distribution, then read off ' + n + ' rollouts', 'svg-title');
+    mtext(svgR, (PA.x0 + PA.x1) / 2, 20, 'Draw the reward distribution', 'svg-title');
 
     /* density band above the axis */
     var dens = shape, di, dx, dy, area = '', line = '';
@@ -287,7 +287,7 @@
       { name: 'REINFORCE', sub: 'A = r − r̄', A: reinforce(rewards), color: C.reinforce },
       { name: 'TailRL',    sub: 'A = ω − ω̄', A: res.A,              color: C.tailrl }
     ];
-    var panelW = 310, gap = 70, x0 = 55, yTop = 48, yBot = 208;
+    var panelW = 300, gap = 72, x0 = 84, yTop = 48, yBot = 208;
     methods.forEach(function (m, mi) {
       var px = x0 + mi * (panelW + gap);
       // each panel is normalised by its own largest magnitude, so the two show
@@ -299,6 +299,10 @@
       el('line', { x1: px, x2: px + panelW, y1: yMid, y2: yMid, stroke: C.muted, 'stroke-width': 1 }, svgA);
       text(svgA, px - 6, yTop + 4, '+' + maxAbs.toFixed(dec(maxAbs)), 'svg-tick', 'end');
       text(svgA, px - 6, yBot + 4, '−' + maxAbs.toFixed(dec(maxAbs)), 'svg-tick', 'end');
+      // sits outboard of the bounds numbers, matching the rewards panel's
+      // rotated "density" label
+      var yl = mtext(svgA, px - 60, yMid, 'Advantages', 'svg-tick');
+      yl.setAttribute('transform', 'rotate(-90, ' + (px - 60) + ', ' + yMid + ')');
 
       if (sz.bars) {
         var bw = panelW / n;
