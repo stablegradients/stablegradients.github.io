@@ -26,7 +26,7 @@
     return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
   }
 
-  var KB = 128;                                    // density bins over [0, 1]
+  var KB = 64;                                     // histogram bars over [0, 1]
 
   /* The reward distribution IS the control. `shape` holds a density over KB
      bins with unit peak; the reader draws on it directly and the rollouts are
@@ -136,7 +136,7 @@
   var svgA = document.getElementById('ex-svg-adv');
 
   // ---- Panel A: the draggable reward strip ----
-  var PA = { x0: 60, x1: 730, yRoll: 168, kdeTop: 30, kdeBase: 160 };
+  var PA = { x0: 60, x1: 730, yRoll: 233, kdeTop: 30, kdeBase: 225 };
 
   /* No KDE any more: the curve on screen is the distribution the reader drew,
      and the rollouts are derived from it rather than the other way round. */
@@ -162,16 +162,16 @@
     mtext(svgR, (PA.x0 + PA.x1) / 2, 20, 'Draw the reward distribution', 'svg-title');
 
     /* density band above the axis */
-    var dens = shape, di, dx, dy, area = '', line = '';
+    var dens = shape, di, dx, dy, bw = (PA.x1 - PA.x0) / KB;
     for (di = 0; di < KB; di++) {
-      dx = xOf(di / (KB - 1));
-      dy = PA.kdeBase - dens[di] * (PA.kdeBase - PA.kdeTop);
-      area += (di === 0 ? 'M' + dx + ' ' + PA.kdeBase + 'L' : 'L') + dx + ' ' + dy;
-      line += (di === 0 ? 'M' : 'L') + dx + ' ' + dy;
+      dx = PA.x0 + di * bw;
+      dy = PA.kdeBase - Math.max(0, dens[di]) * (PA.kdeBase - PA.kdeTop);
+      el('rect', { x: dx + bw * 0.12, y: dy, width: bw * 0.76,
+                   height: Math.max(0.6, PA.kdeBase - dy),
+                   fill: C.tailrl, opacity: 0.34 }, svgR);
     }
-    area += 'L' + xOf(1) + ' ' + PA.kdeBase + 'Z';
-    el('path', { d: area, fill: C.tailrl, opacity: 0.14 }, svgR);
-    el('path', { d: line, fill: 'none', stroke: C.tailrl, 'stroke-width': 1.6, opacity: 0.75 }, svgR);
+    el('line', { x1: PA.x0, x2: PA.x1, y1: PA.kdeBase, y2: PA.kdeBase,
+                 stroke: C.tailrl, 'stroke-width': 1, opacity: 0.5 }, svgR);
     var dmid = (PA.kdeTop + PA.kdeBase) / 2;
     var dl = mtext(svgR, 20, dmid, 'density', 'svg-tick');
     dl.setAttribute('transform', 'rotate(-90, 20, ' + dmid + ')');
@@ -222,17 +222,25 @@
      density the reader is asking for at that reward; a soft brush carries it
      to the neighbouring bins so a drag sweeps a curve rather than cutting
      notches into it. */
-  var BRUSH = 5;                                   // bins, one standard deviation
+  /* A bar takes the pointer's height directly, the way the two-policy widget
+     works. Bins between this point and the last are filled in too, so a quick
+     sweep draws a continuous shape instead of leaving gaps where no frame
+     happened to land. */
+  var lastBin = -1;
+  function setBin(i, v) { if (i >= 0 && i < KB) shape[i] = Math.min(1, Math.max(0, v)); }
   function paint(p) {
     var t = tOf(p.x), c = Math.round(t * (KB - 1));
     var target = (PA.kdeBase - p.y) / (PA.kdeBase - PA.kdeTop);
     target = Math.min(1, Math.max(0, target));
-    var lo = Math.max(0, c - 3 * BRUSH), hi = Math.min(KB - 1, c + 3 * BRUSH), i, d, k;
-    for (i = lo; i <= hi; i++) {
-      d = (i - c) / BRUSH;
-      k = Math.exp(-0.5 * d * d);
-      shape[i] += (target - shape[i]) * k;
+    if (lastBin >= 0 && Math.abs(c - lastBin) > 1) {
+      var step = c > lastBin ? 1 : -1, i, f;
+      for (i = lastBin; i !== c; i += step) {
+        f = (i - lastBin) / (c - lastBin);
+        setBin(i, shape[lastBin] + (target - shape[lastBin]) * f);
+      }
     }
+    setBin(c, target);
+    lastBin = c;
     resample();
     hover = nearest(t);
   }
@@ -247,7 +255,7 @@
   svgR.addEventListener('pointerdown', function (e) {
     var p = localX(svgR, e);
     if (!inBand(p)) return;
-    painting = true;
+    painting = true; lastBin = -1;
     if (svgR.setPointerCapture) { try { svgR.setPointerCapture(e.pointerId); } catch (err) {} }
     pendPt = p; scheduleRender(); e.preventDefault();
   });
@@ -264,7 +272,7 @@
 
   function stopPaint() {
     if (!painting) return;
-    painting = false;
+    painting = false; lastBin = -1;
     if (pendPt) { paint(pendPt); pendPt = null; }
     if (rafId) { cancelAnimationFrame(rafId); rafId = 0; }
     render();
