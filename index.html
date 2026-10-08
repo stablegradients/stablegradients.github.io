@@ -80,7 +80,10 @@
                   <a href="https://www.ecva.net/papers/eccv_2024/papers_ECCV/papers/04389.pdf">ECCV 2024</a> and
                   <a href="https://arxiv.org/pdf/2503.18358">BMVC 2024</a>, as well as work on flatter-minima
                   training for world models accepted to
-                  <a href="https://openreview.net/pdf?id=vcB1OwtWUZ">NeurIPS 2025</a>. I completed my
+                  <a href="https://openreview.net/pdf?id=vcB1OwtWUZ">NeurIPS 2025</a>. My latest preprint,
+                  <a href="https://arxiv.org/abs/2609.02987">Tail-Likelihood Reinforcement Learning (TailRL)</a>,
+                  is a likelihood-based reinforcement-learning objective for continuous rewards that keeps
+                  rare, high-reward rollouts influential. I completed my
                   undergraduate degree in Electrical Engineering at
                   <a href="https://www.iitb.ac.in/">IIT Bombay</a>.
                 </p>
@@ -108,6 +111,63 @@
             </tr>
           </tbody></table>
           <table style="width:100%;border:0px;border-spacing:0px;border-collapse:separate;margin-right:auto;margin-left:auto;"><tbody>
+
+          <tr onmouseout="tailrl_stop()" onmouseover="tailrl_start()">
+              <td style="padding:20px;width:25%;vertical-align:middle">
+                <div class="one">
+                <div class="two" id='tailrl_image'>
+                  <a target="_blank" href="./images/tailrl.png">
+                    <img src="images/tailrl.png" width="100%" alt="Reward distributions of a base policy, GRPO and TailRL">
+                  </a>
+                </div>
+                <a target="_blank" href="./images/tailrl.png">
+                  <img src="images/tailrl.png" width="100%" alt="Reward distributions of a base policy, GRPO and TailRL">
+                </a>
+                </div>
+                <script type="text/javascript">
+                  function tailrl_start() {
+                    document.getElementById('tailrl_image').style.opacity = "1";
+                  }
+
+                  function tailrl_stop() {
+                    document.getElementById('tailrl_image').style.opacity = "0";
+                  }
+                  tailrl_stop();
+                </script>
+              </td>
+              <td style="padding:20px;width:75%;vertical-align:middle">
+                  <a href="https://arxiv.org/abs/2609.02987">
+                      <span class="papertitle">Tail-Likelihood Reinforcement Learning</span>
+                  </a>
+                  <br>
+                  <strong>Shrinivas Ramasubramanian</strong>,
+                  <a href="https://daman1209arora.github.io/">Daman Arora</a>,
+                  <a href="https://tajwarfahim.github.io/">Fahim Tajwar</a>,
+                  <a href="https://scholar.google.com/citations?user=SU6ooAQAAAAJ">Guanning Zeng</a>,
+                  Qingyang Wu,
+                  Zhongzhu Zhou,
+                  Chenfeng Xu,
+                  <a href="https://havenfeng.github.io/">Haiwen Feng</a>,
+                  <a href="https://yudasong.github.io/">Yuda Song</a>,
+                  <a href="https://www.cs.cmu.edu/~aarti/">Aarti Singh</a>,
+                  <a href="https://www.cs.cmu.edu/~rsalakhu/">Ruslan Salakhutdinov</a>,
+                  J. Andrew Bagnell,
+                  <a href="https://www.cs.cmu.edu/~schneide/">Jeff Schneider</a>,
+                  <a href="https://azanette.com">Andrea Zanette</a>
+                  <br>
+                  <em>arXiv preprint</em>, 2026
+                  <br>
+                  <a href="https://zanette-labs.github.io/TailRL-website/">project page</a>
+                  /
+                  <a href="https://arxiv.org/abs/2609.02987">arXiv</a>
+                  /
+                  <a href="https://github.com/Zanette-Labs/TailRL">code</a>
+                  <p></p>
+                  <p>
+                    Reinforcement learning typically optimizes average reward, but two policies with the same mean can have very different chances of producing a rare, high-reward rollout. TailRL instead maximizes the log-probability of exceeding a randomly chosen reward threshold: its gradient gives more weight to rare, high-reward rollouts, can be interpreted as a mixture of Best-of-<em>k</em> gradients, and requires only a simple modification to the advantage function. Across object localization, maze navigation, GUI grounding, and code optimization, TailRL avoids suboptimal solutions and yields models that benefit more from additional samples at inference time.
+                  </p>
+              </td>
+          </tr>
 
           <tr onmouseout="flatten_stop()" onmouseover="flatten_start()">
               <td style="padding:20px;width:25%;vertical-align:middle">
